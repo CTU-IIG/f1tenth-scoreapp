@@ -10,3 +10,6 @@ https://www.amazon.com/2-23inch-OLED-Display-HAT-Interface/dp/B07Z1ZHPBZ
 Další součástky v adresáři **optic_barrier_hw** soubor **basket.pdf**
 
 ---
+#####[2] Užitečné příkazy a odkazy
+* Odkaz na knihovnu pro komunikace s OLED displejem
+>https://www.waveshare.com/wiki/2.23inch_OLED_HAT
