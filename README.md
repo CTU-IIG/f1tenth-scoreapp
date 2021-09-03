@@ -13,3 +13,26 @@ Další součástky v adresáři **optic_barrier_hw** soubor **basket.pdf**
 #####[2] Užitečné příkazy a odkazy
 * Odkaz na knihovnu pro komunikace s OLED displejem
 >https://www.waveshare.com/wiki/2.23inch_OLED_HAT
+* Zapnutí/vypnutí služby
+```
+sudo systemctl enable optic_barrier.service
+sudo systemctl disable optic_barrier.service
+systemctl status optic_barrier.service
+```
+* Zjistenni jakou IP adresu má RPI
+```
+sudo nmap -sP 10.37.1.*
+Actual IP 10.37.1.23
+```
+* Zkopírování image z jedné SD na druhou SD
+>https://www.youtube.com/watch?v=VNqYrmYztZo
+```
+sudo dd if=/dev/mmcblk0 of=raspi.img
+sudo dd if=raspi.img of=/dev/mmcblk0
+```
+
+* Analyzování procesů k optimalizaci doby spouštění
+```
+systemd-analyze critical-chain optic_barrier.service
+systemd-analyze blame
+```
