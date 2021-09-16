@@ -1,0 +1,10 @@
+### SUBPROJECT
+
+# Node.js packages from npm
+/node_modules/
+
+# build
+/dist/
+
+# playground
+/temp/

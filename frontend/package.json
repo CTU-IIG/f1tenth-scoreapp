@@ -1,0 +1,87 @@
+{
+  "name": "f1tenth-scoreapp-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TODO",
+  "keywords": [
+    "learning"
+  ],
+  "homepage": "https://github.com/CTU-IIG/f1tenth-scoreapp#readme",
+  "bugs": {
+    "url": "https://github.com/CTU-IIG/f1tenth-scoreapp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CTU-IIG/f1tenth-scoreapp.git"
+  },
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Martin Endler",
+    "url": "https://github.com/pokusew"
+  },
+  "scripts": {
+    "analyze": "rm -rf dist && mkdir -p dist && cross-env NODE_ENV=production node -r @babel/register ./node_modules/.bin/webpack --config webpack.config.production.js --progress --profile --color --json > dist/stats.json && webpack-bundle-analyzer dist/stats.json",
+    "build": "rm -rf dist && mkdir -p dist && cross-env NODE_ENV=production node -r @babel/register ./node_modules/.bin/webpack --config webpack.config.production.js --profile --color",
+    "lint": "eslint 'app/**/*.{js,ts,tsx}'",
+    "start": "cross-env NODE_ENV=development node -r @babel/register ./node_modules/.bin/webpack serve --config ./webpack.config.development.js",
+    "test": "cross-env NODE_ENV=test ava --verbose",
+    "test-hot": "cross-env NODE_ENV=test ava --verbose --watch",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "classnames": "^2.3.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-hot-loader": "^4.13.0",
+    "react-intl": "^5.20.10"
+  },
+  "devDependencies": {
+    "@ava/babel": "^2.0.0",
+    "@babel/cli": "^7.15.4",
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/plugin-proposal-export-default-from": "^7.14.5",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-react": "^7.14.5",
+    "@babel/preset-typescript": "^7.15.0",
+    "@babel/register": "^7.15.3",
+    "@hot-loader/react-dom": "^17.0.1",
+    "@types/node": "^16.9.1",
+    "@types/react-dom": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "@welldone-software/why-did-you-render": "^6.2.1",
+    "autoprefixer": "^10.3.4",
+    "ava": "^3.15.0",
+    "babel-loader": "8.2.2",
+    "core-js": "^3.17.3",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.2.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.25.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.3.2",
+    "mini-css-extract-plugin": "^2.3.0",
+    "postcss": "^8.3.6",
+    "postcss-loader": "^6.1.1",
+    "postcss-scss": "^4.0.0",
+    "raw-loader": "^4.0.2",
+    "resolve-url-loader": "^5.0.0-beta.1",
+    "sass": "^1.41.0",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.2.1",
+    "svg-react-loader": "^0.4.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.52.1",
+    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.2.1",
+    "webpack-merge": "^5.8.0",
+    "webpack-subresource-integrity": "^5.0.0"
+  },
+  "engines": {
+    "node": "16.x",
+    "yarn": "1.x"
+  }
+}
