@@ -83,7 +83,7 @@ func initDb() *gorm.DB {
 
 func barrierSimulator(hub *Hub, db *gorm.DB) {
 	var trial Trial
-	db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&trial, 1)
+	db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&trial, 2)
 	time.Sleep(1 * time.Second)
 	for {
 		log.Printf("New crossing")
