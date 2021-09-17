@@ -33,6 +33,33 @@ const TrialNotFound = ({ id }) => {
 	);
 };
 
+function computeLapTimes(trial){
+	let lapTimes = [];
+	let shortestLapTime = 99999999999;
+	let last = 0;
+	let startTime = 0;
+
+	if (trial?.crossings === undefined) return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
+
+	for(let cs of trial?.crossings){
+		if (cs?.ignored === true) continue;
+		if (last !== 0){
+			const dif = cs?.time*1000 - last;
+			lapTimes.push(dif);
+			shortestLapTime = (dif < shortestLapTime) ? dif : shortestLapTime;
+		}else{
+			startTime=cs?.time*1000;
+		}
+		last = cs?.time*1000;
+	}
+
+	console.log('lt:', lapTimes);
+	console.log('blt:', shortestLapTime);
+	console.log('lst:', last);
+	console.log('rst:', startTime);
+	return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
+}
+
 
 const test_time = new Date();
 
@@ -99,25 +126,11 @@ const TrialPage = () => {
 		//trial = JSON.parse(JSON.stringify(trialReceived));
 
 
-	let lapTimes = [];
-	let shortestLapTime = 99999999999;
-	let last = None;
-	console.log('comp lap times');
-
-	for(let cs in trial?.crossings){
-		if (cs?.ignored) continue;
-		if (last !== None){
-			lapTimes.push(cs?.time - last);
-			shortestLapTime = (cs?.time - last < shortestLapTime) ? cs?.time - last : shortestLapTime;
-		}
-		last = cs?.time;
-	}
-
-	console.log('comp lap times done: ', lapTimes);
-
-	console.log('trial: ', trial);
-
-
+	const {lapTimes, bestLapTime, lapStartTime, raceStartTime} = computeLapTimes(trial);
+	console.log('lt:', lapTimes);
+	console.log('blt:', bestLapTime);
+	console.log('lst:', lapStartTime);
+	console.log('rst:', raceStartTime);
 
 	return (
 		<>
@@ -146,7 +159,8 @@ const TrialPage = () => {
 				})()}
 			</h2>
 
-			<TimeDisplay name="Best lap: " time={shortestLapTime}/>
+			<TimeDisplay name="Best lap: " time={bestLapTime}/>
+			<Timers name="Best lap: " lapStartTime={lapStartTime} raceStartTime={raceStartTime} bestLapTime={bestLapTime} active={true}/>
 
 		</>
 	);
@@ -155,3 +169,4 @@ const TrialPage = () => {
 
 export default TrialPage;
 // <Timers name="Best lap: " lapStartTime={test_time} raceStartTime={test_time} bestLapTime={test_time} active={true}/>
+//shortestLapTime
