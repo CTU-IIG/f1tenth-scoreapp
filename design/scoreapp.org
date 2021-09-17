@@ -1,0 +1,53 @@
+* Scoreboard app
+
+** Požadavky
+*** Time trials
+**** Zobrazení
+     - Jméno aktuálně jedoucího týmu
+     - Aktuální čas od startu
+     - Čas aktuálního kola + čas zatím nejlepšího kola
+     - Celkový počet kol
+     - Tabulka s časy všech kol (+ průměry, …)
+**** Interakce s uživatelem
+     - Výběr týmu, který pojede
+     - Smazání „průjezdu“ (např. když někdo projde při bouračce) =
+       smazání řádku z tabulky všech časů
+*** Head-to-head
+**** Zobrazení
+     - Jméno aktuálně jedoucích týmů
+     - Tabulka - 2 sloupce = týmy, řádky:
+       - Počet ujetých kol
+       - Penalty: -2 kola
+       - Součet
+     - Celkový čas od startu závodu (málo důležité, aby se tam něco hýbalo :-)
+     - Signalizace že jeden závodník vystartoval před startem
+**** Interakce s uživatelem
+     - Výběr týmů
+     - Odstartování závodu (aby se poznalo, pokud někdo vyjel dřív)
+     - Pauza závodu při bouračce (málo důležité)
+     - Tabulka průjezdů aut přes opto-závoru (dvě obrazovky - pro
+       každou závoru jedna)
+     - UI = označování řádků v tabulce, které odpovídají „domácímu“ autu
+     - Předpoklad, že auta se nepředjíždějí a střídají se; UI pro
+       opravu, když se předjedou. Mohou nastat tyto situace:
+       - Auta se střídají - uživatelský zásah netřeba
+       - Auta se předjela - obsluha přehodí pořadí
+       - Auta jedou vedle sebe - počítat jen „domácí“ auto
+     - Odstranění záznamu průjezdu (jako při time trials)
+*** Výsledková listina - jen zobrazení
+    - 3 tabulky s pořadím pro 3 závody
+    - možný výsledek = čas či počet kol či pořadí h2h nebo nedokončil
+*** Zobrazení pro stream
+    - zelené pozadí
+    - jen základní údaje - jméno týmu + čas/počet kol
+** API
+*** Objekt Trial:
+    - id
+    - team_id
+    - creation_time
+    - state : { before_start, running, finished, unfinished }
+    - laps : [ crossing, … ] # první crossing = začátek závodu
+*** Objekt Crossing
+    - id
+    - timestamp
+    - ignored
