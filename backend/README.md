@@ -1,58 +1,45 @@
 # f1tenth-scoreapp-backend
 
-‼️ **The skeleton not yet prepared!**
+## Installation
 
-Backend for the [f1tenth-scoreapp](../).
+1. Install go - either follow official [Go
+   documentation](https://golang.org/doc/install) or, on Debian/Ubuntu
+   run:
 
-Powered by [Node.js](https://nodejs.org/en/).
-The code is written in **[TypeScript](https://www.typescriptlang.org/)**.
-See more in the [Architecture](#architecture) section.
+        apt install golang
 
-🚧 **Note:** This is work in progress.
+2. Go to the `backend` directory and run:
 
+        go build
 
-## Content
+3. Run the backend
 
-<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+        ./scoreapp
 
-- [Description](#description)
-- [Architecture](#architecture)
-- [Development](#development)
-  - [Requirements](#requirements)
-  - [Set up](#set-up)
+## Testing
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+The backend listens on port 4110. Point your web browser to
+http://localhost:4110 and you should see a "Hello world" page.
 
+The backend creates a database called `scoreapp.db` in the current
+directory and prefills it with some testing data. You can safely
+delete the file and start from scratch.
 
-## Description
+The light barrier is simulated and produces trial updates, which get
+stored to the database and broadcasted to web sockets.
 
-TODO
+Implemented endpoints:
 
+- GET `/trial/<num>` – returns JSON of the trial `<num>`. Currently,
+  we have only 1 and 2.
 
-## Architecture
+  Testing: `curl http://loclahost:4110/trial/1`
 
-Powered by [Node.js](https://nodejs.org/en/).
-The code is written in **[TypeScript](https://www.typescriptlang.org/)**.
+- `/ws` – websocket. All connected clients will automatically receive
+  updates about the current (2) trial.
 
-TODO more detail
+  Testing: `websocat ws://localhost:4110/ws`
 
+  Note: [websocat home page][]
 
-## Development
-
-
-### Requirements
-
-- [Node.js](https://nodejs.org/) 16.x
-- [Yarn](https://yarnpkg.com/) 1.x
-- You can follow [this Node.js Development Setup guide](../NODEJS-SETUP.md).
-
-
-### Set up
-
-TODO
-
-1. Install all dependencies with Yarn (run `yarn`).
-2. You are ready to go.
-3. Use `nodemon index.js` to start server with auto restarting.
+[websocat]: https://github.com/vi/websocat
