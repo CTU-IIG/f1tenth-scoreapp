@@ -40,6 +40,6 @@ Implemented endpoints:
 
   Testing: `websocat ws://localhost:4110/ws`
 
-  Note: [websocat home page][]
+  Note: [websocat home page][websocat]
 
 [websocat]: https://github.com/vi/websocat
