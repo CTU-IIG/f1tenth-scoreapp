@@ -27,20 +27,34 @@ export function Timer(props) {
 	});
 
 	return (
+		<TimeDisplay name={props.name} time={time} />
+	);
+}
+
+export function TimeDisplay(props) {
+	return (
 		<div className="timer">
 			<span className="timer_name">
 				{props.name}
 			</span>
       		<span className="digits">
-        		{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+        		{("0" + Math.floor((props.time / 60000) % 60)).slice(-2)}:
       		</span>
       		<span className="digits">
-        		{("0" + Math.floor((time / 1000) % 60)).slice(-2)}.
+        		{("0" + Math.floor((props.time / 1000) % 60)).slice(-2)}.
       		</span>
       		<span className="digits">
-        		{("0" + ((time / 10) % 100)).slice(-2)}
+        		{("0" + ((props.time / 10) % 100)).slice(-2)}
       		</span>
     	</div>
+    }
+}
+
+export function Timers(props) {
+	return (
+		<Timer name="Total time: " start={props.raceStartTime} active={props.active}>
+		<Timer name="Lap time: " start={props.lapStartTime} active={props.active}>
+		<TimerDisplay name="Best lap: " time={props.bestLapTime}>
 	);
 }
 
