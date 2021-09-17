@@ -33,7 +33,7 @@ Implemented endpoints:
 - GET `/trial/<num>` – returns JSON of the trial `<num>`. Currently,
   we have only 1 and 2.
 
-  Testing: `curl http://localhost:4110/trial/1`
+  Testing: `curl http://localhost:4110/trials/1`
 
 - `/ws` – websocket. All connected clients will automatically receive
   updates about the current (2) trial.
