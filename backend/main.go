@@ -33,6 +33,7 @@ type Trial struct {
 	TeamID    uint       `json:"-"`
 	Team      Team       `json:"team"`
 	Round     uint32     `json:"round"`
+	State     TrialState `json:"state"`
 	Crossings []Crossing `json:"crossings"`
 }
 
@@ -63,27 +64,23 @@ func initDb() *gorm.DB {
 	db.AutoMigrate(&Team{}, &Trial{}, &Crossing{})
 
 	// Create objects for testing
-	var count int64
-
 	var team Team
 	db.FirstOrCreate(&team, Team{Name: "Ředkvičky"})
 
-	db.Model(&Trial{}).Count(&count)
-	for round := 1; round <= 2; round++ {
-		var trial Trial
-		db.FirstOrCreate(&trial, &Trial{TeamID: team.ID, Round: uint32(round)})
-		if round == 1 {
-			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now().Add(-12 * time.Second)), Ignored: false})
-			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
-		}
-	}
-	return db
+	var trial Trial
+	db.FirstOrCreate(&trial, &Trial{TeamID: team.ID, Round: uint32(1), State: Finished})
+	db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now().Add(-12 * time.Second)), Ignored: false})
+	db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
 
+	var trial2 Trial
+	db.FirstOrCreate(&trial2, &Trial{TeamID: team.ID, Round: uint32(2), State: Running})
+
+	return db
 }
 
 func barrierSimulator(hub *Hub, db *gorm.DB) {
 	var trial Trial
-	db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&trial, 2)
+	db.Model(&Trial{}).Preload("Crossings").Preload("Team").Last(&trial)
 	time.Sleep(1 * time.Second)
 	for {
 		log.Printf("New crossing")
