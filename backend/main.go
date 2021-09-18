@@ -53,9 +53,9 @@ var (
 func getTrial(c echo.Context) error {
 	var trial *Trial
 	var id uint
-	err := echo.PathParamsBinder(c).Uint("id", &id)
-	if err.BindError() != nil {
-		return err.BindError()
+	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
+	if err != nil {
+		return err
 	}
 	if err := db.Preload("Team").Preload("Crossings").First(&trial, id).Error; err != nil {
 		return err
@@ -66,11 +66,11 @@ func getTrial(c echo.Context) error {
 func setTrialState(c echo.Context, state TrialState) error {
 	var trial *Trial
 	var id uint
-	berr := echo.PathParamsBinder(c).Uint("id", &id)
-	if berr.BindError() != nil {
-		return berr.BindError()
+	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
+	if err != nil {
+		return err
 	}
-	err := db.Transaction(func(tx *gorm.DB) error {
+	err = db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.First(&trial, id).Error; err != nil {
 			return err
 		}
@@ -122,9 +122,9 @@ func getFinishedTrials(c echo.Context) error {
 func setCrossingIgnore(c echo.Context, ignored bool) error {
 	var id uint
 	var crossing *Crossing
-	err := echo.PathParamsBinder(c).Uint("id", &id)
-	if err.BindError() != nil {
-		return err.BindError()
+	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
+	if err != nil {
+		return err
 	}
 	if err := db.First(&crossing, id).Error; err != nil {
 		return err
