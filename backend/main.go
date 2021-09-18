@@ -83,20 +83,18 @@ func setTrialState(c echo.Context, state TrialState) error {
 		case Unfinished:
 			expectedState = Running
 		default:
-			return c.String(http.StatusBadRequest,
-				fmt.Sprintf("Unspported state '%s'.", string(state)))
+			return fmt.Errorf("Unsupported state '%s'.", string(state))
 		}
 		if trial.State != expectedState {
-			return c.String(http.StatusBadRequest,
-				fmt.Sprintf("State should be '%s', not '%s'.",
-					string(expectedState), string(trial.State)))
+			return fmt.Errorf("State should be '%s', not '%s'.",
+				string(expectedState), string(trial.State))
 		}
 		if err := tx.Model(&trial).Updates(&Trial{State: state}).Error; err != nil {
 			return err
 		}
 		return nil
 	})
-	if err != nil || c.Response().Status != http.StatusOK {
+	if err != nil {
 		return err
 	}
 	broadcastTrial(trial)
