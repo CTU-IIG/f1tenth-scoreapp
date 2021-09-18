@@ -36,6 +36,12 @@ Implemented endpoints:
 
   Testing: `curl http://localhost:4110/trials/1`
 
+- POST `/trials/<num>/start` – changes trial's state from
+  `before_start` to `running`.
+- POST `/trials/<num>/stop` – changes trial's state from
+  `running` to `finished`.
+- POST `/trials/<num>/cancel` – changes trial's state from
+  `running` to `unfinished`.
 - GET `/trials/finished` – returns JSON of all finished trials (without crossings).
 - `/ws` – websocket. All connected clients will automatically receive
   updates about the current (2) trial.

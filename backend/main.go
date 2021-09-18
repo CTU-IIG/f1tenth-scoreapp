@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	//"fmt"
 	"log"
 	"net/http"
@@ -45,7 +46,8 @@ type Crossing struct {
 }
 
 var (
-	db *gorm.DB
+	db  *gorm.DB
+	hub *Hub
 )
 
 func getTrial(c echo.Context) error {
@@ -53,6 +55,41 @@ func getTrial(c echo.Context) error {
 	if err := db.Preload("Team").Preload("Crossings").First(&trial, c.Param("id")).Error; err != nil {
 		return err
 	}
+	return c.JSON(http.StatusOK, *trial)
+}
+
+func setTrialState(c echo.Context, state TrialState) error {
+	var trial *Trial
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.First(&trial, c.Param("id")).Error; err != nil {
+			return err
+		}
+		var expectedState TrialState
+		switch state {
+		case Running:
+			expectedState = BeforeStart
+		case Finished:
+			expectedState = Running
+		case Unfinished:
+			expectedState = Running
+		default:
+			return c.String(http.StatusBadRequest,
+				fmt.Sprintf("Unspported state '%s'.", string(state)))
+		}
+		if trial.State != expectedState {
+			return c.String(http.StatusBadRequest,
+				fmt.Sprintf("State should be '%s', not '%s'.",
+					string(expectedState), string(trial.State)))
+		}
+		if err := tx.Model(&trial).Updates(&Trial{State: state}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil || c.Response().Status != http.StatusOK {
+		return err
+	}
+	broadcastTrial(trial)
 	return c.JSON(http.StatusOK, *trial)
 }
 
@@ -79,6 +116,8 @@ func initDb() *gorm.DB {
 	}
 	db.AutoMigrate(&Team{}, &Trial{}, &Crossing{})
 
+	//db = db.Debug()
+
 	// Create objects for testing
 	var team Team
 	db.FirstOrCreate(&team, Team{Name: "Ředkvičky"})
@@ -94,22 +133,29 @@ func initDb() *gorm.DB {
 	return db
 }
 
+func broadcastTrial(trial *Trial) {
+	type Message struct {
+		Trial *Trial `json:"trial"`
+	}
+
+	var fullTrial Trial
+	db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&fullTrial, trial.ID)
+
+	b, err := json.Marshal(&Message{&fullTrial})
+	if err != nil {
+		log.Fatal(err)
+	}
+	hub.broadcast <- b
+}
+
 func barrierSimulator(hub *Hub, db *gorm.DB) {
 	var trial Trial
-	db.Model(&Trial{}).Preload("Crossings").Preload("Team").Last(&trial)
+	db.Model(&Trial{}).Last(&trial)
 	time.Sleep(1 * time.Second)
 	for {
 		log.Printf("New crossing")
 		db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
-		type Message struct {
-			Trial *Trial `json:"trial"`
-		}
-
-		b, err := json.Marshal(&Message{&trial})
-		if err != nil {
-			log.Fatal(err)
-		}
-		hub.broadcast <- b
+		broadcastTrial(&trial)
 
 		time.Sleep(time.Duration(5_000+rand.Intn(3_000)) * time.Millisecond)
 	}
@@ -122,7 +168,7 @@ func main() {
 
 	db = initDb()
 
-	hub := newHub()
+	hub = newHub()
 	go hub.run()
 	go barrierSimulator(hub, db)
 
@@ -130,6 +176,9 @@ func main() {
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
 	e.GET("/trials", getAllTrials)
 	e.GET("/trials/:id", getTrial)
+	e.POST("/trials/:id/start", func(c echo.Context) error { return setTrialState(c, Running) })
+	e.POST("/trials/:id/stop", func(c echo.Context) error { return setTrialState(c, Finished) })
+	e.POST("/trials/:id/cancel", func(c echo.Context) error { return setTrialState(c, Unfinished) })
 	e.GET("/trials/finished", getFinishedTrials)
 
 	e.Logger.Fatal(e.Start(":4110")) // Port mnemonic f1/10
