@@ -2,21 +2,34 @@
 
 import React, { useMemo } from 'react';
 
-import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
+import { useDocumentTitle, useFormatMessageId, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
-import { LoadingScreen } from '../components/layout';
-import NotFoundPage from './NotFoundPage';
+import { LoadingError, LoadingScreen } from '../components/layout';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { R_TRIAL } from '../routes';
+import { R_TRIAL, R_TRIALS } from '../routes';
 import { useQuery } from '../helpers/data';
-import { Trial } from '../types';
+import { findOneTrialById } from '../queries';
+import { Link } from '../router/compoments';
+import { useIntl } from 'react-intl';
 
 
-const findOneTrialById = (id: number) => (restUrl: string, webSocketUrl: string): Promise<Trial | undefined> => Promise.resolve({
-	id: 1,
-	name: 'x',
-});
+const TrialNotFound = ({ id }) => {
+
+	const intl = useIntl();
+
+	const t = useFormatMessageId();
+
+	return (
+		<>
+			<h1>{t(`trialPage.notFoundHeading`)}</h1>
+			<p>
+				{t(`trialPage.notFoundMessage`, { id })}
+			</p>
+			<Link name={R_TRIALS}>{t(`trialPage.backToTrials`)}</Link>
+		</>
+	);
+};
 
 const TrialPage = () => {
 
@@ -24,7 +37,7 @@ const TrialPage = () => {
 
 	const { route } = useRoute();
 
-	const idStr = route?.payload?.packageId as string;
+	const idStr = route?.payload?.trialId as string;
 
 	const id = parseInt(idStr);
 
@@ -32,7 +45,9 @@ const TrialPage = () => {
 
 	const op = useQuery(query);
 
-	const pageTitle = op.loading ? t`titles.loading` : !isDefined(op.data) ? t`titles.notFound` : op.data.name;
+	const pageTitle = op.loading ?
+		t`titles.loading`
+		: !isDefined(op.data) ? t`titles.notFound` : op.data.id.toString();
 
 	useDocumentTitle(pageTitle);
 
@@ -42,9 +57,16 @@ const TrialPage = () => {
 		);
 	}
 
+	if (op.hasError) {
+		console.log(op.error);
+		return (
+			<LoadingError error={op.error} />
+		);
+	}
+
 	if (!isDefined(op.data)) {
 		return (
-			<NotFoundPage />
+			<TrialNotFound id={id} />
 		);
 	}
 
@@ -56,11 +78,14 @@ const TrialPage = () => {
 			<Breadcrumbs
 				name={R_TRIAL}
 				trialId={trial.id}
-				trialName={trial.name}
 			/>
 
-			ID: {trial.id}<br/>
-			NAME: {trial.name}
+			<p>
+				ID: {trial.id}
+				<br />Round: {trial.round}
+				<br />Team: {trial.team.name}
+				<br />State: {trial.state}
+			</p>
 
 		</>
 	);

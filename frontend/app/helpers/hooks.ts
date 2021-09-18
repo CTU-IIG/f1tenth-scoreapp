@@ -2,7 +2,7 @@
 
 import { IntlFormatters, IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 
-import { useStore, useStoreValue, useStoreValueSetter } from '../store/hooks';
+import { useStoreValue, useStoreValueSetter } from '../store/hooks';
 import { useEffect } from 'react';
 import { AppState } from '../types';
 
@@ -17,6 +17,10 @@ export const useStoreValueLocale = () => useAppSateValue('locale');
 
 export const useStoreValueSoundEffects = () => useAppSateValue('soundEffects');
 
+export const useStoreValueRestUrl = () => useAppSateValue('restUrl');
+
+export const useStoreValueWebSocketUrl = () => useAppSateValue('webSocketUrl');
+
 
 // ### i18n
 
@@ -29,7 +33,7 @@ export const createGetRawIntlMessage = (intl: IntlShape) => (id: MessageId, fall
 	intl.messages[id] ?? (fallbackToId ? id : undefined);
 
 export const createFormatMessage = (intl: IntlShape) => (descriptor: MessageDescriptor, values?: Parameters<IntlFormatters['formatMessage']>[1]) =>
-	intl.formatMessage(descriptor , values);
+	intl.formatMessage(descriptor, values);
 
 export const createFormatMessageId = (intl: IntlShape) => (id: MessageId, values?: Parameters<IntlFormatters['formatMessage']>[1]) =>
 	intl.formatMessage({ id }, values);

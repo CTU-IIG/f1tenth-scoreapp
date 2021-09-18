@@ -6,14 +6,10 @@ import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { LoadingError, LoadingScreen } from '../components/layout';
 import { TrialCard } from '../components/content';
 import { useQuery } from '../helpers/data';
-import { Trial } from '../types';
 import { R_TRIALS } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
+import { findAllTrials } from '../queries';
 
-
-const findAllTrials = (restUrl: string, webSocketUrl: string): Promise<Trial[]> => Promise.resolve([
-	{ id: 1, name: 'X' },
-]);
 
 const TrialsPage = () => {
 
@@ -29,6 +25,13 @@ const TrialsPage = () => {
 		);
 	}
 
+	if (op.hasError) {
+		console.log(op.error);
+		return (
+			<LoadingError error={op.error} />
+		);
+	}
+
 	return (
 		<>
 
@@ -39,13 +42,11 @@ const TrialsPage = () => {
 			<h1>{t`titles.trials`}</h1>
 
 			<div className="card-grid">
-				{op.error ? <LoadingError /> : (
-					op.data.map(trial =>
-						<TrialCard
-							key={trial.id}
-							trial={trial}
-						/>,
-					)
+				{op.data.map(trial =>
+					<TrialCard
+						key={trial.id}
+						trial={trial}
+					/>,
 				)}
 			</div>
 

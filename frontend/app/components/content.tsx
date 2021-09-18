@@ -13,10 +13,7 @@ export interface TrialCardProps {
 
 export const TrialCard = (
 	{
-		trial: {
-			id,
-			name,
-		},
+		trial,
 	}: TrialCardProps,
 ) => {
 
@@ -26,11 +23,16 @@ export const TrialCard = (
 		<section className="card package">
 
 			<header className="card-heading">
-				<h3 className="heading">{name}</h3>
+				<h3 className="heading">#{trial.id} {trial.team.name}</h3>
 			</header>
 
+			<div className="card-content">
+				Round: {trial.round}
+				<br />{trial.state}
+			</div>
+
 			<div className="card-actions">
-				<Link name={R_TRIAL} payload={{ trialId: id }}>{t('trial.actions.detail')}</Link>
+				<Link name={R_TRIAL} payload={{ trialId: trial.id }}>{t('trial.actions.detail')}</Link>
 			</div>
 
 		</section>

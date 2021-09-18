@@ -65,26 +65,19 @@ export default {
 		callout: {
 			welcome: `Welcome to F1Tenth ScoreApp!`,
 		},
-		trialsHeading: `Trials overview`,
 	},
+	trialsPage: {},
 	trialPage: {
-		categoriesHeading: `Kategorie`,
+		notFoundHeading: `Trial not found`,
+		notFoundMessage: `The trial with ID {id} was not found.`,
+		backToTrials: `Back to all trials`,
 	},
-	practicePage: {
-		tipsHeading: `Control and tips`,
-		tips: `
-			<li>It is possible to end the practice at any time.</li>
-			<li>The results are automatically continuously counted towards the total score.</li>
-			<li>After answering each question, you will immediately see the result and the correct solution.</li>
-			<li>You can also use the keyboard
-				– <kbd>Enter</kbd> to check the answer and move on to the next question
-				– numbers/letters to select choices.
-			</li>
-			<li>Sound effects can be enabled/disabled in the <settings>Settings</settings>.</li>
-		`,
-		finishedHeading: `Practice completed`,
-		finished: `All selected questions were practiced.`,
-		backToPackage: `Return to the package detail`,
+	settingsPage: {
+		serverUrlsHeading: 'Server URLs',
+	},
+	notFoundPage: {
+		backToHomePageBtn: `Return to the home page`,
+		message: `There is no page on this address.`,
 	},
 	loginPage: {
 		errors: {
@@ -92,17 +85,5 @@ export default {
 			unknown: `An unknown error occurred while logging in: {message}`,
 		},
 		title: `Login`,
-	},
-	settingsPage: {
-		dataManagementHeading: `Data management`,
-		deleteScores: `Reset all scores`,
-		deleteScoresConfirmation: `Are you sure you want to reset all scores?`,
-		deleteAllLocalData: `Delete all downloaded packages and reset all scores`,
-		deleteAllLocalDataConfirmation:
-			`Are you sure you want to delete all downloaded packages for offline use? This will also reset all scores.`,
-	},
-	notFoundPage: {
-		backToHomePageBtn: `Return to the home page`,
-		message: `There is no page on this address.`,
 	},
 };

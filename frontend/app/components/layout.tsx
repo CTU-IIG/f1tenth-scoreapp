@@ -87,13 +87,20 @@ export const LoadingScreen = () => {
 
 };
 
-export const LoadingError = () => {
+export interface LoadingErrorProps {
+	error?: any;
+}
+
+export const LoadingError = ({ error }: LoadingErrorProps) => {
 
 	const t = useFormatMessageIdAsTagFn();
 
 	return (
 		<div className="loading-error">
 			{t`ui.loadingError`}
+			{typeof error?.code === 'string' && <><br />Code: {error.code}</>}
+			{typeof error?.message === 'string' && <><br />Message: {error.message}</>}
+			{typeof error?.status === 'number' && <><br />HTTP Status: {error.status}</>}
 		</div>
 	);
 

@@ -1,27 +1,27 @@
 "use strict";
 
-import { useCallback, useContext, useDebugValue, useEffect, useState } from 'react';
-import { useStoreValue } from '../store/hooks';
+import { useDebugValue, useEffect, useState } from 'react';
 import { useAppSateValue } from './hooks';
 
 
-export type QueryExecutor<QueryResult> = (restUrl: string, webSocketUrl) => Promise<QueryResult>;
+export type QueryExecutor<QueryResult> = (restUrl: string) => Promise<QueryResult>;
 
 export interface QueryOperationLoading<T> {
 	loading: true;
-	error: false;
+	hasError: false;
 	data: undefined;
 }
 
 export interface QueryOperationSuccess<T> {
 	loading: false;
-	error: false;
+	hasError: false;
 	data: T;
 }
 
 export interface QueryOperationError<T> {
 	loading: false;
-	error: true;
+	hasError: true;
+	error: any;
 	data: undefined;
 }
 
@@ -30,7 +30,6 @@ export type QueryOperation<T> = QueryOperationLoading<T> | QueryOperationSuccess
 
 interface QueryHookState<T> {
 	restUrl: string;
-	webSocketUrl: string;
 	query: QueryExecutor<T>;
 	value: QueryOperation<T>;
 }
@@ -38,36 +37,33 @@ interface QueryHookState<T> {
 export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 
 	const [restUrl] = useAppSateValue('restUrl');
-	const [webSocketUrl] = useAppSateValue('webSocketUrl');
 
 	const [state, setState] = useState<QueryHookState<T>>(() => ({
 		restUrl,
-		webSocketUrl,
 		query,
 		value: {
 			loading: true,
-			error: false,
+			hasError: false,
 			data: undefined,
 		},
 	}));
 
 	let valueToReturn = state.value;
 
-	if (state.restUrl !== restUrl || state.webSocketUrl !== webSocketUrl || state.query !== query) {
+	if (state.restUrl !== restUrl || state.query !== query) {
 
 		valueToReturn = {
 			loading: true,
-			error: false,
+			hasError: false,
 			data: undefined,
 		};
 
 		setState({
 			restUrl,
-			webSocketUrl,
 			query,
 			value: {
 				loading: true,
-				error: false,
+				hasError: false,
 				data: undefined,
 			},
 		});
@@ -103,16 +99,17 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 			let value: QueryOperation<T>;
 
 			try {
-				const data = await query(restUrl, webSocketUrl);
+				const data = await query(restUrl);
 				value = {
 					loading: false,
-					error: false,
+					hasError: false,
 					data,
-				}
+				};
 			} catch (err) {
 				value = {
 					loading: false,
-					error: true,
+					hasError: true,
+					error: err,
 					data: undefined,
 				};
 			}
@@ -128,7 +125,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 				// Since we subscribe an unsubscribe in a passive effect,
 				// it's possible that this callback will be invoked for a stale (previous) subscription.
 				// This check avoids scheduling an update for that stale subscription.
-				if (prevState.restUrl !== restUrl || prevState.webSocketUrl !== webSocketUrl || prevState.query !== query) {
+				if (prevState.restUrl !== restUrl || prevState.query !== query) {
 					return prevState;
 				}
 
@@ -152,7 +149,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 			didUnsubscribe = true;
 		};
 
-	}, [restUrl, webSocketUrl, query]);
+	}, [restUrl, query]);
 
 	// Return the current value for our caller to use while rendering.
 	return valueToReturn;

@@ -11,7 +11,7 @@ export type BreadcrumbsProps =
 	| { name: typeof R_SETTINGS }
 	| { name: typeof R_TRIALS; }
 	| { name: typeof R_TRIAL_NEW; }
-	| { name: typeof R_TRIAL; trialId: number; trialName: string; }
+	| { name: typeof R_TRIAL; trialId: number; }
 
 export type BreadcrumbsLink = {
 	name: string;
@@ -65,7 +65,7 @@ export const breadcrumbsPropsToLinks = (t: ReturnType<typeof useFormatMessageId>
 				payload: {
 					trialId: props.trialId,
 				},
-				label: props.trialName,
+				label: props.trialId.toString(),
 			});
 			return links;
 		}
