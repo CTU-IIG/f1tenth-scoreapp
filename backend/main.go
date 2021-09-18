@@ -31,7 +31,7 @@ type Team struct {
 
 type Trial struct {
 	CommonModelFields
-	TeamID    uint       `json:"-"`
+	TeamID    uint       `json:"team_id" query:"team_id"`
 	Team      Team       `json:"team"`
 	Round     uint32     `json:"round"`
 	State     TrialState `json:"state"`
@@ -103,6 +103,26 @@ func getAllTrials(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, trials)
+}
+
+func createTrial(c echo.Context) error {
+	var trial Trial
+	if err := c.Bind(&trial); err != nil {
+		return err
+	}
+	if trial.TeamID == 0 {
+		return fmt.Errorf("team_id not specified")
+	}
+	if err := db.Model(&trial).Association("Team").Find(&trial.Team); err != nil {
+		return err
+	}
+	if trial.Team.ID == 0 {
+		return fmt.Errorf("No team with id %d", trial.TeamID)
+	}
+	if err := db.Omit("Team").Create(&trial).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, &trial)
 }
 
 func getFinishedTrials(c echo.Context) error {
@@ -197,6 +217,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World! TODO") })
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
 	e.GET("/trials", getAllTrials)
+	e.POST("/trials", createTrial)
 	e.GET("/trials/:id", getTrial)
 	e.POST("/trials/:id/start", func(c echo.Context) error { return setTrialState(c, Running) })
 	e.POST("/trials/:id/stop", func(c echo.Context) error { return setTrialState(c, Finished) })

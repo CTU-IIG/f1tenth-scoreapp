@@ -31,6 +31,8 @@ stored to the database and broadcasted to web sockets.
 Implemented endpoints:
 
 - GET `/trials` – returns JSON of all trials (without crossings).
+- POST `/trials` – creates a new trial
+  Testing: `curl -H 'Content-Type: application/json' -d '{"team_id": 1}' -X POST 'http://localhost:4110/trials'`
 - GET `/trials/<num>` – returns JSON of the trial `<num>`. Currently,
   we have only 1 and 2.
 
