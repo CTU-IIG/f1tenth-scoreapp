@@ -32,17 +32,15 @@ Implemented endpoints:
 
 - GET `/teams` – returns JSON of all teams
 - POST `/teams` – creates a new team
-  Testing: `curl -H 'Content-Type: application/json' -d '{"name": "HokusPokus"}' -X POST 'http://localhost:4110/teams'`
+  - Testing: `curl -H 'Content-Type: application/json' -d '{"name": "HokusPokus"}' -X POST 'http://localhost:4110/teams'`
 - POST `/teams/<num>` - edits a team
   - Testing: `curl -H 'Content-Type: application/json' -d '{"name": "SomeName"}' -X POST 'http://localhost:4110/teams/1'`
 - GET `/trials` – returns JSON of all trials (without crossings).
 - POST `/trials` – creates a new trial
-  Testing: `curl -H 'Content-Type: application/json' -d '{"team_id": 1}' -X POST 'http://localhost:4110/trials'`
+  - Testing: `curl -H 'Content-Type: application/json' -d '{"team_id": 1}' -X POST 'http://localhost:4110/trials'`
 - GET `/trials/<num>` – returns JSON of the trial `<num>`. Currently,
   we have only 1 and 2.
-
-  Testing: `curl http://localhost:4110/trials/1`
-
+  - Testing: `curl http://localhost:4110/trials/1`
 - POST `/trials/<num>/start` – changes trial's state from
   `before_start` to `running`.
 - POST `/trials/<num>/stop` – changes trial's state from
@@ -56,8 +54,7 @@ Implemented endpoints:
   crossing to `false`
 - `/ws` – websocket. All connected clients will automatically receive
   updates about the current (2) trial.
-
-  Testing: `websocat ws://localhost:4110/ws`
+  - Testing: `websocat ws://localhost:4110/ws`
 
   Note: [websocat home page][websocat]
 
