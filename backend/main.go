@@ -243,6 +243,26 @@ func main() {
 		CustomTimeFormat: "2006-01-02 15:04:05.000",
 	}))
 	e.Use(middleware.Recover())
+	// As we access API from different origin,
+	// browsers require the server to implement CORS.
+	// About CORS: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+	// Echo docs: https://echo.labstack.com/middleware/cors/
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		// AllowOrigins defaults to []string{"*"}.
+		// AllowMethods defaults to all methods (DefaultCORSConfig.AllowMethods)
+		AllowHeaders: []string{
+			// We don't need to include CORS-safelisted headers,
+			// if we are okay we the Additional restrictions. But in our use-case, we are NOT.
+			// See https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_request_header
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+		},
+		// AllowCredentials defaults to false (which is ok for our use-case)
+		// ExposeHeaders defaults to []string{} (which is ok for our use-case)
+		// Allow browsers to cache preflight requests for 1 hour.
+		MaxAge: 3600,
+	}))
 
 	db = initDb()
 
