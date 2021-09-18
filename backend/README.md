@@ -30,11 +30,13 @@ stored to the database and broadcasted to web sockets.
 
 Implemented endpoints:
 
-- GET `/trial/<num>` – returns JSON of the trial `<num>`. Currently,
+- GET `/trials` – returns JSON of all trials (without crossings).
+- GET `/trials/<num>` – returns JSON of the trial `<num>`. Currently,
   we have only 1 and 2.
 
   Testing: `curl http://localhost:4110/trials/1`
 
+- GET `/trials/finished` – returns JSON of all finished trials (without crossings).
 - `/ws` – websocket. All connected clients will automatically receive
   updates about the current (2) trial.
 

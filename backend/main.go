@@ -56,6 +56,22 @@ func getTrial(c echo.Context) error {
 	return c.JSON(http.StatusOK, *trial)
 }
 
+func getAllTrials(c echo.Context) error {
+	var trials []Trial
+	if err := db.Preload("Team").Find(&trials).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, trials)
+}
+
+func getFinishedTrials(c echo.Context) error {
+	var trials []Trial
+	if err := db.Where(&Trial{State: Finished}).Preload("Team").Find(&trials).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, trials)
+}
+
 func initDb() *gorm.DB {
 	db, err := gorm.Open(sqlite.Open("scoreapp.db"), &gorm.Config{})
 	if err != nil {
@@ -112,7 +128,9 @@ func main() {
 
 	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World! TODO") })
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
+	e.GET("/trials", getAllTrials)
 	e.GET("/trials/:id", getTrial)
+	e.GET("/trials/finished", getFinishedTrials)
 
 	e.Logger.Fatal(e.Start(":4110")) // Port mnemonic f1/10
 }
