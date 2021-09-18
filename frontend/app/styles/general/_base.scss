@@ -98,6 +98,10 @@ a {
 	background-color: $brand-danger;
 }
 
+pre, code, kbd {
+	font-family: $font-family-monospace;
+}
+
 kbd {
 	display: inline-block;
 	font-size: 0.625rem;
@@ -112,6 +116,17 @@ kbd {
 	align-self: center;
 
 	&.dark {
+		background-color: $gray-dark;
+		color: $white;
+	}
+}
+
+.copyable-code {
+	cursor: pointer;
+	&:hover {
+		background-color: $gray-lighter;
+	}
+	&:active {
 		background-color: $gray-dark;
 		color: $white;
 	}

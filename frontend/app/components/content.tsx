@@ -5,6 +5,7 @@ import { Link } from '../router/compoments';
 import { R_TRIAL } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
 import { Trial } from '../types';
+import { copyOnClick } from '../helpers/copy';
 
 
 export interface TrialCardProps {
@@ -39,3 +40,6 @@ export const TrialCard = (
 	);
 
 };
+
+export const CopyableCode = ({ children }) =>
+	<code className="copyable-code" onClick={copyOnClick}>{children}</code>;
