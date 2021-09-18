@@ -7,12 +7,14 @@ import { isDefined } from '../helpers/common';
 import { useStoreValueLocale } from '../helpers/hooks';
 
 import flatten from '../i18n/flatten';
-import cs from '../i18n/translations.cs';
+// cs temp disable until we finish the app features
+// import cs from '../i18n/translations.cs';
 import en from '../i18n/translations.en';
 
 
 const messages: Record<string, Record<string, string>> = {
-	cs: flatten(cs),
+	// cs temp disable until we finish the app features
+	// cs: flatten(cs),
 	en: flatten(en),
 };
 

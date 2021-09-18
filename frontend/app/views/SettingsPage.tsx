@@ -24,10 +24,11 @@ const LOCALE_OPTIONS: Option[] = [
 		value: 'en',
 		label: 'locales.en',
 	},
-	{
-		value: 'cs',
-		label: 'locales.cs',
-	},
+	// cs temp disable until we finish the app features
+	// {
+	// 	value: 'cs',
+	// 	label: 'locales.cs',
+	// },
 ];
 
 const SettingsPage = () => {
