@@ -109,6 +109,23 @@ func getFinishedTrials(c echo.Context) error {
 	return c.JSON(http.StatusOK, trials)
 }
 
+func setCrossingIgnore(c echo.Context, ignored bool) error {
+	var id uint
+	var crossing *Crossing
+	err := echo.PathParamsBinder(c).Uint("id", &id)
+	if err.BindError() != nil {
+		return err.BindError()
+	}
+	if err := db.First(&crossing, id).Error; err != nil {
+		return err
+	}
+	if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
+		return err
+	}
+	broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}})
+	return c.JSON(http.StatusOK, *crossing)
+}
+
 func initDb() *gorm.DB {
 	db, err := gorm.Open(sqlite.Open("scoreapp.db"), &gorm.Config{})
 	if err != nil {
@@ -180,6 +197,8 @@ func main() {
 	e.POST("/trials/:id/stop", func(c echo.Context) error { return setTrialState(c, Finished) })
 	e.POST("/trials/:id/cancel", func(c echo.Context) error { return setTrialState(c, Unfinished) })
 	e.GET("/trials/finished", getFinishedTrials)
+	e.POST("crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
+	e.POST("crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
 
 	e.Logger.Fatal(e.Start(":4110")) // Port mnemonic f1/10
 }
