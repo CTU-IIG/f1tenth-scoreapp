@@ -17,7 +17,7 @@ import (
 )
 
 type CommonModelFields struct {
-	ID        uint           `gorm:"primaryKey" json:"id"`
+	ID        uint           `gorm:"primaryKey" json:"id" param:"id" query:"id"`
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
@@ -39,7 +39,7 @@ type Trial struct {
 }
 
 type Crossing struct {
-	ID      uint `gorm:"primaryKey" json:"id"`
+	ID      uint `gorm:"primaryKey" json:"id" param:"id" query:"id"`
 	Time    Time `json:"time"`
 	Ignored bool `json:"ignored"`
 	TrialID uint `json:"-"`
@@ -51,27 +51,23 @@ var (
 )
 
 func getTrial(c echo.Context) error {
-	var trial *Trial
-	var id uint
-	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
-	if err != nil {
+	var trial Trial
+	if err := c.Bind(&trial); err != nil {
 		return err
 	}
-	if err := db.Preload("Team").Preload("Crossings").First(&trial, id).Error; err != nil {
+	if err := db.Preload("Team").Preload("Crossings").First(&trial, trial.ID).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, *trial)
+	return c.JSON(http.StatusOK, trial)
 }
 
 func setTrialState(c echo.Context, state TrialState) error {
-	var trial *Trial
-	var id uint
-	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
-	if err != nil {
+	var trial Trial
+	if err := c.Bind(&trial); err != nil {
 		return err
 	}
-	err = db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&trial, id).Error; err != nil {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.First(&trial, trial.ID).Error; err != nil {
 			return err
 		}
 		var expectedState TrialState
@@ -97,8 +93,8 @@ func setTrialState(c echo.Context, state TrialState) error {
 	if err != nil {
 		return err
 	}
-	broadcastTrial(trial)
-	return c.JSON(http.StatusOK, *trial)
+	broadcastTrial(&trial)
+	return c.JSON(http.StatusOK, trial)
 }
 
 func getAllTrials(c echo.Context) error {
@@ -118,20 +114,18 @@ func getFinishedTrials(c echo.Context) error {
 }
 
 func setCrossingIgnore(c echo.Context, ignored bool) error {
-	var id uint
-	var crossing *Crossing
-	err := echo.PathParamsBinder(c).Uint("id", &id).BindError()
-	if err != nil {
+	var crossing Crossing
+	if err := c.Bind(&crossing); err != nil {
 		return err
 	}
-	if err := db.First(&crossing, id).Error; err != nil {
+	if err := db.First(&crossing, crossing.ID).Error; err != nil {
 		return err
 	}
 	if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
 		return err
 	}
 	broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}})
-	return c.JSON(http.StatusOK, *crossing)
+	return c.JSON(http.StatusOK, crossing)
 }
 
 func initDb() *gorm.DB {
