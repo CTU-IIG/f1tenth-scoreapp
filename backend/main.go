@@ -190,7 +190,10 @@ func barrierSimulator(hub *Hub, db *gorm.DB) {
 
 func main() {
 	e := echo.New()
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format:           "${time_custom} ${remote_ip} ${method} ${uri}, status=${status}, error=${error}\n",
+		CustomTimeFormat: "2006-01-02 15:04:05.000",
+	}))
 	e.Use(middleware.Recover())
 
 	db = initDb()
