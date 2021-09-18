@@ -97,6 +97,25 @@ func setTrialState(c echo.Context, state TrialState) error {
 	return c.JSON(http.StatusOK, trial)
 }
 
+func getAllTeams(c echo.Context) error {
+	var teams []Team
+	if err := db.Find(&teams).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, teams)
+}
+
+func createTeam(c echo.Context) error {
+	var team Team
+	if err := c.Bind(&team); err != nil {
+		return err
+	}
+	if err := db.Create(&team).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, team)
+}
+
 func getAllTrials(c echo.Context) error {
 	var trials []Trial
 	if err := db.Preload("Team").Find(&trials).Error; err != nil {
@@ -216,6 +235,8 @@ func main() {
 
 	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World! TODO") })
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
+	e.GET("/teams", getAllTeams)
+	e.POST("/teams", createTeam)
 	e.GET("/trials", getAllTrials)
 	e.POST("/trials", createTrial)
 	e.GET("/trials/:id", getTrial)

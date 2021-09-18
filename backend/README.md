@@ -30,6 +30,9 @@ stored to the database and broadcasted to web sockets.
 
 Implemented endpoints:
 
+- GET `/teams` – returns JSON of all teams
+- POST `/teams` – creates a new team
+  Testing: `curl -H 'Content-Type: application/json' -d '{"name": "HokusPokus"}' -X POST 'http://localhost:4110/teams'`
 - GET `/trials` – returns JSON of all trials (without crossings).
 - POST `/trials` – creates a new trial
   Testing: `curl -H 'Content-Type: application/json' -d '{"team_id": 1}' -X POST 'http://localhost:4110/trials'`
