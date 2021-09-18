@@ -4,25 +4,26 @@ import React from 'react';
 
 import { isDefined } from '../helpers/common';
 import {
-	MemoizedFieldRegister,
-	FieldOptions,
-	FieldRegistration,
-	FieldElement,
-	FieldRegister,
-	FormOnSubmitHandler,
-	OnSubmitHandler,
-	FieldValidityState,
 	FieldChangeListener,
+	FieldElement,
+	FieldOptions,
+	FieldRegister,
+	FieldRegistration,
+	FieldValidityState,
+	FormOnResetHandler,
+	FormOnSubmitHandler,
+	MemoizedFieldRegister,
+	OnSubmitHandler,
 } from './common';
 import {
-	optionsToDependencies,
-	findRegister,
 	addEventListeners,
-	removeAllEventListeners,
-	syncValidationAttributes,
-	isRadio,
+	findRegister,
 	getFieldValue,
+	isRadio,
+	optionsToDependencies,
+	removeAllEventListeners,
 	setFieldValue,
+	syncValidationAttributes,
 } from './helpers';
 import { deepClone, getValue, setValue } from './object-utils';
 import { AutoMap } from '../helpers/maps';
@@ -45,6 +46,7 @@ export default class FormController<DataShape> {
 
 	readonly nativeInputEventHandler: (event: Event) => void;
 	readonly formSubmitHandler: FormOnSubmitHandler;
+	readonly formResetHandler: FormOnResetHandler;
 
 	private _name: string;
 	private _initialValues: DataShape | undefined;
@@ -76,6 +78,9 @@ export default class FormController<DataShape> {
 		this.formSubmitHandler = (event) => {
 			this.handleSubmit(event);
 		};
+		this.formResetHandler = (event) => {
+			this.handleReset(event);
+		};
 
 	}
 
@@ -105,11 +110,37 @@ export default class FormController<DataShape> {
 			return;
 		}
 
-		console.log(`[FormController:${this._name}] initialValues change`);
-		this._initialValues = initialValues;
-		// TODO: make this behaviour configurable via enableReinitialize
-		// TODO: reset and notify
+		console.log(`[FormController:${this._name}] initialValues change, resetting form`);
 
+		// TODO: make this behaviour configurable via enableReinitialize
+		this._initialValues = initialValues;
+		this.reset();
+
+	}
+
+	private reset() {
+		console.log(`[FormController:${this._name}] resetting form`);
+		// reset and notify each field
+		for (const field of this.fields.values()) {
+
+			field.touched = false;
+
+			field.valid = true;
+			field.error = '';
+			field.isCustomError = false;
+
+			// restore initial variable
+			field.value = getValue(this._initialValues, field.name);
+
+			// update input value
+			setFieldValue(field.ref, field.value);
+
+			// update corresponding path in this.values object
+			setValue(this.values, field.name, field.value);
+
+			this.notify(field);
+
+		}
 	}
 
 	get onSubmit(): OnSubmitHandler<DataShape> {
@@ -350,6 +381,17 @@ export default class FormController<DataShape> {
 		// for (const [key, value] of data) {
 		// 	console.log(`key='${key}' has value='${value}'`);
 		// }
+
+	}
+
+	private handleReset(event: React.FormEvent<HTMLFormElement>) {
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		console.log(`[FormController:${this._name}][handleReset] values=%o fields=%o`, this.values, this.fields);
+
+		this.reset();
 
 	}
 

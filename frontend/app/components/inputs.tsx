@@ -19,7 +19,7 @@ export interface SelectInputProps
 	label: string;
 	valid?: boolean;
 	error?: string;
-	isCustomError?: boolean;
+	translateError?: boolean;
 	helpBlock?: React.ReactNode;
 	inputRef?: Ref<HTMLSelectElement>;
 	options: Option[];
@@ -39,7 +39,7 @@ export const SelectInput = (
 
 		valid,
 		error,
-		isCustomError,
+		translateError,
 
 		inputRef,
 
@@ -77,7 +77,7 @@ export const SelectInput = (
 					<option key={value} value={value}>{t(label)}</option>)
 				}
 			</select>
-			{!isEmpty(error) && <p className="form-control-feedback">{isCustomError === true ? error : t(error)}</p>}
+			{!isEmpty(error) && <p className="form-control-feedback">{translateError ? t(error) : error}</p>}
 			{helpBlock}
 		</div>
 	);
@@ -90,7 +90,7 @@ export interface InputProps
 	label: string;
 	valid?: boolean;
 	error?: string;
-	isCustomError?: boolean;
+	translateError?: boolean;
 	helpBlock?: React.ReactNode;
 	inputRef?: Ref<HTMLInputElement>;
 }
@@ -108,7 +108,7 @@ export const Input = (
 
 		valid,
 		error,
-		isCustomError,
+		translateError = true,
 
 		inputRef,
 
@@ -136,7 +136,7 @@ export const Input = (
 				placeholder={isDefined(finalPlaceholder) ? t(finalPlaceholder) : undefined}
 				{...otherInputProps}
 			/>
-			{!isEmpty(error) && <p className="form-control-feedback">{isCustomError === true ? error : t(error)}</p>}
+			{!isEmpty(error) && <p className="form-control-feedback">{translateError ? t(error) : error}</p>}
 			{helpBlock}
 		</div>
 	);
@@ -159,7 +159,7 @@ export const ToggleInput = (
 
 		valid,
 		error,
-		isCustomError,
+		translateError,
 
 		inputRef,
 
@@ -188,7 +188,7 @@ export const ToggleInput = (
 				{...otherInputProps}
 			/>
 			<label className="toggle-checkbox-label" htmlFor={id} />
-			{!isEmpty(error) && <p className="form-control-feedback">{isCustomError === true ? error : t(error)}</p>}
+			{!isEmpty(error) && <p className="form-control-feedback">{translateError ? t(error) : error}</p>}
 			{helpBlock}
 		</div>
 	);
@@ -253,7 +253,7 @@ export interface CheckboxListInputProps {
 
 	valid?: boolean;
 	error?: string;
-	isCustomError?: boolean;
+	translateError?: boolean;
 
 	options: Option[];
 	value: Set<string>;
@@ -275,7 +275,7 @@ export const CheckboxListInput = (
 
 		valid,
 		error,
-		isCustomError,
+		translateError,
 
 		options,
 		value,
@@ -332,7 +332,7 @@ export const CheckboxListInput = (
 				)}
 			</ol>
 
-			{!isEmpty(error) && <p className="form-control-feedback">{isCustomError === true ? error : t(error)}</p>}
+			{!isEmpty(error) && <p className="form-control-feedback">{translateError ? t(error) : error}</p>}
 
 			{helpBlock}
 

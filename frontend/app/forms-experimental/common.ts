@@ -67,6 +67,7 @@ export interface MemoizedFieldRegister {
 export type InputOnChangeHandler = NonNullable<InputHTMLAttributes<FieldElement>['onChange']>;
 export type InputOnBlurHandler = NonNullable<InputHTMLAttributes<FieldElement>['onBlur']>;
 export type FormOnSubmitHandler = NonNullable<DOMAttributes<HTMLFormElement>['onSubmit']>;
+export type FormOnResetHandler = NonNullable<DOMAttributes<HTMLFormElement>['onReset']>;
 
 export type OnSubmitHandler<DataShape> = (values: DataShape) => void;
 

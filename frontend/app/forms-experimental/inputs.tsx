@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useUncontrolledFormField } from './hooks';
 
@@ -45,7 +45,7 @@ export const FormInput = React.memo((
 			label={label}
 			valid={valid}
 			error={error}
-			isCustomError={isCustomError}
+			translateError={isCustomError}
 			inputRef={register}
 			{...otherInputProps}
 		/>
