@@ -116,6 +116,17 @@ func createTeam(c echo.Context) error {
 	return c.JSON(http.StatusOK, team)
 }
 
+func updateTeam(c echo.Context) error {
+	var team Team
+	if err := c.Bind(&team); err != nil {
+		return err
+	}
+	if err := db.Updates(&team).Error; err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, team)
+}
+
 func getAllTrials(c echo.Context) error {
 	var trials []Trial
 	if err := db.Preload("Team").Find(&trials).Error; err != nil {
@@ -237,6 +248,7 @@ func main() {
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
 	e.GET("/teams", getAllTeams)
 	e.POST("/teams", createTeam)
+	e.POST("/teams/:id", updateTeam)
 	e.GET("/trials", getAllTrials)
 	e.POST("/trials", createTrial)
 	e.GET("/trials/:id", getTrial)
