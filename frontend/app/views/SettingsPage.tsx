@@ -8,11 +8,17 @@ import {
 	fnToTemplateTag,
 	useDocumentTitle,
 	useStoreValueLocale,
+	useStoreValueRestUrl,
 	useStoreValueSoundEffects,
+	useStoreValueWebSocketUrl,
 } from '../helpers/hooks';
 import { Option, SelectInput, ToggleInput } from '../components/inputs';
 import { isDefined } from '../helpers/common';
 import { useIntl } from 'react-intl';
+import { Form } from '../forms-experimental/compoments';
+import { FormInput } from '../forms-experimental/inputs';
+import { CopyableCode } from '../components/content';
+import { OnSubmitHandler } from '../forms-experimental/common';
 
 
 const LOCALE_OPTIONS: Option[] = [
@@ -31,6 +37,18 @@ const LOCALE_OPTIONS: Option[] = [
 	// },
 ];
 
+interface ServerUrlsFormShape {
+	restUrl: string;
+	webSocketUrl: string;
+}
+
+/**
+ * Normalizes the given URL so that is does NOT have a trailing slash.
+ * E.g.: 'http://localhost:4110/' -> 'http://localhost:4110'
+ * @param url URL to normalize
+ */
+const normalizeRestUrl = (url: string) => url.endsWith('/') ? url.slice(0, -1) : url;
+
 const SettingsPage = () => {
 
 	const intl = useIntl();
@@ -41,6 +59,9 @@ const SettingsPage = () => {
 
 	const [locale, setLocale] = useStoreValueLocale();
 	const [soundEffects, setSoundEffects] = useStoreValueSoundEffects();
+
+	const [restUrl, setRestUrl] = useStoreValueRestUrl();
+	const [webSocketUrl, setWebSocketUrl] = useStoreValueWebSocketUrl();
 
 	if (!isDefined(locale)) {
 		throw new Error(`[LocaleLoader] locale undefined`);
@@ -54,7 +75,10 @@ const SettingsPage = () => {
 		setSoundEffects(event.target.checked);
 	}, [setSoundEffects]);
 
-	// TODO: server URLs
+	const handleChangeServerUrls = useCallback<OnSubmitHandler<ServerUrlsFormShape>>((data) => {
+		setRestUrl(normalizeRestUrl(data.restUrl));
+		setWebSocketUrl(data.webSocketUrl);
+	}, [setRestUrl, setWebSocketUrl]);
 
 	return (
 		<>
@@ -82,6 +106,54 @@ const SettingsPage = () => {
 				checked={soundEffects}
 				onChange={handleSoundEffectsChange}
 			/>
+
+			<h2>{t`settingsPage.serverUrlsHeading`}</h2>
+
+			<Form<ServerUrlsFormShape>
+				name="serverUrls"
+				initialValues={{
+					restUrl,
+					webSocketUrl,
+				}}
+				onSubmit={handleChangeServerUrls}
+			>
+
+				<FormInput
+					type="url"
+					required={true}
+					name="restUrl"
+					label="settingsForm.labels.restUrl"
+					helpBlock={
+						<p className="help-block">
+							{t`settingsForm.labels.effectiveRestUrl`}{': '}
+							<CopyableCode>{restUrl}</CopyableCode>
+						</p>
+					}
+				/>
+
+				<FormInput
+					type="url"
+					required={true}
+					name="webSocketUrl"
+					label="settingsForm.labels.webSocketUrl"
+					helpBlock={
+						<p className="help-block">
+							{t`settingsForm.labels.effectiveWebSocketUrl`}{': '}
+							<CopyableCode>{webSocketUrl}</CopyableCode>
+						</p>
+					}
+				/>
+
+				<div className="btn-group">
+					<button className="btn btn-danger" type="submit">
+						{t`settingsForm.saveServerUrls`}
+					</button>
+					<button className="btn btn-default" type="reset">
+						{t`forms.reset`}
+					</button>
+				</div>
+
+			</Form>
 
 		</>
 	);

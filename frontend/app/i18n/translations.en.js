@@ -43,6 +43,7 @@ export default {
 		},
 		prompt: `-- Please select --`,
 		send: `Submit`,
+		reset: `Reset`,
 	},
 	loginForm: {
 		labels: {
@@ -57,9 +58,12 @@ export default {
 			effectiveLocale: `Currently used language`,
 			locale: `Language`,
 			soundEffects: `Sound effects`,
-			serverUrl: `Server URL`,
+			restUrl: `REST API URL`,
+			effectiveRestUrl: `Currently used`,
+			webSocketUrl: `WebSocket API URL`,
+			effectiveWebSocketUrl: `Currently used`,
 		},
-		switchToBtn: `Switch to {url}`,
+		saveServerUrls: `Save URLs changes`,
 	},
 	homePage: {
 		callout: {
