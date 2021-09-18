@@ -93,7 +93,9 @@ func setTrialState(c echo.Context, state TrialState) error {
 	if err != nil {
 		return err
 	}
-	broadcastTrial(&trial)
+	if err := broadcastTrial(&trial); err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, trial)
 }
 
@@ -174,7 +176,9 @@ func setCrossingIgnore(c echo.Context, ignored bool) error {
 	if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
 		return err
 	}
-	broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}})
+	if err := broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}}); err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, crossing)
 }
 
@@ -202,19 +206,21 @@ func initDb() *gorm.DB {
 	return db
 }
 
-func broadcastTrial(trial *Trial) {
+func broadcastTrial(trial *Trial) error {
 	type Message struct {
 		Trial *Trial `json:"trial"`
 	}
 
 	var fullTrial Trial
-	db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&fullTrial, trial.ID)
-
+	if err := db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&fullTrial, trial.ID).Error; err != nil {
+		return err
+	}
 	b, err := json.Marshal(&Message{&fullTrial})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	hub.broadcast <- b
+	return nil
 }
 
 func barrierSimulator(hub *Hub, db *gorm.DB) {
