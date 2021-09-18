@@ -52,7 +52,12 @@ var (
 
 func getTrial(c echo.Context) error {
 	var trial *Trial
-	if err := db.Preload("Team").Preload("Crossings").First(&trial, c.Param("id")).Error; err != nil {
+	var id uint
+	err := echo.PathParamsBinder(c).Uint("id", &id)
+	if err.BindError() != nil {
+		return err.BindError()
+	}
+	if err := db.Preload("Team").Preload("Crossings").First(&trial, id).Error; err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, *trial)
@@ -60,8 +65,13 @@ func getTrial(c echo.Context) error {
 
 func setTrialState(c echo.Context, state TrialState) error {
 	var trial *Trial
+	var id uint
+	berr := echo.PathParamsBinder(c).Uint("id", &id)
+	if berr.BindError() != nil {
+		return berr.BindError()
+	}
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&trial, c.Param("id")).Error; err != nil {
+		if err := tx.First(&trial, id).Error; err != nil {
 			return err
 		}
 		var expectedState TrialState
