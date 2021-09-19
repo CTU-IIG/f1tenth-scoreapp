@@ -1,11 +1,11 @@
 "use strict";
 
 import { isDefined, TypedMap } from '../helpers/common';
-import { AutoMap } from '../helpers/maps';
+import { SmartMap } from '../helpers/maps';
 
 
 export interface OnChangeHandler<Key> {
-	(value: any, path: Key): void
+	(value: any, path: Key): void;
 }
 
 export type OnInitData<DataModel extends object> = () => TypedMap<DataModel>
@@ -21,7 +21,7 @@ class Store<DataModel extends object> {
 	readonly storageKey: string;
 	readonly version: string;
 	private readonly onInitData: OnInitData<DataModel>;
-	private readonly listeners: AutoMap<keyof DataModel, Set<OnChangeHandler<keyof DataModel>>>;
+	private readonly listeners: SmartMap<keyof DataModel, Set<OnChangeHandler<keyof DataModel>>>;
 	private readonly data: TypedMap<DataModel>;
 
 	constructor({ storageKey = 'state', version = '0.0.0', onInitData }: StoreOptions<DataModel>) {
@@ -29,7 +29,10 @@ class Store<DataModel extends object> {
 		this.storageKey = storageKey;
 		this.version = version;
 		this.onInitData = onInitData ?? (() => new Map());
-		this.listeners = new AutoMap(() => new Set());
+		this.listeners = new SmartMap(
+			(key, value) => value.size === 0,
+			() => new Set(),
+		);
 
 		const data = this.loadData();
 
@@ -104,11 +107,11 @@ class Store<DataModel extends object> {
 
 		// console.log(`[Store] notify ${path}`);
 
-		const pathListeners = this.listeners.get(path);
-
-		if (!isDefined(pathListeners)) {
+		if (!this.listeners.has(path)) {
 			return;
 		}
+
+		const pathListeners = this.listeners.get(path);
 
 		pathListeners.forEach(fn => fn(value, path));
 
@@ -118,11 +121,11 @@ class Store<DataModel extends object> {
 
 		// console.log(`[Store] listen ${path}`);
 
-		this.listeners.use(path).add(onChange);
+		this.listeners.get(path).add(onChange);
 
 		return () => {
 			// console.log(`[Store] unlisten ${path}`);
-			this.listeners.get(path)?.delete(onChange);
+			this.listeners.get(path).delete(onChange);
 			this.listeners.safeDelete(path);
 		};
 

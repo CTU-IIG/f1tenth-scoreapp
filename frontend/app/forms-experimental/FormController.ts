@@ -26,7 +26,7 @@ import {
 	syncValidationAttributes,
 } from './helpers';
 import { deepClone, getValue, setValue } from './object-utils';
-import { AutoMap } from '../helpers/maps';
+import { SmartMap } from '../helpers/maps';
 
 
 export interface FormControllerOptions<DataShape> {
@@ -42,7 +42,7 @@ export default class FormController<DataShape> {
 
 	private readonly fields: Map<string, FieldRegistration>;
 
-	private readonly fieldChangeListeners: AutoMap<string, Set<FieldChangeListener>>;
+	private readonly fieldChangeListeners: SmartMap<string, Set<FieldChangeListener>>;
 
 	readonly nativeInputEventHandler: (event: Event) => void;
 	readonly formSubmitHandler: FormOnSubmitHandler;
@@ -69,7 +69,10 @@ export default class FormController<DataShape> {
 
 		this.memoizedFieldRegister = new Map<string, MemoizedFieldRegister>();
 		this.fields = new Map<string, FieldRegistration>();
-		this.fieldChangeListeners = new AutoMap(() => new Set());
+		this.fieldChangeListeners = new SmartMap(
+			(key, value) => value.size === 0,
+			() => new Set(),
+		);
 
 		this.nativeInputEventHandler = (event: Event) => {
 			this.handleNativeInputEvent(event);
@@ -192,11 +195,11 @@ export default class FormController<DataShape> {
 
 		// console.log(`[FormController:${this._name}] listen for field change ${name}`);
 
-		this.fieldChangeListeners.use(name).add(onChange);
+		this.fieldChangeListeners.get(name).add(onChange);
 
 		return () => {
 			// console.log(`[FormController:${this._name}] unlisten for field change ${name}`);
-			this.fieldChangeListeners.get(name)?.delete(onChange);
+			this.fieldChangeListeners.get(name).delete(onChange);
 			this.fieldChangeListeners.safeDelete(name);
 		};
 
@@ -206,11 +209,11 @@ export default class FormController<DataShape> {
 
 		console.log(`[FormController:${this._name}] notify ${field.name}`);
 
-		const fieldListeners = this.fieldChangeListeners.get(field.name);
-
-		if (!isDefined(fieldListeners)) {
+		if (!this.fieldChangeListeners.has(field.name)) {
 			return;
 		}
+
+		const fieldListeners = this.fieldChangeListeners.get(field.name);
 
 		fieldListeners.forEach((fn) => fn(field));
 

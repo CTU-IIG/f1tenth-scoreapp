@@ -1,115 +1,60 @@
 "use strict";
 
-import { isDefined } from './common';
 
+export type KeyValueCreator<K, V> = ((key: K) => V) | V;
 
-export type AutoMapFallback<K, V> = ((key: K) => V) | V
+export const isFunctionalCreator = <K, V>(creator: KeyValueCreator<K, V>): creator is ((key: K) => V) =>
+	typeof creator === 'function';
 
-export const isFunctionalFallback = <K, V>(fallback: AutoMapFallback<K, V>): fallback is ((key: K) => V) => typeof fallback === 'function';
+export class SmartMap<K, V> {
 
-// see https://medium.com/front-end-hacking/es6-map-vs-object-what-and-when-b80621932373
-export class AutoMap<K, V> {
+	private readonly store: Map<K, V>;
+	readonly canKeyBeSafelyDeleted: (key: K, value: V) => boolean;
+	readonly createValueForKey: KeyValueCreator<K, V>;
 
-	private _store: Map<K, { count: number; value: V }>;
-	private _usages: number;
-	private readonly fallback: AutoMapFallback<K, V>;
-
-	constructor(fallback: AutoMapFallback<K, V>) {
-		this._store = new Map();
-		this._usages = 0;
-		this.fallback = fallback;
+	constructor(canBeKeySafelyDeleted: (key: K, value: V) => boolean, fallback: KeyValueCreator<K, V>) {
+		this.store = new Map();
+		this.canKeyBeSafelyDeleted = canBeKeySafelyDeleted;
+		this.createValueForKey = fallback;
 	}
 
-	static resolveFallback<K, V>(fallback: AutoMapFallback<K, V>, key: K): V {
-		return isFunctionalFallback(fallback) ? fallback(key) : fallback;
+	static resolveValue<K, V>(createValueForKey: KeyValueCreator<K, V>, key: K): V {
+		return isFunctionalCreator(createValueForKey) ? createValueForKey(key) : createValueForKey;
 	}
 
-	use(key: K, fallback?: AutoMapFallback<K, V>): V {
+	has(key: K): boolean {
+		return this.store.has(key);
+	}
 
-		const record = this._store.get(key);
+	get(key: K, createValueForKey?: KeyValueCreator<K, V>): V {
 
-		if (!isDefined(record)) {
-
-			const value = AutoMap.resolveFallback(fallback ?? this.fallback, key);
-
-			// if (!isDefined(value)) {
-			// 	throw new Error(`[AutoMap] record for key '${key}' does not exists and value fallback resolved to ${value}`);
-			// }
-
-			this._store.set(key, {
-				count: 1,
-				value,
-			});
-
-			this._usages++;
-
-			return value;
-
+		// we have to use has check in order to be able to support `undefined` values
+		if (this.store.has(key)) {
+			return this.store.get(key) as V;
 		}
 
-		record.count++;
-		this._usages++;
-
-		return record.value;
+		// create new entry
+		const value = SmartMap.resolveValue(createValueForKey ?? this.createValueForKey, key);
+		this.store.set(key, value);
+		return value;
 
 	}
 
-	unuse(key: K): V | undefined {
+	safeDelete(key: K): boolean {
 
-		const record = this._store.get(key);
-
-		if (!isDefined(record)) {
-			return undefined;
+		if (!this.store.has(key)) {
+			return false;
 		}
 
-		record.count--;
-		this._usages--;
+		const value = this.store.get(key) as V;
 
-		return record.value;
-
-	}
-
-	safeDelete(key): number | undefined {
-
-		const record = this._store.get(key);
-
-		if (!isDefined(record)) {
-			return undefined;
+		if (this.canKeyBeSafelyDeleted(key, value)) {
+			this.store.delete(key);
+			return true;
 		}
 
-		record.count--;
-		this._usages--;
+		return false;
 
-		if (record.count < 1) {
-			this._store.delete(key);
-		}
-
-		return record.count;
-
-	}
-
-	delete(key): boolean {
-		return this._store.delete(key);
-	}
-
-	has(key): boolean {
-		return this._store.has(key);
-	}
-
-	get(key): V | undefined {
-		return this._store.get(key)?.value;
-	}
-
-	forEach(cb: (key: K, value: V, count: number) => void) {
-		return this._store.forEach((v, k) => cb(k, v.value, v.count));
-	}
-
-	get size(): number {
-		return this._store.size;
-	}
-
-	get usages(): number {
-		return this._usages;
 	}
 
 }
