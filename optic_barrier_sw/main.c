@@ -115,6 +115,14 @@ void convert_time(mytime_t *mytime, unsigned long time_us)
     time_us = time_us - mytime->miliseconds * 1000;
 }
 
+char *us2str(char *dest, const char *prefix, long unsigned time_us)
+{
+        mytime_t mytime;
+        convert_time(&mytime, time_us);
+        sprintf(dest, "%s%02d:%02d:%02d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
+        return dest;
+}
+
 int main(int argc, char *argv[])
 {
     // 1.System Initialization
@@ -218,10 +226,8 @@ int main(int argc, char *argv[])
             GUI_DisString_EN(0, font->Height - 2, lap_str_init, font, FONT_BACKGROUND, WHITE);      // lap time
             GUI_DisString_EN(0, 2 * font->Height - 4, best_str_init, font, FONT_BACKGROUND, WHITE); // best time
 
-            strcpy(lap_str, "LAP: ");
-            strcat(lap_str, "00:00:000");
-            strcpy(best_str, "BEST: ");
-            strcat(best_str, "00:00:000");
+            strcpy(lap_str, "LAP: 00:00:000");
+            strcpy(best_str, "BEST: 00:00:000");
 
             GUI_Display();
         }
@@ -229,8 +235,7 @@ int main(int argc, char *argv[])
         if (after_start) {
             gettimeofday(&stop, NULL);
             time_us = (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
-            convert_time(&mytime, time_us); // convert time in uS to stopwatch time
-            sprintf(str, "%02d:%02d:%02d", mytime.minutes, mytime.seconds, mytime.miliseconds);
+            us2str(str, "", time_us);
 
             GUI_Clear();
             GUI_DisString_EN(10, 0, str, font, FONT_BACKGROUND, WHITE);                        // actual time
@@ -254,16 +259,10 @@ int main(int argc, char *argv[])
                 fflush(stdout);
 
                 if (no_lap == true) {
-                    // more accurate lap time
-                    convert_time(&mytime, time_us); // convert time in uS to stopwatch time   //add new
-                    sprintf(str, "%02d:%02d:%02d", mytime.minutes, mytime.seconds, mytime.miliseconds); // add new
-
-                    strcpy(lap_str, "LAP: ");
-                    strcat(lap_str, str);
+                    us2str(lap_str, "LAP: ", time_us);
 
                     if (best_time > time_us) {
-                        strcpy(best_str, "BEST: ");
-                        strcat(best_str, str);
+                        us2str(best_str, "BEST: ", time_us);
                         best_time = time_us;
                     }
                 }
