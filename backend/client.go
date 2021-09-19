@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"net/http"
 	"time"
 )
 
@@ -32,6 +33,9 @@ var (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	// Currently, we want to allow browser connections from all origins.
+	// We do not use cookies (so we are safe from cross-site request forgery attacks).
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
 type Client struct {
