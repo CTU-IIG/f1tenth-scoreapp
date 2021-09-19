@@ -50,6 +50,8 @@ const useChat = () => {
 	// called only on init (see its deps), opens WebSocket, registers callbacks
 	useEffect(() => {
 
+		let didUnsubscribe = false;
+
 		console.log('subscribing ...');
 
 		const client = new WebSocket('ws://localhost:4000');
@@ -64,6 +66,9 @@ const useChat = () => {
 
 		client.onmessage = (event) => {
 			console.log('ws: message', event.data);
+			if (didUnsubscribe || clientRef.current !== client) {
+				return;
+			}
 			addMessage(event.data);
 		};
 
@@ -78,9 +83,15 @@ const useChat = () => {
 
 			console.log('unsubscribing (closing client)...');
 
+			didUnsubscribe = true;
+
 			// 1000 means "The connection successfully completed the purpose for which it was created."
 			client.close(1000);
-			clientRef.current = undefined;
+
+			// not sure if such a situation can ever occur... but
+			if (clientRef.current === client) {
+				clientRef.current = undefined;
+			}
 
 		};
 
