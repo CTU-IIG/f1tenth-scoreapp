@@ -23,13 +23,13 @@ const Root = ({ store, router }: RootProps) => {
 
 	return (
 		<StoreContext.Provider value={store}>
-				<RouterContext.Provider value={router}>
-					<LocaleLoader>
-						<App>
-							<PageRouter />
-						</App>
-					</LocaleLoader>
-				</RouterContext.Provider>
+			<RouterContext.Provider value={router}>
+				<LocaleLoader>
+					<App>
+						<PageRouter />
+					</App>
+				</LocaleLoader>
+			</RouterContext.Provider>
 		</StoreContext.Provider>
 	);
 
