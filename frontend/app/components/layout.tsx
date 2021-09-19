@@ -3,7 +3,7 @@
 import React from 'react';
 import { NavLink } from '../router/compoments';
 import { useFormatMessageIdAsTagFn } from '../helpers/hooks';
-import { R_PRESENTATION, R_ROOT, R_SETTINGS, R_TRIALS } from '../routes';
+import { R_ROOT, R_SETTINGS, R_TEAMS, R_TRIALS } from '../routes';
 
 
 export const AppHeader = React.memo((props) => {
@@ -25,11 +25,14 @@ export const AppHeader = React.memo((props) => {
 							<NavLink name={R_ROOT}>{t`titles.home`}</NavLink>
 						</li>
 						<li>
-							<NavLink name={R_TRIALS}>{t`titles.trials`}</NavLink>
+							<NavLink name={R_TEAMS}>{t`titles.teams`}</NavLink>
 						</li>
 						<li>
-							<NavLink name={R_PRESENTATION}>{t`titles.presentation`}</NavLink>
+							<NavLink name={R_TRIALS}>{t`titles.trials`}</NavLink>
 						</li>
+						{/*<li>*/}
+						{/*	<NavLink name={R_PRESENTATION}>{t`titles.presentation`}</NavLink>*/}
+						{/*</li>*/}
 					</ul>
 					<ul className="right">
 						<li>

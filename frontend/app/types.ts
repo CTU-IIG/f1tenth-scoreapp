@@ -27,6 +27,7 @@ export type TrialState =
 export interface Trial {
 	id: number;
 	round: number;
+	team_id: number;
 	team: Team;
 	state: TrialState;
 }

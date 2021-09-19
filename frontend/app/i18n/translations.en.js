@@ -7,16 +7,17 @@ export default {
 		cs: 'Czech',
 	},
 	titles: {
-		home: `Home page`,
+		home: `Home`,
 		loading: `Loading ...`,
 		login: `Login`,
 		notFound: `Page not found`,
 		settings: `Settings`,
+		teams: 'Teams',
 		trials: 'Trials',
 		presentation: 'Presentation',
 	},
 	header: {
-		appName: `F1Tenth ScoreApp`,
+		appName: `ScoreApp`,
 	},
 	footer: {
 		sourceCode: `Source code on`,
@@ -75,6 +76,17 @@ export default {
 		notFoundHeading: `Trial not found`,
 		notFoundMessage: `The trial with ID {id} was not found.`,
 		backToTrials: `Back to all trials`,
+	},
+	teamsPage: {
+		columns: {
+			id: 'ID',
+			name: 'Name',
+		},
+	},
+	teamPage: {
+		notFoundHeading: `Team not found`,
+		notFoundMessage: `The team with ID {id} was not found.`,
+		backToTrials: `Back to all teams`,
 	},
 	settingsPage: {
 		serverUrlsHeading: 'Server URLs',

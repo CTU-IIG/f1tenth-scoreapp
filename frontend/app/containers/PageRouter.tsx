@@ -5,7 +5,7 @@ import React from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { useRoute } from '../router/hooks';
 
-import { R_PRESENTATION, R_ROOT, R_SETTINGS, R_TRIAL, R_TRIAL_NEW, R_TRIALS } from '../routes';
+import { R_PRESENTATION, R_ROOT, R_SETTINGS, R_TEAMS, R_TRIAL, R_TRIALS } from '../routes';
 
 import NotFoundPage from '../views/NotFoundPage';
 import SettingsPage from '../views/SettingsPage';
@@ -16,6 +16,7 @@ import TrialsPage from '../views/TrialsPage';
 import TrialPage from '../views/TrialPage';
 
 import PresentationPage from '../views/PresentationPage';
+import TeamsPage from '../views/TeamsPage';
 
 
 const PageRouter = () => {
@@ -36,13 +37,12 @@ const PageRouter = () => {
 		return <SettingsPage />;
 	}
 
-	if (name === R_TRIAL) {
-		return <TrialPage />;
+	if (name === R_TEAMS) {
+		return <TeamsPage />;
 	}
 
-	if (name === R_TRIAL_NEW) {
-		// TODO
-		return <HomePage />;
+	if (name === R_TRIAL) {
+		return <TrialPage />;
 	}
 
 	if (name === R_TRIALS) {

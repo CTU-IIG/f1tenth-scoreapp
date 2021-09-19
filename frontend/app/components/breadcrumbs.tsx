@@ -2,13 +2,16 @@
 
 import React from 'react';
 import { Link } from '../router/compoments';
-import { R_ROOT, R_SETTINGS, R_TRIAL, R_TRIAL_NEW, R_TRIALS } from '../routes';
+import { R_ROOT, R_SETTINGS, R_TEAM, R_TEAM_NEW, R_TEAMS, R_TRIAL, R_TRIAL_NEW, R_TRIALS } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
 
 
 export type BreadcrumbsProps =
 	| { name: typeof R_ROOT }
 	| { name: typeof R_SETTINGS }
+	| { name: typeof R_TEAMS; }
+	| { name: typeof R_TEAM_NEW; }
+	| { name: typeof R_TEAM; teamId: number; }
 	| { name: typeof R_TRIALS; }
 	| { name: typeof R_TRIAL_NEW; }
 	| { name: typeof R_TRIAL; trialId: number; }
@@ -38,6 +41,40 @@ export const breadcrumbsPropsToLinks = (t: ReturnType<typeof useFormatMessageId>
 			label: t(`titles.settings`),
 		});
 		return links;
+	}
+
+	if (props.name === R_TEAMS || props.name === R_TEAM_NEW || props.name === R_TEAM) {
+
+		links.push({
+			name: R_TEAMS,
+			label: t(`titles.teams`),
+		});
+
+		if (props.name === R_TEAMS) {
+			return links;
+		}
+
+		if (props.name === R_TEAM_NEW) {
+			links.push({
+				name: R_TEAM_NEW,
+				label: t(`titles.newTeam`),
+			});
+			return links;
+		}
+
+		if (props.name === R_TEAM) {
+			links.push({
+				name: R_TEAM,
+				payload: {
+					teamId: props.teamId,
+				},
+				label: props.teamId.toString(),
+			});
+			return links;
+		}
+
+		return links;
+
 	}
 
 	if (props.name === R_TRIALS || props.name === R_TRIAL_NEW || props.name === R_TRIAL) {
