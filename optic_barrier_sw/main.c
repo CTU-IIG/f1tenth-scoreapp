@@ -28,6 +28,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <limits.h>
+#include <string.h>
 
 char ip_address[] = "IP:";
 char password[] = "Password:user";
