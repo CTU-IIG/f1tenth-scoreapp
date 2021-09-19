@@ -212,8 +212,7 @@ int main(int argc, char *argv[])
     GUI_Display();
     sleep(2);
 
-    struct timeval stop, start;
-    bool no_lap = false;
+    struct timeval start;
     // gettimeofday(&start, NULL);
 
     // This initialises the wiringPi system
@@ -243,42 +242,28 @@ int main(int argc, char *argv[])
         /* Reset everything */
         if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
             after_start = false;
-            no_lap = false;
             state.time_us = 0;
             state.lap_time_us = 0;
             state.best_time_us = LONG_MAX;
         }
 
         if (after_start) {
+            struct timeval stop;
             gettimeofday(&stop, NULL);
             state.time_us = usec_between(&start, &stop);
         }
 
         if (object_detected) {
-            after_start = true;
             object_detected = 0;
-            printf("DETECT OBJECT");
 
-            gettimeofday(&stop, NULL);
-            state.time_us = usec_between(&start, &stop);
-
-            if ((no_lap == false) || (state.time_us > MIN_TIME_US)) {
+            if (after_start == false || state.time_us > MIN_TIME_US) {
+                state.lap_time_us = state.time_us;
                 gettimeofday(&start, NULL);
 
-                printf("\n");
-                fflush(stdout);
-
-                if (no_lap == true) {
-                    state.lap_time_us = state.time_us;
-
-                    if (state.best_time_us > state.time_us)
-                        state.best_time_us = state.time_us;
-                }
-                no_lap = true;
-            } else {
-                printf(":FALSE\n");
-                fflush(stdout);
+                if (state.best_time_us > state.lap_time_us)
+                    state.best_time_us = state.lap_time_us;
             }
+            after_start = true;
         }
     }
     System_Exit();
