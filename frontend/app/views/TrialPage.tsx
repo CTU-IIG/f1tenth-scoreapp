@@ -14,6 +14,7 @@ import { Link } from '../router/compoments';
 import { useIntl } from 'react-intl';
 import { Timers, Timer, TimeDisplay } from '../components/timers';
 import { useWebSocket } from '../helpers/ws_hook';
+import { cancelTrial, ignoreCrossing, stopTrial, unignoreCrossing } from '../queries';
 
 const LapHistory = (props) => {
 	return (
@@ -27,8 +28,12 @@ const LapHistory = (props) => {
 }
 
 const CrossingsHistory = (props) => {
-	const sendRequest = () => {
-		//TODO send REST API request
+	const sendRequest = (ignored, id) => {
+		if (ignored) {
+			unignoreCrossing(id);
+		}else{
+			ignoreCrossing(id);
+		}
 	};
 
 	return (
@@ -37,7 +42,7 @@ const CrossingsHistory = (props) => {
 				return (
 					<>
 						<TimeDisplay key={index} name={'Crossing ' + (index+1)+': '} time={cs?.time*1000 - props.start}/>
-						<button key={index} onClick={sendRequest}>
+						<button  class="trial-ignorebutton" key={index} onClick={() => sendRequest(cs?.ignored, cs?.id)}>
 							{cs?.ignored ? 'Y' : 'N'}
 						</button>
 					</>
@@ -157,8 +162,17 @@ const TrialPage = () => {
 	//const trialReceived = state?.trial;
 	const trial = state?.trial;
 
-	//if (state?.trial?.id === id) trial = trialReceived;
-		//trial = JSON.parse(JSON.stringify(trialReceived));
+
+
+	//RACE NOT FOUND
+	if (trial?.id !== id){
+		return (
+			<p>
+				No data regarding this race
+			</p>
+		);
+	}
+
 
 
 
@@ -169,7 +183,7 @@ const TrialPage = () => {
 	if (canEdit){
 		history = <LapHistory lapTimes={lapTimes}/>
 	}else{
-		history = <CrossingsHistory crossings={trial?.crossings} start={raceStartTime}/>
+		history = <CrossingsHistory id={trial?.id} crossings={trial?.crossings} start={raceStartTime}/>
 	}
 
 
@@ -188,7 +202,7 @@ const TrialPage = () => {
 				<br />State: {trial.state}
 			</p>
 
-			<h2>
+			<h2  class="trial-state">
 				{(() => {
 					if (trial?.state === "running"){
 						return "Race in progress";
@@ -205,6 +219,14 @@ const TrialPage = () => {
 			{history}
 			<button onClick={() => setCanEdit(prev => !prev)}>
 				{canEdit ? "Switch to display only mode" : "Switch to editing mode"}
+			</button>
+
+			<button class="cancel" onClick={() => cancelTrial(trial?.id)}>
+				Cancel trial
+			</button>
+
+			<button class="stop" onClick={() => stopTrial(trial?.id)}>
+				Stop trial
 			</button>
 
 		</>
