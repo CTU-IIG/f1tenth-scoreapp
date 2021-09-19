@@ -152,7 +152,7 @@ void update_display(enum screen screen)
         break;
     }
     case SHUTDOWN:
-        GUI_DisString_EN(10, 0, "Shutdown", &Font16, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(10, 0, "Hold 4s to shutdown", &Font12, FONT_BACKGROUND, WHITE);
     }
     GUI_Display();
 }
@@ -160,6 +160,29 @@ void update_display(enum screen screen)
 long usec_between(const struct timeval *start, const struct timeval *stop)
 {
     return (stop->tv_sec - start->tv_sec) * 1000000 + stop->tv_usec - start->tv_usec;
+}
+
+void shutdown_handler(bool btn_pressed)
+{
+    static struct timeval start;
+    struct timeval now;
+
+    if (!btn_pressed) {
+        start = (struct timeval){0, 0};
+        return;
+    }
+
+    if (start.tv_sec == 0)
+        gettimeofday(&start, NULL);
+
+    gettimeofday(&now, NULL);
+
+    if (usec_between(&start, &now) > 4*1000000) {
+        update_display(EMPTY);
+        System_Exit();
+        system("sudo shutdown -h now");
+        exit(0);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -228,15 +251,12 @@ int main(int argc, char *argv[])
     state.best_time_us = LONG_MAX;
 
     while (1) {
-        update_display(TIME);
-
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
             update_display(SHUTDOWN);
-            sleep(2);
-            update_display(EMPTY);
-            System_Exit();
-            system("sudo shutdown -h now");
-            return 0;
+            shutdown_handler(true);
+        } else {
+            update_display(TIME);
+            shutdown_handler(false);
         }
 
         /* Reset everything */
