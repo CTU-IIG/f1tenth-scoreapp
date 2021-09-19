@@ -1,8 +1,31 @@
 "use strict";
 
 import { doRequest, METHOD_POST } from './helpers/api';
-import { Crossing, FullTrial, Trial } from './types';
+import { Crossing, FullTrial, Team, Trial } from './types';
 
+export const findAllTeams =
+	(restUrl: string) =>
+		doRequest<Team[]>(`${restUrl}/teams`);
+
+export const createTeam = (name: string) =>
+	(restUrl: string) =>
+		doRequest<Team>(
+			`${restUrl}/teams`,
+			{
+				method: METHOD_POST,
+				body: { name },
+			},
+		);
+
+export const updateTeam = (id: number, name: string) =>
+	(restUrl: string) =>
+		doRequest<Team>(
+			`${restUrl}/teams/${id}`,
+			{
+				method: METHOD_POST,
+				body: { name },
+			},
+		);
 
 export const findAllTrials =
 	(restUrl: string) =>
@@ -13,6 +36,16 @@ export const findOneTrialById = (id: number) =>
 		doRequest<FullTrial | undefined>(
 			`${restUrl}/trials/${id}`,
 			{ returnUndefinedForNotFoundError: true },
+		);
+
+export const createTrial = (team_id: string) =>
+	(restUrl: string) =>
+		doRequest<Trial>(
+			`${restUrl}/trials`,
+			{
+				method: METHOD_POST,
+				body: { team_id },
+			},
 		);
 
 export const startTrial = (id: number) =>
