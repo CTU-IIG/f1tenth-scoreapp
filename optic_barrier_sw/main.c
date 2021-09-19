@@ -30,6 +30,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 char ip_address[] = "IP:";
 char password[] = "Password:user";
@@ -53,11 +54,19 @@ char best_str_init[] = {"BEST: 00:00:000"};
 
 #define MIN_TIME_US 1000000
 
-volatile int object_detected = 0;
+pthread_mutex_t detect_mutex = PTHREAD_MUTEX_INITIALIZER;
+bool object_detected = false;
+struct timeval detect_time;
 
 void interrupt_optic_barrier()
 {
-    object_detected = 1;
+    struct timeval now;
+
+    gettimeofday(&now, NULL);
+    pthread_mutex_lock(&detect_mutex);
+    object_detected = true;
+    detect_time = now;
+    pthread_mutex_unlock(&detect_mutex);
 }
 
 int show_ip_address()
@@ -276,17 +285,30 @@ int main(int argc, char *argv[])
             state.time_us = usec_between(&start, &stop);
         }
 
-        if (object_detected) {
-            object_detected = 0;
+        {
+            bool local_object_detected;
+            struct timeval local_detect_time;
 
-            if (after_start == false || state.time_us > MIN_TIME_US) {
-                state.lap_time_us = state.time_us;
-                gettimeofday(&start, NULL);
-
-                if (state.best_time_us > state.lap_time_us)
-                    state.best_time_us = state.lap_time_us;
+            pthread_mutex_lock(&detect_mutex);
+            local_object_detected = object_detected;
+            if (object_detected) {
+                object_detected = false;
+                local_detect_time = detect_time;
             }
-            after_start = true;
+            pthread_mutex_unlock(&detect_mutex);
+
+            if (local_object_detected) {
+                state.time_us = usec_between(&start, &local_detect_time);
+
+                if (after_start == false || state.time_us > MIN_TIME_US) {
+                    state.lap_time_us = state.time_us;
+                    start = local_detect_time;
+
+                    if (state.best_time_us > state.lap_time_us)
+                        state.best_time_us = state.lap_time_us;
+                }
+                after_start = true;
+            }
         }
     }
     System_Exit();
