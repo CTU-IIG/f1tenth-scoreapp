@@ -124,9 +124,9 @@ char *us2str(char *dest, const char *prefix, long unsigned time_us)
 }
 
 struct state {
-    unsigned long time_us;
-    unsigned long lap_time_us;
-    unsigned long best_time_us;
+    long time_us;
+    long lap_time_us;
+    long best_time_us;
 } state;
 
 enum screen { EMPTY, TIME, SHUTDOWN };
@@ -157,7 +157,7 @@ void update_display(enum screen screen)
     GUI_Display();
 }
 
-unsigned long usec_between(const struct timeval *start, const struct timeval *stop)
+long usec_between(const struct timeval *start, const struct timeval *stop)
 {
     return (stop->tv_sec - start->tv_sec) * 1000000 + stop->tv_usec - start->tv_usec;
 }
