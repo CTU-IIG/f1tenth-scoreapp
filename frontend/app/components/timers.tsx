@@ -6,9 +6,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 const calculateElapsedTime = (start) => {
 	let difference = new Date() - start;
 	difference = (difference>5*60*1000) ? 5*60*1000 : difference;
-    timeLeft = {
+    const timeLeft = {
       	minutes: Math.floor((difference / 1000 / 60) % 60),
-      	seconds: Math.floor((difference / 1000) % 60)
+      	seconds: Math.floor((difference / 1000) % 60),
       	milliseconds: Math.floor((difference / 10) % 100)
     };
 }
@@ -22,7 +22,7 @@ export function Timer(props) {
 		if (props.active){
   			const timer = setTimeout(() => {
     			setTime(new Date() - props.start);
- 			}, 10);
+ 			}, 130);
  		}
 	});
 
@@ -32,6 +32,7 @@ export function Timer(props) {
 }
 
 export function TimeDisplay(props) {
+	console.log(("0" + Math.floor((props.time / 10) % 100)).slice(-2))
 	return (
 		<div className="timer">
 			<span className="timer_name">
@@ -44,17 +45,19 @@ export function TimeDisplay(props) {
         		{("0" + Math.floor((props.time / 1000) % 60)).slice(-2)}.
       		</span>
       		<span className="digits">
-        		{("0" + ((props.time / 10) % 100)).slice(-2)}
+        		{("0" + Math.floor((props.time / 10) % 100)).slice(-2)}
       		</span>
     	</div>
-    }
+	);
 }
 
 export function Timers(props) {
 	return (
-		<Timer name="Total time: " start={props.raceStartTime} active={props.active}>
-		<Timer name="Lap time: " start={props.lapStartTime} active={props.active}>
-		<TimerDisplay name="Best lap: " time={props.bestLapTime}>
+		<div>
+			<Timer name="Total time: " start={props.raceStartTime} active={props.active}/>
+			<Timer name="Lap time: " start={props.lapStartTime} active={props.active}/>
+			<TimeDisplay name="Best lap: " time={props.bestLapTime}/>
+		</div>
 	);
 }
 

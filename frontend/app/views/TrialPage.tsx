@@ -12,6 +12,8 @@ import { useQuery } from '../helpers/data';
 import { findOneTrialById } from '../queries';
 import { Link } from '../router/compoments';
 import { useIntl } from 'react-intl';
+import { Timers, Timer, TimeDisplay } from '../components/timers';
+import { useWebSocket } from '../helpers/ws_hook';
 
 
 const TrialNotFound = ({ id }) => {
@@ -31,20 +33,28 @@ const TrialNotFound = ({ id }) => {
 	);
 };
 
+
+const test_time = new Date();
+
 const TrialPage = () => {
 
 	const t = useFormatMessageIdAsTagFn();
 
 	const { route } = useRoute();
 
+	//red trialId is IDE error
 	const idStr = route?.payload?.trialId as string;
 
 	//id contains race id parsed from html
 	const id = parseInt(idStr);
 
+	console.log('id = ', id);
+
 	const query = useMemo(() => findOneTrialById(id), [id]);
+	console.log('query= ', query);
 
 	const op = useQuery(query);
+	console.log('op= ', op);
 
 	const pageTitle = op.loading ?
 		t`titles.loading`
@@ -53,7 +63,7 @@ const TrialPage = () => {
 	useDocumentTitle(pageTitle);
 
 	//state is an immutable json object containing received message
-	const state = useWebSocket(pageTitle);
+	const state = useWebSocket();	//id
 
 	if (op.loading) {
 		return (
@@ -74,8 +84,39 @@ const TrialPage = () => {
 		);
 	}
 
-	const trial = op.data;
-	const
+	const displayedTrial = op.data;
+	//const ID: {trial.id}<br />
+	// 			NAME: {trial.name}
+
+
+
+	console.log('State:', state);
+
+	//const trialReceived = state?.trial;
+	const trial = state?.trial;
+
+	//if (state?.trial?.id === id) trial = trialReceived;
+		//trial = JSON.parse(JSON.stringify(trialReceived));
+
+
+	let lapTimes = [];
+	let shortestLapTime = 99999999999;
+	let last = None;
+	console.log('comp lap times');
+
+	for(let cs in trial?.crossings){
+		if (cs?.ignored) continue;
+		if (last !== None){
+			lapTimes.push(cs?.time - last);
+			shortestLapTime = (cs?.time - last < shortestLapTime) ? cs?.time - last : shortestLapTime;
+		}
+		last = cs?.time;
+	}
+
+	console.log('comp lap times done: ', lapTimes);
+
+	console.log('trial: ', trial);
+
 
 
 	return (
@@ -93,10 +134,24 @@ const TrialPage = () => {
 				<br />State: {trial.state}
 			</p>
 
-			<Timer name="Best lap" />
+			<h2>
+				{(() => {
+					if (trial?.state === "running"){
+						return "Race in progress";
+					} else if (trial?.state === "unfinished"){
+						return "Race cancelled";
+					} else if (trial?.state === "finished"){
+						return "Race finished";
+					}
+				})()}
+			</h2>
+
+			<TimeDisplay name="Best lap: " time={shortestLapTime}/>
+
 		</>
 	);
 
 };
 
 export default TrialPage;
+// <Timers name="Best lap: " lapStartTime={test_time} raceStartTime={test_time} bestLapTime={test_time} active={true}/>
