@@ -53,11 +53,11 @@ char best_str_init[] = {"BEST: 00:00:000"};
 
 #define MIN_TIME_US 1000000
 
-volatile int detect_object = 0;
+volatile int object_detected = 0;
 
 void interrupt_optic_barrier()
 {
-    detect_object = 1;
+    object_detected = 1;
 }
 
 int show_ip_address()
@@ -254,9 +254,9 @@ int main(int argc, char *argv[])
             state.time_us = usec_between(&start, &stop);
         }
 
-        if (detect_object) {
+        if (object_detected) {
             after_start = true;
-            detect_object = 0;
+            object_detected = 0;
             printf("DETECT OBJECT");
 
             gettimeofday(&stop, NULL);
