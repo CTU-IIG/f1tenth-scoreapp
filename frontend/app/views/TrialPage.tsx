@@ -15,6 +15,40 @@ import { useIntl } from 'react-intl';
 import { Timers, Timer, TimeDisplay } from '../components/timers';
 import { useWebSocket } from '../helpers/ws_hook';
 
+const LapHistory = (props) => {
+	return (
+		<ul>
+			{props.lapTimes.map((time, index) => {
+				//return <li key={index}>{time}</li>;
+				return <TimeDisplay key={index} name={'Lap ' + (index+1)+': '} time={time}/>
+			})}
+		</ul>
+	);
+}
+
+const CrossingsHistory = (props) => {
+	const sendRequest = () => {
+		//TODO send REST API request
+	};
+
+	return (
+		<ul>
+			{props.crossings.map((cs, index) => {
+				return (
+					<>
+						<TimeDisplay key={index} name={'Crossing ' + (index+1)+': '} time={cs?.time*1000 - props.start}/>
+						<button key={index} onClick={sendRequest}>
+							{cs?.ignored ? 'Y' : 'N'}
+						</button>
+					</>
+				)
+			})}
+		</ul>
+	);
+}
+
+
+const findOneTrialById = (id: number) => (restUrl: string, webSocketUrl: string): Promise<Trial | undefined> => {
 
 const TrialNotFound = ({ id }) => {
 
@@ -41,7 +75,7 @@ function computeLapTimes(trial){
 
 	if (trial?.crossings === undefined) return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
 
-	for(let cs of trial?.crossings){
+	for(const cs of trial?.crossings){
 		if (cs?.ignored === true) continue;
 		if (last !== 0){
 			const dif = cs?.time*1000 - last;
@@ -60,14 +94,12 @@ function computeLapTimes(trial){
 	return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
 }
 
-
-const test_time = new Date();
-
 const TrialPage = () => {
 
 	const t = useFormatMessageIdAsTagFn();
 
 	const { route } = useRoute();
+	const [canEdit, setCanEdit] = useState(false);
 
 	//red trialId is IDE error
 	const idStr = route?.payload?.trialId as string;
@@ -89,8 +121,11 @@ const TrialPage = () => {
 
 	useDocumentTitle(pageTitle);
 
+	//set ws listener to race with id = id
+	const state = useWebSocket(id);	//id
+
 	//state is an immutable json object containing received message
-	const state = useWebSocket();	//id
+
 
 	if (op.loading) {
 		return (
@@ -126,11 +161,17 @@ const TrialPage = () => {
 		//trial = JSON.parse(JSON.stringify(trialReceived));
 
 
+
+	const isActive = (trial?.state === 'running');
 	const {lapTimes, bestLapTime, lapStartTime, raceStartTime} = computeLapTimes(trial);
-	console.log('lt:', lapTimes);
-	console.log('blt:', bestLapTime);
-	console.log('lst:', lapStartTime);
-	console.log('rst:', raceStartTime);
+
+	let history;
+	if (canEdit){
+		history = <LapHistory lapTimes={lapTimes}/>
+	}else{
+		history = <CrossingsHistory crossings={trial?.crossings} start={raceStartTime}/>
+	}
+
 
 	return (
 		<>
@@ -159,8 +200,12 @@ const TrialPage = () => {
 				})()}
 			</h2>
 
-			<TimeDisplay name="Best lap: " time={bestLapTime}/>
-			<Timers name="Best lap: " lapStartTime={lapStartTime} raceStartTime={raceStartTime} bestLapTime={bestLapTime} active={true}/>
+
+			<Timers name="Best lap: " lapStartTime={lapStartTime} raceStartTime={raceStartTime} bestLapTime={bestLapTime} active={isActive}/>
+			{history}
+			<button onClick={() => setCanEdit(prev => !prev)}>
+				{canEdit ? "Switch to display only mode" : "Switch to editing mode"}
+			</button>
 
 		</>
 	);

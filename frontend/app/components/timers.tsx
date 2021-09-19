@@ -32,7 +32,6 @@ export function Timer(props) {
 }
 
 export function TimeDisplay(props) {
-	console.log(("0" + Math.floor((props.time / 10) % 100)).slice(-2))
 	return (
 		<div className="timer">
 			<span className="timer_name">

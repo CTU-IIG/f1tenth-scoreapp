@@ -1,3 +1,4 @@
 # TODO
-
-Here is tracked what needs to be done / or cloud be done in the future.
+- add REST API requests
+- implement trials view
+- styling

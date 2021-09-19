@@ -11,7 +11,7 @@ const ConfigContext = React.createContext<string>('ws://localhost:4000');
 
 //This registers component to websocket communication
 //received message in subscribed channel will cause rerender of the component with updated messages object
-export const useWebSocket = () => {	//mySubscription
+export const useWebSocket = (id = -1) => {	//mySubscription
 
 	//way to store socket without rerender
 	const clientRef = useRef<WebSocket | undefined>(undefined);
@@ -46,9 +46,10 @@ export const useWebSocket = () => {	//mySubscription
 
 		client.onmessage = (event) => {
 			console.log('ws: message', event.data);
+			console.log('RACE ID', id);
 			try{
 				const dataFromServer = JSON.parse(event.data);
-				if (true) {	// dataFromServer.type === mySubscription
+				if (id === -1 || id === dataFromServer?.trial?.id) {	// dataFromServer.type === mySubscription
 					addMessage(dataFromServer);
 				}
 			}catch (error){
