@@ -275,3 +275,7 @@ int main(int argc, char *argv[])
     }
     System_Exit();
 }
+
+/* Local Variables: */
+/* c-basic-offset: 4 */
+/* End: */
