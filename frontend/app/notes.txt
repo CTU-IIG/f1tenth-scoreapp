@@ -1,0 +1,13 @@
+Subscription - useEffect
+useEffect(fce,[extra_trigger]) - vykona po inicializaci
+return fce se vykona po zniceni
+
+Store - useContext
+const theme = useContext(ThemeContext);
+<ThemeContext.Provider value={themes.dark}>
+
+Avoid recomputing - useMemo
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+
+Store mutable value - useRef
+const inputEl = useRef(null);

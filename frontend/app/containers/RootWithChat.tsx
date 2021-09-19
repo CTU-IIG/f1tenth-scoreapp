@@ -16,17 +16,25 @@ export interface RootProps {
 	router: Router;
 }
 
+// This registers component to WebSocket communication
+// received message will cause rerender of the component with updated messages object
 const useChat = () => {
 
+	// way to store socket without rerender
 	const clientRef = useRef<WebSocket | undefined>(undefined);
 
+	// immutable array of messages, setMessages will trigger component rerender
 	const [messages, setMessages] = useState<string[]>([]);
 
+	// creates function addMessage on init
+	// addMessage updates messages list
+	// used only when new message arrives
 	const addMessage = useCallback(
 		(message: string) => setMessages(prev => [...prev, message]),
 		[setMessages],
 	);
 
+	// creates function sendMessage on init
 	const sendMessage = useCallback(
 		(message: string) => {
 			if (clientRef.current?.readyState === WebSocket.OPEN) {
@@ -39,6 +47,7 @@ const useChat = () => {
 		[],
 	);
 
+	// called only on init (see its deps), opens WebSocket, registers callbacks
 	useEffect(() => {
 
 		console.log('subscribing ...');
@@ -64,6 +73,7 @@ const useChat = () => {
 
 		clientRef.current = client;
 
+		// cleanup function that is called after component is destroyed
 		return () => {
 
 			console.log('unsubscribing (closing client)...');
@@ -76,6 +86,7 @@ const useChat = () => {
 
 	}, [addMessage]);
 
+	// returns immutable messages object and set functions
 	return {
 		messages,
 		addMessage,
@@ -83,6 +94,7 @@ const useChat = () => {
 	};
 
 };
+
 
 const MyChat = (props) => {
 

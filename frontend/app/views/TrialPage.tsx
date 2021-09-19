@@ -39,6 +39,7 @@ const TrialPage = () => {
 
 	const idStr = route?.payload?.trialId as string;
 
+	//id contains race id parsed from html
 	const id = parseInt(idStr);
 
 	const query = useMemo(() => findOneTrialById(id), [id]);
@@ -50,6 +51,9 @@ const TrialPage = () => {
 		: !isDefined(op.data) ? t`titles.notFound` : op.data.id.toString();
 
 	useDocumentTitle(pageTitle);
+
+	//state is an immutable json object containing received message
+	const state = useWebSocket(pageTitle);
 
 	if (op.loading) {
 		return (
@@ -71,6 +75,8 @@ const TrialPage = () => {
 	}
 
 	const trial = op.data;
+	const
+
 
 	return (
 		<>
@@ -87,6 +93,7 @@ const TrialPage = () => {
 				<br />State: {trial.state}
 			</p>
 
+			<Timer name="Best lap" />
 		</>
 	);
 
