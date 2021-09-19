@@ -119,7 +119,10 @@ char *us2str(char *dest, const char *prefix, long unsigned time_us)
 {
         mytime_t mytime;
         convert_time(&mytime, time_us);
-        sprintf(dest, "%s%02d:%02d:%02d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
+        if (time_us != LONG_MAX)
+            sprintf(dest, "%s%02d:%02d:%02d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
+        else
+            sprintf(dest, "%s--:--:--", prefix);
         return dest;
 }
 
