@@ -310,6 +310,7 @@ int main(int argc, char *argv[])
                 after_start = true;
             }
         }
+        usleep(1000); // wait 1ms
     }
     System_Exit();
 }
