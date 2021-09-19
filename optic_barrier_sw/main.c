@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
     struct timeval stop, start;
     long unsigned time_us = 0;
-    int no_lap = 0;
+    bool no_lap = false;
     // gettimeofday(&start, NULL);
 
     mytime_t mytime;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
         /* Reset everything */
         if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
             after_start = false;
-            no_lap = 0;
+            no_lap = false;
             best_time = LONG_MAX;
             GUI_Clear();
             GUI_DisString_EN(10, 0, "00:00:000", font, FONT_BACKGROUND, WHITE);                     // actual time
@@ -247,13 +247,13 @@ int main(int argc, char *argv[])
             gettimeofday(&stop, NULL);
             time_us = (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
 
-            if ((no_lap == 0) || (time_us > MIN_TIME_US)) {
+            if ((no_lap == false) || (time_us > MIN_TIME_US)) {
                 gettimeofday(&start, NULL);
 
                 printf("\n");
                 fflush(stdout);
 
-                if (no_lap == 1) {
+                if (no_lap == true) {
                     // more accurate lap time
                     convert_time(&mytime, time_us); // convert time in uS to stopwatch time   //add new
                     sprintf(str, "%02d:%02d:%02d", mytime.minutes, mytime.seconds, mytime.miliseconds); // add new
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
                         best_time = time_us;
                     }
                 }
-                no_lap = 1;
+                no_lap = true;
             } else {
                 printf(":FALSE\n");
                 fflush(stdout);
