@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <limits.h>
 #include <string.h>
+#include <stdbool.h>
 
 char ip_address[] = "IP:";
 char password[] = "Password:user";
@@ -190,7 +191,7 @@ int main(int argc, char *argv[])
         printf("Unable to setup ISR \n");
     }
 
-    int start_time = 0;
+    bool after_start = false;
     long unsigned best_time = LONG_MAX;
 
     while (1) {
@@ -207,8 +208,9 @@ int main(int argc, char *argv[])
             return 0;
         }
 
+        /* Reset everything */
         if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
-            start_time = 0;
+            after_start = false;
             no_lap = 0;
             best_time = LONG_MAX;
             GUI_Clear();
@@ -224,7 +226,7 @@ int main(int argc, char *argv[])
             GUI_Display();
         }
 
-        if (start_time) {
+        if (after_start) {
             gettimeofday(&stop, NULL);
             time_us = (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
             convert_time(&mytime, time_us); // convert time in uS to stopwatch time
@@ -238,7 +240,7 @@ int main(int argc, char *argv[])
         }
 
         if (detect_object) {
-            start_time = 1;
+            after_start = true;
             detect_object = 0;
             printf("DETECT OBJECT");
 
