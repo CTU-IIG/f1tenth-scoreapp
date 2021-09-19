@@ -1,0 +1,33 @@
+//
+// Timers
+// --------------------------------------------------
+
+.timers {
+	display: block;
+	margin: 0 0 1rem 0;
+
+	.total {
+		.timer {
+			.digits {
+				opacity: .8;
+				font-size: .875rem;
+			}
+
+			.timerName {
+				opacity: .13;
+				font-size: .875rem;
+			}
+		}
+	}
+
+	.this {
+		margin: 0 0 1rem 0;
+	}
+
+	.best {
+		display: block;
+		margin: 0;
+		padding: 0;
+	}
+
+}
