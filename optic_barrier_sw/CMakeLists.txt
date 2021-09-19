@@ -2,8 +2,13 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(optic_barrier_sw)
 
-message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
-set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+# If you want to use different compiler than arm-linux-gnueabihf-gcc, run cmake as:
+# cmake -DHARDCODE_C_COMPILER=NO -DCMAKE_C_COMPILER=...
+set(HARDCODE_C_COMPILER YES CACHE BOOL "Override user's (or default) value of CMAKE_C_COMPILER with 'arm-linux-gnueabihf-gcc'")
+
+if(HARDCODE_C_COMPILER)
+  set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+endif()
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 
 link_directories(${CMAKE_SOURCE_DIR} wiringPi/)
