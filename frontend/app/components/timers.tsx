@@ -11,22 +11,30 @@ export interface TimeDisplayProps {
 	className?: any;
 }
 
-export const TimeDisplay = ({ name, time, className }: TimeDisplayProps) => (
-	<div className={classNames('timer', className)}>
-		<span className="timerName">
-			{name}
-		</span>
-		<span className="digits">
-        	{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
-      	</span>
-		<span className="digits">
-        	{("0" + Math.floor((time / 1000) % 60)).slice(-2)}.
-      	</span>
-		<span className="digits">
-        	{("0" + Math.floor((time / 10) % 100)).slice(-2)}
-      	</span>
-	</div>
-);
+export const minTwoDigits = (num: number) => num.toString().padStart(2, '0');
+
+export const TimerDisplay = ({ name, time, className }: TimeDisplayProps) => {
+
+	const mm = Math.floor((time / 60000) % 60);
+	const ss = Math.floor((time / 1000) % 60);
+	const ms = Math.floor((time / 10) % 100);
+
+	return (
+		<div className={classNames('timer', className)}>
+			<div className="timer-name">
+				{name}
+			</div>
+			<div className="timer-time">
+				<span className="digits">{minTwoDigits(mm)}</span>
+				<span className="divider">:</span>
+				<span className="digits">{minTwoDigits(ss)}</span>
+				<span className="divider">.</span>
+				<span className="digits">{minTwoDigits(ms)}</span>
+			</div>
+		</div>
+	);
+
+};
 
 export interface TimerProps {
 	name: string;
@@ -39,21 +47,35 @@ export const Timer = ({ name, start, active, className }: TimerProps) => {
 
 	const [currentTime, setCurrentTime] = useState(() => Date.now());
 
-	// TODO: more efficient solution (perhaps update the HTML DOM directly?)
 	useEffect(() => {
 
-		let interval: number | undefined;
-
-		if (active) {
-			interval = window.setInterval(() => {
-				setCurrentTime(Date.now());
-			}, 100);
+		if (!active) {
+			return;
 		}
+
+		let didCleanup = false;
+		let req: number | null;
+
+		const update = () => {
+
+			if (didCleanup) {
+				return;
+			}
+
+			setCurrentTime(Date.now());
+			req = window.requestAnimationFrame(update);
+
+		};
+
+		req = window.requestAnimationFrame(update);
 
 		return () => {
 
-			if (isDefined(interval)) {
-				window.clearInterval(interval);
+			didCleanup = true;
+
+			if (isDefined(req)) {
+				window.cancelAnimationFrame(req);
+				req = null;
 			}
 
 		};
@@ -61,8 +83,13 @@ export const Timer = ({ name, start, active, className }: TimerProps) => {
 	}, [active, setCurrentTime]);
 
 	return (
-		<TimeDisplay className={className} name={name} time={currentTime - start} />
+		<TimerDisplay
+			className={className}
+			name={name}
+			time={currentTime - start}
+		/>
 	);
+
 };
 
 export interface TimersProps {
@@ -74,8 +101,8 @@ export interface TimersProps {
 
 export const Timers = ({ raceStartTime, lapStartTime, bestLapTime, active }: TimersProps) => (
 	<div className="timers">
-		<Timer className="total" name="Total time: " start={raceStartTime} active={active} />
-		<Timer className="this" name="Lap time: " start={lapStartTime} active={active} />
-		<TimeDisplay className="best" name="Best lap: " time={bestLapTime} />
+		<Timer className="timer--total-time" name="Total time:" start={raceStartTime} active={active} />
+		<Timer className="timer--lap-time" name="Lap time:" start={lapStartTime} active={active} />
+		<TimerDisplay className="timer--best-lap-time" name="Best lap:" time={bestLapTime} />
 	</div>
 );
