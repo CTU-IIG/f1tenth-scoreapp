@@ -1,7 +1,7 @@
 "use strict";
 
 import { isDefined, TypedMap } from '../helpers/common';
-import { SmartMap } from '../helpers/maps';
+import { createSmartMapOfSets, SmartMap } from '../helpers/maps';
 
 
 export interface OnChangeHandler<DataModel, Key extends keyof DataModel> {
@@ -29,10 +29,7 @@ class Store<DataModel extends object> {
 		this.storageKey = storageKey;
 		this.version = version;
 		this.onInitData = onInitData ?? (() => new Map());
-		this.listeners = new SmartMap(
-			(key, value) => value.size === 0,
-			() => new Set(),
-		);
+		this.listeners = createSmartMapOfSets();
 
 		const data = this.loadData();
 

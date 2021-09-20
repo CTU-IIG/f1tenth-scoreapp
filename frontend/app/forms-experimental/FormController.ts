@@ -26,7 +26,7 @@ import {
 	syncValidationAttributes,
 } from './helpers';
 import { deepClone, getValue, setValue } from './object-utils';
-import { SmartMap } from '../helpers/maps';
+import { createSmartMapOfSets, SmartMap } from '../helpers/maps';
 
 
 export interface FormControllerOptions<DataShape> {
@@ -69,10 +69,7 @@ export default class FormController<DataShape> {
 
 		this.memoizedFieldRegister = new Map<string, MemoizedFieldRegister>();
 		this.fields = new Map<string, FieldRegistration>();
-		this.fieldChangeListeners = new SmartMap(
-			(key, value) => value.size === 0,
-			() => new Set(),
-		);
+		this.fieldChangeListeners = createSmartMapOfSets();
 
 		this.nativeInputEventHandler = (event: Event) => {
 			this.handleNativeInputEvent(event);

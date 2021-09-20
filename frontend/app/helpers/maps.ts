@@ -58,3 +58,8 @@ export class SmartMap<K, V> {
 	}
 
 }
+
+export const createSmartMapOfSets = <K, V>() => new SmartMap<K, Set<V>>(
+	(key, value) => value.size === 0,
+	() => new Set(),
+);
