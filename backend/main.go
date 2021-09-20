@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	//"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -13,7 +13,6 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"math/rand"
 )
 
 type CommonModelFields struct {
