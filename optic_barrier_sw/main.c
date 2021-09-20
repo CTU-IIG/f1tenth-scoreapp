@@ -32,14 +32,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-char ip_address[] = "IP:";
-char password[] = "Password:user";
-char user[] = "User:pi";
-char host[NI_MAXHOST];
-
-char lap_str_init[] = {"LAP: 00:00:000"};
-char best_str_init[] = {"BEST: 00:00:000"};
-
 #include <wiringPi.h>
 
 #include "OLED_Config.h"
@@ -69,7 +61,7 @@ void interrupt_optic_barrier()
     pthread_mutex_unlock(&detect_mutex);
 }
 
-int show_ip_address()
+int get_ip_address(char *host)
 {
     struct ifaddrs *ifa;
     int family, s; // n;
@@ -110,18 +102,17 @@ typedef struct mytime_t {
     int miliseconds;
 } mytime_t;
 
-void convert_time(mytime_t *mytime, unsigned long time_us)
+void convert_time(mytime_t *mytime, long time_us)
 {
-    // minutes
-    mytime->minutes = 0;
-    mytime->minutes = (int)time_us / 60000000;
-    time_us = time_us - mytime->minutes * 60000000;
-    // seconds
-    mytime->seconds = (int)time_us / 1000000;
-    time_us = time_us - mytime->seconds * 1000000;
-    // milisec
-    mytime->miliseconds = (int)time_us / 1000;
-    time_us = time_us - mytime->miliseconds * 1000;
+    long t = time_us;
+
+    mytime->miliseconds = (t % 1000000) / 1000;
+    t /= 1000000;
+
+    mytime->seconds = t % 60;
+    t /= 60;
+
+    mytime->minutes = t % 99;
 }
 
 char *us2str(char *dest, const char *prefix, long unsigned time_us)
@@ -129,9 +120,9 @@ char *us2str(char *dest, const char *prefix, long unsigned time_us)
         mytime_t mytime;
         convert_time(&mytime, time_us);
         if (time_us != LONG_MAX)
-            sprintf(dest, "%s%02d:%02d:%02d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
+            sprintf(dest, "%s%02d:%02d.%03d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
         else
-            sprintf(dest, "%s--:--:--", prefix);
+            sprintf(dest, "%s--:--.---", prefix);
         return dest;
 }
 
@@ -153,18 +144,32 @@ void update_display(enum screen screen)
         char str[50];
         sFONT *font = &Font12;
 
-        us2str(str, "", state.time_us);
-        GUI_DisString_EN(10, 0, str, font, FONT_BACKGROUND, WHITE);                   // actual time
+        us2str(str, "      ", state.time_us);
+        GUI_DisString_EN(0, 0, str, font, FONT_BACKGROUND, WHITE);                   // actual time
 
-        us2str(str, "LAP: ", state.lap_time_us);
+        us2str(str, "LAP:  ", state.lap_time_us);
         GUI_DisString_EN(0, font->Height - 2, str, font, FONT_BACKGROUND, WHITE);     // lap time
 
         us2str(str, "BEST: ", state.best_time_us);
         GUI_DisString_EN(0, 2 * font->Height - 4, str, font, FONT_BACKGROUND, WHITE); // best time
         break;
     }
-    case SHUTDOWN:
-        GUI_DisString_EN(10, 0, "Hold 4s to shutdown", &Font12, FONT_BACKGROUND, WHITE);
+    case SHUTDOWN: {
+        GUI_DisString_EN(0, 0, "Hold 5s to pwroff", &Font12, FONT_BACKGROUND, WHITE);
+        char host[NI_MAXHOST];
+        get_ip_address(host);
+        char str[100];
+        sprintf(str, "IP: %s", host);
+        GUI_DisString_EN(0, Font12.Height - 2, str, &Font12, FONT_BACKGROUND, WHITE);
+
+        char name_user[32];
+        char user_info[50];
+        cuserid(name_user);
+        sprintf(user_info, "User:%s Pass:user", name_user);
+        GUI_DisString_EN(0, 2*Font12.Height - 4, user_info, &Font12, FONT_BACKGROUND, WHITE);
+
+        break;
+    }
     }
     GUI_Display();
 }
@@ -189,7 +194,7 @@ void shutdown_handler(bool btn_pressed)
 
     gettimeofday(&now, NULL);
 
-    if (usec_between(&start, &now) > 4*1000000) {
+    if (usec_between(&start, &now) > 5*1000000) {
         update_display(EMPTY);
         System_Exit();
         system("sudo shutdown -h now");
@@ -205,47 +210,8 @@ int main(int argc, char *argv[])
 
     // 2.show
     OLED_Init();
-
     GUI_Init(OLED_WIDTH, OLED_HEIGHT);
     GUI_Clear();
-
-    sFONT *font = &Font12;
-
-    char *name_user;
-    name_user = (char *)malloc(10 * sizeof(char));
-    cuserid(name_user);
-    free(name_user);
-    // printf("%s%s\n",user, name_user);
-    printf("%s%s\n", user, name_user);
-    GUI_Clear();
-    GUI_DisString_EN(10, 0, "Hello user", &Font16, FONT_BACKGROUND, WHITE);
-    GUI_Display();
-
-    GUI_Clear();
-    GUI_DisString_EN(0, 0, user, font, FONT_BACKGROUND, WHITE);
-
-    printf("%s\n", password);
-    GUI_DisString_EN(0, font->Height - 2, password, font, FONT_BACKGROUND, WHITE);
-
-    int len_ip_string = strlen(host);
-    int i;
-    for (i = 0; i < 20; i++) {
-        show_ip_address();
-        if (strlen(host) > len_ip_string)
-            break;
-        sleep(1);
-    }
-    char ip_str[30];
-    strcpy(ip_str, ip_address);
-    strcat(ip_str, host);
-
-    GUI_DisString_EN(0, 2 * font->Height - 4, ip_str, font, FONT_BACKGROUND, WHITE);
-
-    printf("%s%s\n", ip_address, host);
-    fflush(stdout);
-
-    GUI_Display();
-    sleep(2);
 
     struct timeval start;
     // gettimeofday(&start, NULL);
@@ -259,24 +225,27 @@ int main(int argc, char *argv[])
         printf("Unable to setup ISR \n");
     }
 
+    bool detect_in_progress = false;
     bool after_start = false;
+    state.time_us = 0;
+    state.lap_time_us = LONG_MAX;
     state.best_time_us = LONG_MAX;
 
     while (1) {
+        /* Reset everything */
+        if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
+            after_start = false;
+            state.time_us = 0;
+            state.lap_time_us = LONG_MAX;
+            state.best_time_us = LONG_MAX;
+        }
+
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
             update_display(SHUTDOWN);
             shutdown_handler(true);
         } else {
             update_display(TIME);
             shutdown_handler(false);
-        }
-
-        /* Reset everything */
-        if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
-            after_start = false;
-            state.time_us = 0;
-            state.lap_time_us = 0;
-            state.best_time_us = LONG_MAX;
         }
 
         if (after_start) {
@@ -298,18 +267,20 @@ int main(int argc, char *argv[])
             pthread_mutex_unlock(&detect_mutex);
 
             if (local_object_detected) {
-                state.time_us = usec_between(&start, &local_detect_time);
-
-                if (after_start == false || state.time_us > MIN_TIME_US) {
-                    state.lap_time_us = state.time_us;
+                if (!detect_in_progress) {
+                    detect_in_progress = true;
+                    if (after_start) {
+                        state.lap_time_us = usec_between(&start, &local_detect_time);;
+                        if (state.best_time_us > state.lap_time_us)
+                            state.best_time_us = state.lap_time_us;
+                    }
                     start = local_detect_time;
+                    after_start = true;
 
                     printf("{\"timestamp\":\"%ld.%03ld\"}\n", local_detect_time.tv_sec, local_detect_time.tv_usec/1000);
-
-                    if (state.best_time_us > state.lap_time_us)
-                        state.best_time_us = state.lap_time_us;
                 }
-                after_start = true;
+            } else {
+                detect_in_progress = false;
             }
         }
         usleep(1000); // wait 1ms
