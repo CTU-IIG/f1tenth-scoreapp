@@ -4,8 +4,8 @@ import { isDefined, TypedMap } from '../helpers/common';
 import { SmartMap } from '../helpers/maps';
 
 
-export interface OnChangeHandler<Key> {
-	(value: any, path: Key): void;
+export interface OnChangeHandler<DataModel, Key extends keyof DataModel> {
+	(value: DataModel[Key], path: Key): void;
 }
 
 export type OnInitData<DataModel extends object> = () => TypedMap<DataModel>
@@ -21,7 +21,7 @@ class Store<DataModel extends object> {
 	readonly storageKey: string;
 	readonly version: string;
 	private readonly onInitData: OnInitData<DataModel>;
-	private readonly listeners: SmartMap<keyof DataModel, Set<OnChangeHandler<keyof DataModel>>>;
+	private readonly listeners: SmartMap<keyof DataModel, Set<OnChangeHandler<DataModel, keyof DataModel>>>;
 	private readonly data: TypedMap<DataModel>;
 
 	constructor({ storageKey = 'state', version = '0.0.0', onInitData }: StoreOptions<DataModel>) {
@@ -117,7 +117,7 @@ class Store<DataModel extends object> {
 
 	}
 
-	listen(path: keyof DataModel, onChange): () => void {
+	listen<Key extends keyof DataModel>(path: Key, onChange: OnChangeHandler<DataModel, Key>): () => void {
 
 		// console.log(`[Store] listen ${path}`);
 
