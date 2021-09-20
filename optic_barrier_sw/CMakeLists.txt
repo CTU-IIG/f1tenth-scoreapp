@@ -11,6 +11,9 @@ if(HARDCODE_C_COMPILER)
 endif()
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address -static-libasan")
+set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address -static-libasan")
+
 link_directories(${CMAKE_SOURCE_DIR} wiringPi/)
 
 INCLUDE_DIRECTORIES("wiringPi" "OLED/Fonts" "OLED/Driver")
