@@ -28,13 +28,10 @@ char System_Init(void)
    //1.wiringPiSetupGpio
     //if(wiringPiSetup() < 0)//use wiringpi Pin number table
     if(wiringPiSetupGpio() < 0) { //use BCM2835 Pin number table
-        printf("set wiringPi lib failed	!!! \r\n");
+        fprintf(stderr, "set wiringPi lib failed	!!! \r\n");
         return 1;
-    } else {
-        printf("set wiringPi lib success  !!! \r\n");
     }
 	
-    printf("USE_IIC\r\n");
 	fd = wiringPiI2CSetup(0x3c);
 
     return 0;
