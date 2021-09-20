@@ -3,20 +3,20 @@
 import { useContext, useEffect, useState } from 'react';
 
 import WebSocketManagerContext from './WebSocketManagerContext';
-import WebSocketManager, { ConnectionState } from './WebSocketManager';
+import WebSocketManager, { ManagerState } from './WebSocketManager';
 import { useSubscription } from '../helpers/useSubscription';
 import { FullTrial } from '../types';
 
 
 export const useWebSocketManager = () => useContext<WebSocketManager>(WebSocketManagerContext);
 
-export const useWebSocketConnectionState = (): { manager: WebSocketManager, state: ConnectionState } => {
+export const useWebSocketManagerState = (): { manager: WebSocketManager, state: ManagerState } => {
 
 	const manager = useWebSocketManager();
 
 	const state = useSubscription({
-		getCurrentValue: manager.connectionStateGetter,
-		subscribe: manager.registerConnectionStateChangeListener,
+		getCurrentValue: manager.stateGetter,
+		subscribe: manager.registerStateChangeListener,
 	});
 
 	return { manager, state };

@@ -1,146 +1,268 @@
 "use strict";
 
 import { isDefined } from '../helpers/common';
-import { SmartMap } from '../helpers/maps';
+import { createSmartMapOfSets, SmartMap } from '../helpers/maps';
+import { linearRetryPolicy, RetryPolicy } from '../helpers/retry-policy';
 import { FullTrial } from '../types';
 
 
-export interface ConnectionState {
-	url: string | undefined;
-	state: number;
+export interface ManagerOptions {
+	reconnectPolicy: RetryPolicy;
 }
 
-export type ConnectionStateChangeListener = (state: ConnectionState) => void;
+export const MANAGER_STATE_NO_URL = 0; // gray
+export const MANAGER_STATE_NOT_CONNECTED = 1; // gray
+export const MANAGER_STATE_CONNECTING = 2; // yellow
+export const MANAGER_STATE_CONNECTED = 3; // green
+export const MANAGER_STATE_DISCONNECTED_MAX_RETRIES_REACHED = 4; // red
 
-export type TrialDataListener = (trial: FullTrial) => void;
-
-const staleClient = (thisClient, client): boolean => {
-	// not sure if this can happen...
-	if (thisClient !== client) {
-		console.warn(`this.client !== client`);
+const staleWs = (thisWs, ws): boolean => {
+	if (thisWs !== ws) {
+		console.warn(`this.ws !== ws`);
 		return true;
 	}
 	return false;
 };
 
+export interface ManagerStateUrlNotSet {
+	name: typeof MANAGER_STATE_NO_URL;
+}
+
+export interface ManagerStateUrlSet {
+	name:
+		| typeof MANAGER_STATE_NOT_CONNECTED
+		| typeof MANAGER_STATE_CONNECTING
+		| typeof MANAGER_STATE_CONNECTED
+		| typeof MANAGER_STATE_DISCONNECTED_MAX_RETRIES_REACHED;
+	url: string;
+	attempt: number;
+}
+
+export type ManagerState = ManagerStateUrlNotSet | ManagerStateUrlSet;
+
+export type ManagerStateChangeListener = (state: ManagerState) => void;
+
+export type TrialDataListener = (trial: FullTrial) => void;
+
 class WebSocketManager {
 
-	private readonly connectionStateChangeListeners: Set<ConnectionStateChangeListener>;
+	public static NORMAL_CLOSURE_CODE = 4444;
+	public static NORMAL_CLOSURE_REASON = 'destroy';
+
+	private readonly stateChangeListeners: Set<ManagerStateChangeListener>;
 	private readonly trialDataListeners: SmartMap<number, Set<TrialDataListener>>;
 
-	public readonly connectionStateGetter: () => ConnectionState;
-	public readonly registerConnectionStateChangeListener: (onChange: ConnectionStateChangeListener) => () => void;
+	public readonly stateGetter: () => ManagerState;
+	public readonly registerStateChangeListener: (onChange: ManagerStateChangeListener) => () => void;
 
-	private _url: string | undefined;
-	private client: WebSocket | undefined;
+	private readonly options: ManagerOptions;
 
+	private state: ManagerState;
 
-	constructor(url: string, autoConnect = true) {
+	private ws: WebSocket | null = null;
+	private nextReconnectAttemptTimeout: ReturnType<typeof setTimeout> | null = null;
 
-		this.connectionStateChangeListeners = new Set();
-		this.trialDataListeners = new SmartMap(
-			(key, value) => value.size === 0,
-			() => new Set(),
-		);
+	constructor(options?: Partial<ManagerOptions>, url?: string | undefined) {
 
-		this.connectionStateGetter = () => this.getConnectionState();
-		this.registerConnectionStateChangeListener = onChange => this.listenForConnectionStateChange(onChange);
+		this.stateChangeListeners = new Set();
+		this.trialDataListeners = createSmartMapOfSets();
 
-		this._url = url;
-		this.client = undefined;
+		this.stateGetter = () => this.getState();
+		this.registerStateChangeListener = onChange => this.listenForStateChange(onChange);
 
-		if (isDefined(this._url) && autoConnect) {
-			this.connect();
-		}
+		this.options = {
+			reconnectPolicy: linearRetryPolicy(10, 1000),
+			...options,
+		};
+
+		this.state = {
+			name: MANAGER_STATE_NO_URL,
+		};
+
+		this.connect(url);
 
 	}
 
 	get url(): string | undefined {
-		return this._url;
+		return this.state.name === MANAGER_STATE_NO_URL ? undefined : this.state.url;
 	}
 
-	set url(value: string | undefined) {
-		console.log(`ws: changing url from '${this._url}' to '${value}'`);
-		this._url = value;
-		if (isDefined(this.client)) {
-			this.disconnect();
-			this.connect();
+	set url(url: string | undefined) {
+		if (this.url !== url) {
+			console.log(`[Manager] changing url from '${this.url}' to '${url}'`);
+			this.connect(url);
 		}
 	}
 
-	public getConnectionState(): ConnectionState {
-		return {
-			url: this._url,
-			state: this.client?.readyState ?? -1,
-		};
-	}
+	public connect(newUrl: string | undefined) {
 
-	public connect() {
-
-		if (isDefined(this.client)) {
-			this.disconnect();
+		if (this.state.name === MANAGER_STATE_CONNECTING || this.state.name === MANAGER_STATE_CONNECTED) {
+			this.disconnect(WebSocketManager.NORMAL_CLOSURE_CODE, WebSocketManager.NORMAL_CLOSURE_REASON);
 		}
 
-		if (!isDefined(this._url)) {
-			console.error(`ws: could not connect - url not set`);
+		// no url to connect to
+		if (!isDefined(newUrl)) {
+			this.state = { name: MANAGER_STATE_NO_URL };
+			this.notifyStateChangeListeners();
 			return;
 		}
 
-		const client = new WebSocket(this._url);
+		this.state = {
+			name: MANAGER_STATE_CONNECTING,
+			url: newUrl,
+			attempt: 0,
+		};
+		this.notifyStateChangeListeners();
 
-		client.onopen = (event) => {
-			if (staleClient(this.client, client)) {
+		this.tryConnect();
+
+	}
+
+	public disconnect(
+		code: number = WebSocketManager.NORMAL_CLOSURE_CODE,
+		reason: string = WebSocketManager.NORMAL_CLOSURE_REASON,
+	) {
+
+		console.log(`[Manager] disconnect code=${code}, reason='${reason}'`);
+
+		if (this.state.name !== MANAGER_STATE_CONNECTING && this.state.name !== MANAGER_STATE_CONNECTED) {
+			console.error(`[Manager] attempted to invoke disconnect when not in CONNECTING or CONNECTED state`);
+			return;
+		}
+
+		this.clearNextReconnectAttemptTimeout();
+
+		if (isDefined(this.ws)) {
+			this.ws.close(code, reason);
+			this.ws = null;
+		}
+
+		this.state.name = MANAGER_STATE_NOT_CONNECTED;
+		this.notifyStateChangeListeners();
+
+	}
+
+	private clearNextReconnectAttemptTimeout() {
+		if (isDefined(this.nextReconnectAttemptTimeout)) {
+			clearTimeout(this.nextReconnectAttemptTimeout);
+			this.nextReconnectAttemptTimeout = null;
+		}
+	}
+
+	private scheduleReconnect() {
+
+		if (this.state.name !== MANAGER_STATE_CONNECTING) {
+			console.error(`[Manager] attempted to invoke scheduleReconnect when not in CONNECTING state`);
+			return;
+		}
+
+		console.log(`[Manager] scheduleReconnect for attempt=${this.state.attempt}`);
+
+		const delay = this.options.reconnectPolicy(this.state.attempt);
+
+		if (!isDefined(delay)) {
+			console.error(`[Manager] max retries reached (determined by the policy), will NOT automatically reconnect`);
+			this.clearNextReconnectAttemptTimeout(); // just to be sure
+			this.state.name = MANAGER_STATE_DISCONNECTED_MAX_RETRIES_REACHED;
+			this.notifyStateChangeListeners();
+			return;
+		}
+
+		console.log(`[Manager] setting nextReconnectAttemptTimeout to ${delay} ms (attempt=${this.state.attempt})`);
+
+		this.nextReconnectAttemptTimeout = setTimeout(() => {
+			console.log(`[Manager] nextReconnectAttemptTimeout expired`);
+			this.nextReconnectAttemptTimeout = null;
+			this.tryConnect();
+		}, delay);
+
+	}
+
+	private tryConnect() {
+
+		if (this.state.name !== MANAGER_STATE_CONNECTING) {
+			console.error(`[Manager] attempted to invoke connect when not in CONNECTING`);
+			return;
+		}
+
+		if (isDefined(this.ws)) {
+			this.ws.close(WebSocketManager.NORMAL_CLOSURE_CODE, WebSocketManager.NORMAL_CLOSURE_REASON);
+			this.ws = null;
+		}
+
+		// increment attempt
+		this.state.attempt++;
+		this.notifyStateChangeListeners();
+
+		console.log(`[Manager] connecting to '${this.state.url}', attempt=${this.state.attempt}`);
+
+		const ws = new WebSocket(this.state.url);
+
+		this.ws = ws;
+
+		ws.onerror = (err) => {
+			if (staleWs(this.ws, ws)) {
 				return;
 			}
-			console.log(`ws('${client.url}'): open`);
-			this.notifyConnectionStateChangeListeners();
+			console.log(`[Manager][ws] onerror`);
 		};
 
-		client.onclose = (event) => {
-			if (staleClient(this.client, client)) {
-				console.log(`ws('${client.url}'): close, code=${event.code}, reason='${event.reason}'`);
+		ws.onclose = (event) => {
+
+			if (staleWs(this.ws, ws)) {
 				return;
 			}
-			console.log(`ws('${client.url}'): close, code=${event.code}, reason='${event.reason}'`);
-			this.notifyConnectionStateChangeListeners();
+
+			console.log(`[Manager][ws] onclose, code=${event.code}, reason='${event.reason}'`);
+
+			this.ws = null;
+
+			if (event.code === WebSocketManager.NORMAL_CLOSURE_CODE) {
+				this.state.name = MANAGER_STATE_NOT_CONNECTED;
+				this.notifyStateChangeListeners();
+			} else {
+				// maybe the ws was closed before it was even opened
+				// so this ensures we do not invoke notify unnecessarily
+				if (this.state.name !== MANAGER_STATE_CONNECTING) {
+					this.state.name = MANAGER_STATE_CONNECTING;
+					this.notifyStateChangeListeners();
+				}
+				this.scheduleReconnect();
+			}
+
 		};
 
-		client.onmessage = (event) => {
-			if (staleClient(this.client, client)) {
+		ws.onopen = (event) => {
+
+			if (staleWs(this.ws, ws)) {
 				return;
 			}
-			console.log(`ws('${client.url}'): message`);
+
+			console.log(`[Manager][ws] onopen`);
+
+			if (this.state.name !== MANAGER_STATE_NO_URL) {
+				this.state.name = MANAGER_STATE_CONNECTED;
+				this.state.attempt = 1;
+				this.notifyStateChangeListeners();
+			}
+
+		};
+
+		ws.onmessage = (event) => {
+
+			if (staleWs(this.ws, ws)) {
+				return;
+			}
+
+			// console.log(`[Manager][ws] onmessage`, event.data);
 			this.processMessage(event.data);
+
 		};
-
-		client.onerror = (event) => {
-			if (staleClient(this.client, client)) {
-				return;
-			}
-			console.error('ws: error', event);
-		};
-
-		this.client = client;
-
-		this.notifyConnectionStateChangeListeners();
 
 	}
 
-	public disconnect() {
-
-		if (!isDefined(this.client)) {
-			return;
-		}
-
-		if (this.client.readyState !== WebSocket.CLOSED) {
-			// 1000 means "The connection successfully completed the purpose for which it was created."
-			this.client.close(1000);
-		}
-
-		this.client = undefined;
-
-		this.notifyConnectionStateChangeListeners();
-
+	public getState(): ManagerState {
+		return { ...this.state }; // return copy to prevent accidental mutations
 	}
 
 	private processMessage(data: string) {
@@ -160,12 +282,12 @@ class WebSocketManager {
 
 	}
 
-	public listenForConnectionStateChange(onChange: ConnectionStateChangeListener): () => void {
+	public listenForStateChange(onChange: ManagerStateChangeListener): () => void {
 
-		this.connectionStateChangeListeners.add(onChange);
+		this.stateChangeListeners.add(onChange);
 
 		return () => {
-			this.connectionStateChangeListeners.delete(onChange);
+			this.stateChangeListeners.delete(onChange);
 		};
 
 	}
@@ -181,8 +303,8 @@ class WebSocketManager {
 
 	}
 
-	private notifyConnectionStateChangeListeners() {
-		this.connectionStateChangeListeners.forEach(fn => fn(this.getConnectionState()));
+	private notifyStateChangeListeners() {
+		this.stateChangeListeners.forEach(fn => fn(this.getState()));
 	}
 
 	private notifyTrialDataListeners(trial: FullTrial) {

@@ -37,7 +37,12 @@ const store = new Store<AppState>({
 	]),
 });
 
-const manager = new WebSocketManager(store.get('webSocketUrl'));
+const manager = new WebSocketManager(undefined, store.get('webSocketUrl'));
+
+manager.listenForStateChange((newState) => {
+	// TODO: remove once we an UI component for that
+	console.log('[xxx] manager state change', newState);
+});
 
 store.listen('webSocketUrl', (url) => {
 	manager.url = url;
