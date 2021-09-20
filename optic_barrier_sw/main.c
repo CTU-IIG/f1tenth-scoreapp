@@ -304,6 +304,8 @@ int main(int argc, char *argv[])
                     state.lap_time_us = state.time_us;
                     start = local_detect_time;
 
+                    printf("{\"timestamp\":\"%ld.%03ld\"}\n", local_detect_time.tv_sec, local_detect_time.tv_usec/1000);
+
                     if (state.best_time_us > state.lap_time_us)
                         state.best_time_us = state.lap_time_us;
                 }

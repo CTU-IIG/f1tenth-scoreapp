@@ -3,7 +3,7 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     # cross compiler
-    pkgsCross.raspberryPi.buildPackages.gcc
+    pkgsCross.raspberryPi.buildPackages.gcc8
 
     # symlink the crosscompiler under the name used in CMakeLists.txt
     (runCommandLocal "rpi-cross-gcc-symlink" {} ''
