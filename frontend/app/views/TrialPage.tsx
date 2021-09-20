@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 
 import { useDocumentTitle, useFormatMessageId, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
@@ -8,56 +8,62 @@ import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { R_TRIAL, R_TRIALS } from '../routes';
-import { useQuery } from '../helpers/data';
-import { findOneTrialById } from '../queries';
+import { cancelTrial, ignoreCrossing, stopTrial, unignoreCrossing } from '../helpers/queries';
 import { Link } from '../router/compoments';
-import { useIntl } from 'react-intl';
-import { Timers, Timer, TimeDisplay } from '../components/timers';
-import { useWebSocket } from '../helpers/ws_hook';
-import { cancelTrial, ignoreCrossing, stopTrial, unignoreCrossing } from '../queries';
+import { TimeDisplay, Timers } from '../components/timers';
+import { useTrialData } from '../helpers/trials';
+import { Crossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_RUNNING, TRIAL_STATE_UNFINISHED } from '../types';
+
 
 const LapHistory = (props) => {
 	return (
 		<ul>
 			{props.lapTimes.map((time, index) => {
-				//return <li key={index}>{time}</li>;
-				return <TimeDisplay key={index} name={'Lap ' + (index+1)+': '} time={time}/>
+				return (
+					<TimeDisplay
+						key={index}
+						name={'Lap ' + (index + 1) + ': '}
+						time={time}
+					/>
+				);
 			})}
 		</ul>
 	);
+};
+
+interface CrossingsHistoryProps {
+	start: number;
+	crossings: Crossing[];
 }
 
-const CrossingsHistory = (props) => {
+const CrossingsHistory = ({ start, crossings }: CrossingsHistoryProps) => {
+
+	// TODO: This is not correct. ignoreCrossing/unignoreCrossing must not be called directly.
 	const sendRequest = (ignored, id) => {
 		if (ignored) {
 			unignoreCrossing(id);
-		}else{
+		} else {
 			ignoreCrossing(id);
 		}
 	};
 
 	return (
 		<ul>
-			{props.crossings.map((cs, index) => {
+			{crossings.map((cs, index) => {
 				return (
-					<>
-						<TimeDisplay key={index} name={'Crossing ' + (index+1)+': '} time={cs?.time*1000 - props.start}/>
-						<button  class="trial-ignorebutton" key={index} onClick={() => sendRequest(cs?.ignored, cs?.id)}>
-							{cs?.ignored ? 'Y' : 'N'}
+					<div key={index}>
+						<TimeDisplay name={'Crossing ' + (index + 1) + ': '} time={cs.time * 1000 - start} />
+						<button className="trial-ignorebutton" onClick={() => sendRequest(cs.ignored, cs.id)}>
+							{cs.ignored ? 'Y' : 'N'}
 						</button>
-					</>
-				)
+					</div>
+				);
 			})}
 		</ul>
 	);
-}
-
-
-const findOneTrialById = (id: number) => (restUrl: string, webSocketUrl: string): Promise<Trial | undefined> => {
+};
 
 const TrialNotFound = ({ id }) => {
-
-	const intl = useIntl();
 
 	const t = useFormatMessageId();
 
@@ -72,65 +78,63 @@ const TrialNotFound = ({ id }) => {
 	);
 };
 
-function computeLapTimes(trial){
-	let lapTimes = [];
-	let shortestLapTime = 99999999999;
+const computeLapTimes = (trial: FullTrial) => {
+
+	const lapTimes: number[] = [];
+	let shortestLapTime = Number.MAX_SAFE_INTEGER;
 	let last = 0;
 	let startTime = 0;
 
-	if (trial?.crossings === undefined) return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
+	for (const cs of trial.crossings) {
 
-	for(const cs of trial?.crossings){
-		if (cs?.ignored === true) continue;
-		if (last !== 0){
-			const dif = cs?.time*1000 - last;
-			lapTimes.push(dif);
-			shortestLapTime = (dif < shortestLapTime) ? dif : shortestLapTime;
-		}else{
-			startTime=cs?.time*1000;
+		if (cs.ignored) {
+			continue;
 		}
-		last = cs?.time*1000;
+
+		if (last !== 0) {
+			const diff = cs.time * 1000 - last;
+			lapTimes.push(diff);
+			shortestLapTime = (diff < shortestLapTime) ? diff : shortestLapTime;
+		} else {
+			startTime = cs.time * 1000;
+		}
+
+		last = cs.time * 1000;
+
 	}
 
 	console.log('lt:', lapTimes);
 	console.log('blt:', shortestLapTime);
 	console.log('lst:', last);
 	console.log('rst:', startTime);
-	return {lapTimes, bestLapTime: shortestLapTime, lapStartTime: last, raceStartTime: startTime};
-}
+
+	return {
+		lapTimes,
+		bestLapTime: shortestLapTime,
+		lapStartTime: last,
+		raceStartTime: startTime,
+	};
+
+};
 
 const TrialPage = () => {
 
 	const t = useFormatMessageIdAsTagFn();
 
 	const { route } = useRoute();
-	const [canEdit, setCanEdit] = useState(false);
-
-	//red trialId is IDE error
 	const idStr = route?.payload?.trialId as string;
-
-	//id contains race id parsed from html
 	const id = parseInt(idStr);
-
 	console.log('id = ', id);
 
-	const query = useMemo(() => findOneTrialById(id), [id]);
-	console.log('query= ', query);
+	const [isEditMode, setIsEditMode] = useState(false);
 
-	const op = useQuery(query);
-	console.log('op= ', op);
+	const op = useTrialData(id);
 
 	const pageTitle = op.loading ?
 		t`titles.loading`
 		: !isDefined(op.data) ? t`titles.notFound` : op.data.id.toString();
 
 	useDocumentTitle(pageTitle);
-
-	//set ws listener to race with id = id
-	const state = useWebSocket(id);	//id
-
-	//state is an immutable json object containing received message
-
 
 	if (op.loading) {
 		return (
@@ -151,41 +155,19 @@ const TrialPage = () => {
 		);
 	}
 
-	const displayedTrial = op.data;
-	//const ID: {trial.id}<br />
-	// 			NAME: {trial.name}
+	const trial = op.data;
 
+	console.log('trial', trial);
 
-
-	console.log('State:', state);
-
-	//const trialReceived = state?.trial;
-	const trial = state?.trial;
-
-
-
-	//RACE NOT FOUND
-	if (trial?.id !== id){
-		return (
-			<p>
-				No data regarding this race
-			</p>
-		);
-	}
-
-
-
-
-	const isActive = (trial?.state === 'running');
-	const {lapTimes, bestLapTime, lapStartTime, raceStartTime} = computeLapTimes(trial);
+	const isActive = trial.state === TRIAL_STATE_RUNNING;
+	const { lapTimes, bestLapTime, lapStartTime, raceStartTime } = computeLapTimes(trial);
 
 	let history;
-	if (canEdit){
-		history = <LapHistory lapTimes={lapTimes}/>
-	}else{
-		history = <CrossingsHistory id={trial?.id} crossings={trial?.crossings} start={raceStartTime}/>
+	if (isEditMode) {
+		history = <LapHistory lapTimes={lapTimes} />;
+	} else {
+		history = <CrossingsHistory crossings={trial.crossings} start={raceStartTime} />;
 	}
-
 
 	return (
 		<>
@@ -202,30 +184,36 @@ const TrialPage = () => {
 				<br />State: {trial.state}
 			</p>
 
-			<h2  class="trial-state">
+			<h2 className="trial-state">
 				{(() => {
-					if (trial?.state === "running"){
+					if (trial.state === TRIAL_STATE_RUNNING) {
 						return "Race in progress";
-					} else if (trial?.state === "unfinished"){
+					} else if (trial.state === TRIAL_STATE_UNFINISHED) {
 						return "Race cancelled";
-					} else if (trial?.state === "finished"){
+					} else if (trial.state === TRIAL_STATE_FINISHED) {
 						return "Race finished";
 					}
 				})()}
 			</h2>
 
-
-			<Timers name="Best lap: " lapStartTime={lapStartTime} raceStartTime={raceStartTime} bestLapTime={bestLapTime} active={isActive}/>
+			<Timers
+				lapStartTime={lapStartTime}
+				raceStartTime={raceStartTime}
+				bestLapTime={bestLapTime}
+				active={isActive}
+			/>
 			{history}
-			<button onClick={() => setCanEdit(prev => !prev)}>
-				{canEdit ? "Switch to display only mode" : "Switch to editing mode"}
+			<button onClick={() => setIsEditMode(prev => !prev)}>
+				{isEditMode ? 'Switch to display only mode' : 'Switch to editing mode'}
 			</button>
 
-			<button class="cancel" onClick={() => cancelTrial(trial?.id)}>
+			{/* TODO: cancelTrial must NOT be called directly */}
+			<button className="cancel" onClick={() => cancelTrial(trial.id)}>
 				Cancel trial
 			</button>
 
-			<button class="stop" onClick={() => stopTrial(trial?.id)}>
+			{/* TODO: stopTrial must NOT be called directly */}
+			<button className="stop" onClick={() => stopTrial(trial.id)}>
 				Stop trial
 			</button>
 
@@ -235,5 +223,3 @@ const TrialPage = () => {
 };
 
 export default TrialPage;
-// <Timers name="Best lap: " lapStartTime={test_time} raceStartTime={test_time} bestLapTime={test_time} active={true}/>
-//shortestLapTime

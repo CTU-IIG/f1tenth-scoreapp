@@ -1,7 +1,7 @@
 "use strict";
 
-import { doRequest, METHOD_POST } from './helpers/api';
-import { Crossing, FullTrial, Team, Trial } from './types';
+import { doRequest, METHOD_POST } from './api';
+import { Crossing, FullTrial, Team, Trial } from '../types';
 
 export const findAllTeams =
 	(restUrl: string) =>

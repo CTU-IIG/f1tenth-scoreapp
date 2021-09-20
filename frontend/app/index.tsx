@@ -24,6 +24,7 @@ import Store from './store/Store';
 import Router from './router/Router';
 import { typedMapConstructor } from './helpers/common';
 import { AppState } from './types';
+import WebSocketManager from './ws/WebSocketManager';
 
 
 const store = new Store<AppState>({
@@ -36,11 +37,17 @@ const store = new Store<AppState>({
 	]),
 });
 
+const manager = new WebSocketManager(store.get('webSocketUrl'));
+
+store.listen('webSocketUrl', (url) => {
+	manager.url = url;
+});
+
 const router = new Router(routesMap);
 
 render(
 	<AppContainer>
-		<Root store={store} router={router} />
+		<Root store={store} manager={manager} router={router} />
 	</AppContainer>,
 	document.getElementById('root'),
 );
@@ -52,7 +59,7 @@ if (module.hot) {
 		const NextRoot = require('./containers/Root').default; // eslint-disable-line global-require
 		render(
 			<AppContainer>
-				<NextRoot store={store} router={router} />
+				<NextRoot store={store} manager={manager} router={router} />
 			</AppContainer>,
 			document.getElementById('root'),
 		);

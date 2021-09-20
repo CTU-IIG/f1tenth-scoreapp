@@ -5,7 +5,13 @@ import classNames from 'classnames';
 import { isDefined } from '../helpers/common';
 
 
-export const TimeDisplay = ({ name, time, className }) => (
+export interface TimeDisplayProps {
+	name: string;
+	time: number;
+	className?: any;
+}
+
+export const TimeDisplay = ({ name, time, className }: TimeDisplayProps) => (
 	<div className={classNames('timer', className)}>
 		<span className="timerName">
 			{name}
@@ -22,7 +28,14 @@ export const TimeDisplay = ({ name, time, className }) => (
 	</div>
 );
 
-export const Timer = ({ name, start, active, className }) => {
+export interface TimerProps {
+	name: string;
+	start: number;
+	active: boolean;
+	className?: any;
+}
+
+export const Timer = ({ name, start, active, className }: TimerProps) => {
 
 	const [currentTime, setCurrentTime] = useState(() => Date.now());
 
@@ -52,13 +65,17 @@ export const Timer = ({ name, start, active, className }) => {
 	);
 };
 
-export const Timers = props => (
+export interface TimersProps {
+	raceStartTime: number;
+	lapStartTime: number;
+	bestLapTime: number;
+	active: boolean;
+}
+
+export const Timers = ({ raceStartTime, lapStartTime, bestLapTime, active }: TimersProps) => (
 	<div className="timers">
-		<Timer className="total" name="Total time: " start={props.raceStartTime} active={props.active} />
-		<Timer className="this" name="Lap time: " start={props.lapStartTime} active={props.active} />
-		<TimeDisplay className="best" name="Best lap: " time={props.bestLapTime} />
+		<Timer className="total" name="Total time: " start={raceStartTime} active={active} />
+		<Timer className="this" name="Lap time: " start={lapStartTime} active={active} />
+		<TimeDisplay className="best" name="Best lap: " time={bestLapTime} />
 	</div>
 );
-
-
-

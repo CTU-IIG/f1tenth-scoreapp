@@ -8,7 +8,7 @@ import { TrialCard } from '../components/content';
 import { useQuery } from '../helpers/data';
 import { R_TRIALS } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { findAllTrials } from '../queries';
+import { findAllTrials } from '../helpers/queries';
 
 
 const TrialsPage = () => {

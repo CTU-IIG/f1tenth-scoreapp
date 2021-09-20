@@ -7,7 +7,7 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { useQuery } from '../helpers/data';
 import { R_TEAMS } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { findAllTeams } from '../queries';
+import { findAllTeams } from '../helpers/queries';
 import { Table, TableColumn } from '../components/table';
 import { Team } from '../types';
 
