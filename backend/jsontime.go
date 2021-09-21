@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql/driver"
-	"math"
 	"strconv"
 	"time"
 )
@@ -10,19 +9,19 @@ import (
 // Time defines a timestamp, which is JSON-encoded as a fractional number of seconds since epoch
 type Time time.Time
 
-// Convert the timestamp to JSON
+// MarshalJSON converts the timestamp to JSON as number of milliseconds (int64)
 func (t Time) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatFloat(float64(time.Time(t).UnixNano())/1e9, 'f', 3, 64)), nil
+	return []byte(strconv.FormatInt(time.Time(t).UnixMilli(), 10)), nil
 }
 
-// Convert the timestamp from JSON
+// UnmarshalJSON converts the timestamp from JSON number of milliseconds (int64)
 func (t *Time) UnmarshalJSON(s []byte) (err error) {
 	r := string(s)
-	q, err := strconv.ParseFloat(r, 64)
+	q, err := strconv.ParseInt(r, 10, 64)
 	if err != nil {
 		return err
 	}
-	*(*time.Time)(t) = time.Unix(int64(math.Floor(q)), int64((q-math.Floor(q))*1e9))
+	*(*time.Time)(t) = time.UnixMilli(q)
 	return nil
 }
 
