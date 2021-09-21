@@ -23,3 +23,12 @@ set(SRCS main.c OLED/Driver/OLED_Config.c OLED/Driver/OLED_Driver.c OLED/Driver/
 add_executable(${PROJECT_NAME} ${HDRS} ${SRCS} )
 
 target_link_libraries(${PROJECT_NAME} -lwiringPi)
+
+if(DEFINED ENV{IN_NIX_SHELL})
+  # When compiled by Nix, we need to change interpreter in order to
+  # run the resulting binary on Raspbian system.
+  add_custom_target(patchelf ALL
+    COMMAND patchelf --set-interpreter /lib/ld-linux-armhf.so.3 ${PROJECT_NAME}
+    DEPENDS ${PROJECT_NAME}
+    )
+endif()
