@@ -14,16 +14,27 @@ import { computeStats, useTrialData } from '../helpers/trials';
 import { EnhancedCrossing, TRIAL_STATE_FINISHED, TRIAL_STATE_RUNNING, TRIAL_STATE_UNFINISHED } from '../types';
 import classNames from 'classnames';
 import { Button } from '../components/common';
+import { ToggleInput } from '../components/inputs';
 
 
 interface CrossingRowProps {
 	crossing: EnhancedCrossing,
 	isBestLap: boolean;
+	showToggle: boolean;
 }
 
-const CrossingRow = ({ crossing, isBestLap }: CrossingRowProps) => {
+const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
 
 	const { id, ignored, start, lap } = crossing;
+
+	const toggle = showToggle ? <ToggleInput
+		id="crossing--ignore"
+		name="valid"
+		label="Valid"
+		checked={!ignored}
+		onChange={() => {}}
+	/> : undefined;
+
 
 	return (
 		<div
@@ -47,6 +58,7 @@ const CrossingRow = ({ crossing, isBestLap }: CrossingRowProps) => {
 				</>
 			)}
 			<div className="crossing-id">{id}</div>
+			<div className="crossing-toggle">{toggle}</div>
 		</div>
 	);
 
@@ -71,6 +83,7 @@ const CrossingsList = ({ showIgnored, bestLapCrossingId, crossings }: CrossingsL
 					key={c.id}
 					crossing={c}
 					isBestLap={c.id === bestLapCrossingId}
+					showToggle={showIgnored}
 				/>,
 			)}
 		</div>
