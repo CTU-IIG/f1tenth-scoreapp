@@ -8,8 +8,12 @@ export interface AppState {
 	soundEffects: boolean;
 }
 
-export interface Team {
+export interface Entity {
 	id: number;
+	updatedAt: number; // Unix timestamp in UTC milliseconds
+}
+
+export interface Team extends Entity {
 	name: string;
 }
 
@@ -24,10 +28,9 @@ export type TrialState =
 	| typeof TRIAL_STATE_FINISHED
 	| typeof TRIAL_STATE_UNFINISHED;
 
-export interface Trial {
-	id: number;
+export interface Trial extends Entity {
 	round: number;
-	team_id: number;
+	teamId: number;
 	team: Team;
 	state: TrialState;
 }
@@ -36,9 +39,8 @@ export interface FullTrial extends Trial {
 	crossings: Crossing[],
 }
 
-export interface Crossing {
-	id: number;
-	time: number;
+export interface Crossing extends Entity {
+	time: number; // Unix timestamp in UTC milliseconds
 	ignored: boolean;
 }
 
@@ -48,6 +50,6 @@ export interface ComputedLap {
 }
 
 export interface EnhancedCrossing extends Crossing {
-	start: boolean;
-	lap: ComputedLap | undefined;
+	start?: boolean | undefined;
+	lap?: ComputedLap | undefined;
 }
