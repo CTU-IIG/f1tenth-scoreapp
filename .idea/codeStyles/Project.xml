@@ -5,19 +5,27 @@
         <option name="USE_TAB_CHARACTER" value="true" />
       </value>
     </option>
-    <DB2CodeStyleSettings version="2">
+    <DB2CodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </DB2CodeStyleSettings>
     <DartCodeStyleSettings>
       <option name="DELEGATE_TO_DARTFMT" value="false" />
     </DartCodeStyleSettings>
-    <DerbyCodeStyleSettings version="2">
+    <DerbyCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </DerbyCodeStyleSettings>
-    <H2CodeStyleSettings version="2">
+    <H2CodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </H2CodeStyleSettings>
-    <HSQLCodeStyleSettings version="2">
+    <H2CodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+    </H2CodeStyleSettings>
+    <HSQLCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </HSQLCodeStyleSettings>
     <HTMLCodeStyleSettings>
@@ -34,25 +42,8 @@
       <option name="SPACES_WITHIN_OBJECT_LITERAL_BRACES" value="true" />
       <option name="SPACES_WITHIN_IMPORTS" value="true" />
     </JSCodeStyleSettings>
-    <JetCodeStyleSettings>
-      <option name="PACKAGES_TO_USE_STAR_IMPORTS">
-        <value>
-          <package name="java.util" alias="false" withSubpackages="false" />
-          <package name="kotlinx.android.synthetic" alias="false" withSubpackages="true" />
-          <package name="io.ktor" alias="false" withSubpackages="true" />
-        </value>
-      </option>
-      <option name="PACKAGES_IMPORT_LAYOUT">
-        <value>
-          <package name="" alias="false" withSubpackages="true" />
-          <package name="java" alias="false" withSubpackages="true" />
-          <package name="javax" alias="false" withSubpackages="true" />
-          <package name="kotlin" alias="false" withSubpackages="true" />
-          <package name="" alias="true" withSubpackages="true" />
-        </value>
-      </option>
-    </JetCodeStyleSettings>
-    <MSSQLCodeStyleSettings version="2">
+    <MSSQLCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </MSSQLCodeStyleSettings>
     <Markdown>
@@ -70,17 +61,19 @@
       <option name="CODE_FENCE_MARKER_TYPE" value="1" />
       <option name="RIGHT_MARGIN" value="72" />
     </MarkdownNavigatorCodeStyleSettings>
-    <MySQLCodeStyleSettings version="2">
+    <MySQLCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </MySQLCodeStyleSettings>
-    <OracleCodeStyleSettings version="2">
+    <OracleCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </OracleCodeStyleSettings>
-    <PostgresCodeStyleSettings version="2">
-      <option name="ALIAS_CASE" value="4" />
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <PostgresCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="IDENTIFIER_CASE" value="1" />
+      <option name="CUSTOM_TYPE_CASE" value="0" />
+      <option name="ALIAS_CASE" value="4" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
       <option name="TABLE_OPENING" value="1" />
       <option name="TABLE_CONTENT" value="2" />
@@ -91,13 +84,15 @@
       <option name="POST_OPT_WRAP_1" value="true" />
       <option name="VIEW_INDENT_QUERY" value="true" />
     </PostgresCodeStyleSettings>
-    <SQLiteCodeStyleSettings version="2">
+    <SQLiteCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </SQLiteCodeStyleSettings>
-    <SqlCodeStyleSettings version="2">
+    <SqlCodeStyleSettings version="6">
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </SqlCodeStyleSettings>
-    <SybaseCodeStyleSettings version="2">
+    <SybaseCodeStyleSettings version="6">
+      <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </SybaseCodeStyleSettings>
     <TypeScriptCodeStyleSettings version="0">
