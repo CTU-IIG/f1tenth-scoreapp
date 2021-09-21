@@ -107,6 +107,9 @@ void convert_time(mytime_t *mytime, int64_t time_us)
 {
     int64_t t = time_us;
 
+    if (time_us < 0)
+        t = -t;
+
     mytime->miliseconds = (t % 1000000) / 1000;
     t /= 1000000;
 
@@ -114,6 +117,9 @@ void convert_time(mytime_t *mytime, int64_t time_us)
     t /= 60;
 
     mytime->minutes = t % 99;
+
+    if (time_us < 0)
+        mytime->minutes *= -1;
 }
 
 char *us2str(char *dest, const char *prefix, int64_t time_us)
