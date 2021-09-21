@@ -18,8 +18,8 @@ import (
 
 type CommonModelFields struct {
 	ID        uint           `gorm:"primaryKey" json:"id" param:"id" query:"id"`
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
+	CreatedAt Time           `json:"-"`
+	UpdatedAt Time           `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
@@ -39,10 +39,11 @@ type Trial struct {
 }
 
 type Crossing struct {
-	ID      uint `gorm:"primaryKey" json:"id" param:"id" query:"id"`
-	Time    Time `json:"time"`
-	Ignored bool `json:"ignored"`
-	TrialID uint `json:"-"`
+	ID        uint `gorm:"primaryKey" json:"id" param:"id" query:"id"`
+	UpdatedAt Time `json:"updatedAt"`
+	Time      Time `json:"time"`
+	Ignored   bool `json:"ignored"`
+	TrialID   uint `json:"-"`
 }
 
 var (
