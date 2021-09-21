@@ -57,8 +57,10 @@ void interrupt_optic_barrier()
 
     gettimeofday(&now, NULL);
     pthread_mutex_lock(&detect_mutex);
-    object_detected = true;
-    detect_time = now;
+    if (!object_detected) {
+        object_detected = true;
+        detect_time = now;
+    }
     pthread_mutex_unlock(&detect_mutex);
 }
 
