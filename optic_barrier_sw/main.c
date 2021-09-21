@@ -242,6 +242,7 @@ int main(int argc, char *argv[])
         /* Reset everything */
         if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
             after_start = false;
+            detect_in_progress = false;
             state.time_us = 0;
             state.lap_time_us = INT64_MAX;
             state.best_time_us = INT64_MAX;
