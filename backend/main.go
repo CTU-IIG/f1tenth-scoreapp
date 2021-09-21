@@ -31,7 +31,7 @@ type Team struct {
 
 type Trial struct {
 	CommonModelFields
-	TeamID    uint       `json:"team_id" query:"team_id"`
+	TeamID    uint       `json:"teamId" query:"team_id"`
 	Team      Team       `json:"team"`
 	Round     uint32     `json:"round"`
 	State     TrialState `json:"state"`
@@ -143,7 +143,7 @@ func createTrial(c echo.Context) error {
 		return err
 	}
 	if trial.TeamID == 0 {
-		return fmt.Errorf("team_id not specified")
+		return fmt.Errorf("teamId not specified")
 	}
 	if err := db.Model(&trial).Association("Team").Find(&trial.Team); err != nil {
 		return err
