@@ -283,8 +283,8 @@ func main() {
 	e.POST("/trials/:id/stop", func(c echo.Context) error { return setTrialState(c, Finished) })
 	e.POST("/trials/:id/cancel", func(c echo.Context) error { return setTrialState(c, Unfinished) })
 	e.GET("/trials/finished", getFinishedTrials)
-	e.POST("crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
-	e.POST("crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
+	e.POST("/crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
+	e.POST("/crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
 
 	e.Logger.Fatal(e.Start(":4110")) // Port mnemonic f1/10
 }
