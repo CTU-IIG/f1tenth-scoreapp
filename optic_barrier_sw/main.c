@@ -31,6 +31,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include <wiringPi.h>
 
@@ -102,9 +103,9 @@ typedef struct mytime_t {
     int miliseconds;
 } mytime_t;
 
-void convert_time(mytime_t *mytime, long time_us)
+void convert_time(mytime_t *mytime, int64_t time_us)
 {
-    long t = time_us;
+    int64_t t = time_us;
 
     mytime->miliseconds = (t % 1000000) / 1000;
     t /= 1000000;
@@ -115,11 +116,11 @@ void convert_time(mytime_t *mytime, long time_us)
     mytime->minutes = t % 99;
 }
 
-char *us2str(char *dest, const char *prefix, long unsigned time_us)
+char *us2str(char *dest, const char *prefix, int64_t time_us)
 {
         mytime_t mytime;
         convert_time(&mytime, time_us);
-        if (time_us != LONG_MAX)
+        if (time_us != INT64_MAX)
             sprintf(dest, "%s%02d:%02d.%03d", prefix, mytime.minutes, mytime.seconds, mytime.miliseconds);
         else
             sprintf(dest, "%s--:--.---", prefix);
@@ -127,9 +128,9 @@ char *us2str(char *dest, const char *prefix, long unsigned time_us)
 }
 
 struct state {
-    long time_us;
-    long lap_time_us;
-    long best_time_us;
+    int64_t time_us;
+    int64_t lap_time_us;
+    int64_t best_time_us;
 } state;
 
 enum screen { EMPTY, TIME, SHUTDOWN };
@@ -174,9 +175,9 @@ void update_display(enum screen screen)
     GUI_Display();
 }
 
-long usec_between(const struct timeval *start, const struct timeval *stop)
+int64_t usec_between(const struct timeval *start, const struct timeval *stop)
 {
-    return (stop->tv_sec - start->tv_sec) * 1000000 + stop->tv_usec - start->tv_usec;
+    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
 }
 
 void shutdown_handler(bool btn_pressed)
@@ -228,16 +229,16 @@ int main(int argc, char *argv[])
     bool detect_in_progress = false;
     bool after_start = false;
     state.time_us = 0;
-    state.lap_time_us = LONG_MAX;
-    state.best_time_us = LONG_MAX;
+    state.lap_time_us = INT64_MAX;
+    state.best_time_us = INT64_MAX;
 
     while (1) {
         /* Reset everything */
         if (digitalRead(UNIVERSAL_BUTTON1) == 1) {
             after_start = false;
             state.time_us = 0;
-            state.lap_time_us = LONG_MAX;
-            state.best_time_us = LONG_MAX;
+            state.lap_time_us = INT64_MAX;
+            state.best_time_us = INT64_MAX;
         }
 
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
