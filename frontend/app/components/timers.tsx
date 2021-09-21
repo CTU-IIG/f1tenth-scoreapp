@@ -64,15 +64,20 @@ export const ValueDisplay = ({ name, value, className }: ValueDisplayProps) => {
 export interface TimerProps {
 	name: string;
 	start: number;
+	stop?: number | undefined;
 	active: boolean;
 	className?: any;
 }
 
-export const Timer = ({ name, start, active, className }: TimerProps) => {
+export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 	const [currentTime, setCurrentTime] = useState(() => Date.now());
 
 	useEffect(() => {
+
+		if (isDefined(stop) && stop !== -1 && Date.now() >= stop) {
+			return;
+		}
 
 		if (!active) {
 			return;
@@ -105,13 +110,15 @@ export const Timer = ({ name, start, active, className }: TimerProps) => {
 
 		};
 
-	}, [active, setCurrentTime]);
+	}, [active, stop, setCurrentTime]);
+
+	const diff = (isDefined(stop) && stop !== -1 ? stop : currentTime) - start;
 
 	return (
 		<TimerDisplay
 			className={className}
 			name={name}
-			time={currentTime - start}
+			time={diff}
 		/>
 	);
 
@@ -141,6 +148,7 @@ export const TrialTimers = (
 			className="timer--total-time"
 			name="Total time:"
 			start={startTime}
+			stop={stopTime}
 			active={active}
 		/>
 		<ValueDisplay
@@ -157,6 +165,7 @@ export const TrialTimers = (
 			className="timer--lap-time"
 			name="Current lap time:"
 			start={currentLapStartTime}
+			stop={stopTime}
 			active={active}
 		/>
 	</div>

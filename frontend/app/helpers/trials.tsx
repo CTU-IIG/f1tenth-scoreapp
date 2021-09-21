@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from './data';
 import { findOneTrialById } from './queries';
 import { useLiveTrialData } from '../ws/hooks';
-import { ComputedLap, EnhancedCrossing, FullTrial } from '../types';
+import { ComputedLap, EnhancedCrossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_UNFINISHED } from '../types';
 
 
 export const useTrialData = (id: number) => {
@@ -100,6 +100,10 @@ export const computeStats = (trial: FullTrial): TrialStats => {
 		};
 
 	});
+
+	if (last !== -1 && (trial.state === TRIAL_STATE_FINISHED || trial.state === TRIAL_STATE_UNFINISHED)) {
+		stopTime = last;
+	}
 
 	if (bestLapTime === Number.MAX_SAFE_INTEGER) {
 		bestLapTime = -1;

@@ -78,22 +78,6 @@ const CrossingsList = ({ showIgnored, bestLapCrossingId, crossings }: CrossingsL
 
 };
 
-const LapHistory = (props) => {
-	return (
-		<ul>
-			{props.lapTimes.map((time, index) => {
-				return (
-					<TimerDisplay
-						key={index}
-						name={`Lap ${index + 1}:`}
-						time={time}
-					/>
-				);
-			})}
-		</ul>
-	);
-};
-
 const TrialNotFound = ({ id }) => {
 
 	const t = useFormatMessageId();
