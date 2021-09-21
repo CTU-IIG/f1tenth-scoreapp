@@ -149,8 +149,9 @@ func createTrial(c echo.Context) error {
 		return err
 	}
 	if trial.Team.ID == 0 {
-		return fmt.Errorf("No team with id %d", trial.TeamID)
+		return fmt.Errorf("no team with id %d", trial.TeamID)
 	}
+	trial.State = BeforeStart
 	if err := db.Omit("Team").Create(&trial).Error; err != nil {
 		return err
 	}
