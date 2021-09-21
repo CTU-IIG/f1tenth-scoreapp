@@ -76,6 +76,11 @@ export default {
 		notFoundHeading: `Trial not found`,
 		notFoundMessage: `The trial with ID {id} was not found.`,
 		backToTrials: `Back to all trials`,
+		switchToDisplayMode: `Switch to display mode`,
+		switchToEditMode: `Switch to edit mode`,
+		startTrial: `Start trial`,
+		cancelTrial: `Cancel trial`,
+		stopTrial: `Stop trial`,
 	},
 	teamsPage: {
 		columns: {

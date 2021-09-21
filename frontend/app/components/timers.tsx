@@ -6,7 +6,7 @@ import { isDefined } from '../helpers/common';
 
 
 export interface TimeDisplayProps {
-	name: string;
+	name?: string | undefined;
 	time: number;
 	className?: any;
 }
@@ -20,16 +20,41 @@ export const TimerDisplay = ({ name, time, className }: TimeDisplayProps) => {
 	const ms = Math.floor((time / 10) % 100);
 
 	return (
-		<div className={classNames('timer', className)}>
-			<div className="timer-name">
-				{name}
-			</div>
-			<div className="timer-time">
+		<div className={classNames('timer-display', className)}>
+			{isDefined(name) && (
+				<div className="display-name">
+					{name}
+				</div>
+			)}
+			<div className="display-value">
 				<span className="digits">{minTwoDigits(mm)}</span>
 				<span className="divider">:</span>
 				<span className="digits">{minTwoDigits(ss)}</span>
 				<span className="divider">.</span>
 				<span className="digits">{minTwoDigits(ms)}</span>
+			</div>
+		</div>
+	);
+
+};
+
+export interface ValueDisplayProps {
+	name?: string | undefined;
+	value: any;
+	className?: any;
+}
+
+export const ValueDisplay = ({ name, value, className }: ValueDisplayProps) => {
+
+	return (
+		<div className={classNames('value-display', className)}>
+			{isDefined(name) && (
+				<div className="display-name">
+					{name}
+				</div>
+			)}
+			<div className="display-value">
+				{value}
 			</div>
 		</div>
 	);
@@ -92,17 +117,47 @@ export const Timer = ({ name, start, active, className }: TimerProps) => {
 
 };
 
-export interface TimersProps {
-	raceStartTime: number;
-	lapStartTime: number;
+export interface TrialTimersProps {
+	startTime: number;
+	stopTime: number;
+	numLaps: number;
 	bestLapTime: number;
+	currentLapStartTime: number;
 	active: boolean;
 }
 
-export const Timers = ({ raceStartTime, lapStartTime, bestLapTime, active }: TimersProps) => (
+export const TrialTimers = (
+	{
+		startTime,
+		stopTime,
+		numLaps,
+		bestLapTime,
+		currentLapStartTime,
+		active,
+	}: TrialTimersProps,
+) => (
 	<div className="timers">
-		<Timer className="timer--total-time" name="Total time:" start={raceStartTime} active={active} />
-		<Timer className="timer--lap-time" name="Lap time:" start={lapStartTime} active={active} />
-		<TimerDisplay className="timer--best-lap-time" name="Best lap:" time={bestLapTime} />
+		<Timer
+			className="timer--total-time"
+			name="Total time:"
+			start={startTime}
+			active={active}
+		/>
+		<ValueDisplay
+			className="timer--total-laps"
+			name="Total laps:"
+			value={numLaps}
+		/>
+		<TimerDisplay
+			className="timer--best-lap-time"
+			name="Best lap time:"
+			time={bestLapTime}
+		/>
+		<Timer
+			className="timer--lap-time"
+			name="Current lap time:"
+			start={currentLapStartTime}
+			active={active}
+		/>
 	</div>
 );

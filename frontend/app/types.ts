@@ -41,3 +41,13 @@ export interface Crossing {
 	time: number;
 	ignored: boolean;
 }
+
+export interface ComputedLap {
+	number: number;
+	time: number;
+}
+
+export interface EnhancedCrossing extends Crossing {
+	start: boolean;
+	lap: ComputedLap | undefined;
+}
