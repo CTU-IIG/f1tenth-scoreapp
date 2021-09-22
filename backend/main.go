@@ -243,16 +243,21 @@ func broadcastTrial(trial *Trial) error {
 }
 
 func barrierSimulator(hub *Hub, db *gorm.DB) {
-	var trial Trial
-	db.Model(&Trial{}).Last(&trial)
 	time.Sleep(1 * time.Second)
 	for {
-		log.Printf("New crossing")
-		// this also updates Trial's UpdatedAt which is what we want
-		// so the frontend can find out what is the latest version
-		db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
-		broadcastTrial(&trial)
-
+		var trial Trial
+		if err := db.Last(&trial, "state = ?", Running).Error; err != nil {
+			log.Printf("could not generate new crossing because: %s", err)
+		} else if trial.ID == 0 {
+			log.Printf("could not generate new crossing because: there is no trial")
+		} else {
+			log.Printf("adding new crossing for trial %d", trial.ID)
+			// this also updates Trial's UpdatedAt which is what we want
+			// so the frontend can find out what is the latest version
+			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
+			broadcastTrial(&trial)
+			// reset the trial id so that next time gorm will rerun the query
+		}
 		time.Sleep(time.Duration(5_000+rand.Intn(3_000)) * time.Millisecond)
 	}
 }
