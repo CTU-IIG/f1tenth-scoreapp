@@ -38,13 +38,13 @@ export const findOneTrialById = (id: number) =>
 			{ returnUndefinedForNotFoundError: true },
 		);
 
-export const createTrial = (team_id: string) =>
+export const createTrial = (teamId: number) =>
 	(restUrl: string) =>
 		doRequest<Trial>(
 			`${restUrl}/trials`,
 			{
 				method: METHOD_POST,
-				body: { team_id },
+				body: { teamId },
 			},
 		);
 
