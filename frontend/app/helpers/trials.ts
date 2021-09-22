@@ -1,10 +1,10 @@
 "use strict";
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from './data';
 import { findOneTrialById } from './queries';
 import { useLiveTrialData } from '../ws/hooks';
-import { ComputedLap, EnhancedCrossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_UNFINISHED } from '../types';
+import { EnhancedCrossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_UNFINISHED } from '../types';
 
 
 export const useTrialData = (id: number) => {
@@ -39,48 +39,43 @@ export interface TrialStats {
 export const computeStats = (trial: FullTrial): TrialStats => {
 
 	let startTime = -1;
-	let stopTime = -1; // TODO
+	let stopTime = -1;
 	let numLaps = 0;
 	let bestLapTime = Number.MAX_SAFE_INTEGER;
 	let currentLapStartTime = -1;
 	let last = -1;
 	let bestLapCrossingId = -1;
 
-	const enhancedCrossings: EnhancedCrossing[] = trial.crossings.map(c => {
+	// for performance reasons, we do not copy crossings, and instead we directly mutate it
+	const enhancedCrossings: EnhancedCrossing[] = trial.crossings;
 
-		// remove once we get timestamps as integers
-		const ts = c.time * 1000;
+	enhancedCrossings.forEach(c => {
 
 		if (c.ignored) {
-			return {
-				id: c.id,
-				time: ts,
-				ignored: c.ignored,
-				start: false,
-				lap: undefined,
-			};
+			return c;
 		}
 
-		let start = false;
-		let lap: ComputedLap | undefined = undefined;
-
 		if (startTime === -1) {
-			start = true;
-			startTime = ts;
+			c.start = true;
+			startTime = c.time;
 		}
 
 		if (last !== -1) {
 
-			const diff = ts - last;
+			const diff = c.time - last;
+
+			if (diff < 0) {
+				console.error('lap calc', c, last);
+			}
 
 			numLaps++;
 
-			lap = {
+			c.lap = {
 				number: numLaps,
 				time: diff,
 			};
 
-			currentLapStartTime = ts;
+			currentLapStartTime = c.time;
 
 			if (diff < bestLapTime) {
 				bestLapTime = diff;
@@ -89,19 +84,12 @@ export const computeStats = (trial: FullTrial): TrialStats => {
 
 		}
 
-		last = ts;
-
-		return {
-			id: c.id,
-			time: ts,
-			ignored: c.ignored,
-			start,
-			lap,
-		};
+		last = c.time;
 
 	});
 
 	if (last !== -1 && (trial.state === TRIAL_STATE_FINISHED || trial.state === TRIAL_STATE_UNFINISHED)) {
+		// TODO: maybe different stopTime logic?
 		stopTime = last;
 	}
 
