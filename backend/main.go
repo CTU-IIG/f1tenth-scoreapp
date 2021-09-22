@@ -33,7 +33,7 @@ type Trial struct {
 	TeamID    uint       `json:"teamId" query:"team_id"`
 	Team      Team       `json:"team"`
 	Round     uint32     `json:"round"`
-	State     TrialState `json:"state"`
+	State     TrialState `json:"state" gorm:"index"`
 	Crossings []Crossing `json:"crossings"`
 }
 
