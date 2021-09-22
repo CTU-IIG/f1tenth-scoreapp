@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -281,6 +282,9 @@ func barrierWebsockHandler(c echo.Context) error {
 }
 
 func main() {
+	sim := flag.Bool("sim", false, "Simulate barrier")
+	flag.Parse()
+
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format:           "${time_custom} ${remote_ip} ${method} ${uri}, status=${status}, error=${error}\n",
@@ -312,7 +316,10 @@ func main() {
 
 	hub = newHub()
 	go hub.run()
-	go barrierSimulator(hub, db)
+
+	if *sim {
+		go barrierSimulator(hub, db)
+	}
 
 	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World! TODO") })
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
