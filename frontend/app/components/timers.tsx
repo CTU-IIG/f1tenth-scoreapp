@@ -5,6 +5,42 @@ import classNames from 'classnames';
 import { isDefined } from '../helpers/common';
 
 
+export interface TimeDisplayValueProps {
+	name?: string | undefined;
+	time: number;
+	className?: any;
+}
+
+export const TimerDisplayValue = ({ time }: TimeDisplayValueProps) => {
+
+	if (time === -1) {
+		return (
+			<div className="display-value display-value--disabled">
+				<span className="digits">00</span>
+				<span className="divider">:</span>
+				<span className="digits">00</span>
+				<span className="divider">.</span>
+				<span className="digits">00</span>
+			</div>
+		);
+	}
+
+	const mm = Math.floor((time / 60000) % 60);
+	const ss = Math.floor((time / 1000) % 60);
+	const ms = Math.floor((time / 10) % 100);
+
+	return (
+		<div className="display-value">
+			<span className="digits">{minTwoDigits(mm)}</span>
+			<span className="divider">:</span>
+			<span className="digits">{minTwoDigits(ss)}</span>
+			<span className="divider">.</span>
+			<span className="digits">{minTwoDigits(ms)}</span>
+		</div>
+	);
+
+};
+
 export interface TimeDisplayProps {
 	name?: string | undefined;
 	time: number;
@@ -15,10 +51,6 @@ export const minTwoDigits = (num: number) => num.toString().padStart(2, '0');
 
 export const TimerDisplay = ({ name, time, className }: TimeDisplayProps) => {
 
-	const mm = Math.floor((time / 60000) % 60);
-	const ss = Math.floor((time / 1000) % 60);
-	const ms = Math.floor((time / 10) % 100);
-
 	return (
 		<div className={classNames('timer-display', className)}>
 			{isDefined(name) && (
@@ -26,13 +58,7 @@ export const TimerDisplay = ({ name, time, className }: TimeDisplayProps) => {
 					{name}
 				</div>
 			)}
-			<div className="display-value">
-				<span className="digits">{minTwoDigits(mm)}</span>
-				<span className="divider">:</span>
-				<span className="digits">{minTwoDigits(ss)}</span>
-				<span className="divider">.</span>
-				<span className="digits">{minTwoDigits(ms)}</span>
-			</div>
+			<TimerDisplayValue time={time} />
 		</div>
 	);
 
@@ -112,7 +138,9 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 	}, [active, stop, setCurrentTime]);
 
-	const diff = (isDefined(stop) && stop !== -1 ? stop : currentTime) - start;
+	const diff = start !== -1
+		? (isDefined(stop) && stop !== -1 ? stop : currentTime) - start
+		: -1;
 
 	return (
 		<TimerDisplay
