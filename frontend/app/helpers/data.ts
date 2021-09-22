@@ -1,6 +1,6 @@
 "use strict";
 
-import { useDebugValue, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAppSateValue } from './hooks';
 
 
@@ -34,7 +34,18 @@ interface QueryHookState<T> {
 	value: QueryOperation<T>;
 }
 
-export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
+interface QueryHookOperationUpdater<T> {
+	(prev: QueryOperation<T>): QueryOperation<T>;
+}
+
+interface QueryHookReturnValue<T> {
+	op: QueryOperation<T>;
+	updateOp: (updater: QueryHookOperationUpdater<T>) => void;
+}
+
+export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> => {
+
+	// NOTE: This hook is based on useSubscription. See useSubscription.ts for reasoning and comments.
 
 	const [restUrl] = useAppSateValue('restUrl');
 
@@ -47,6 +58,24 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 			data: undefined,
 		},
 	}));
+
+	const updateOp = useCallback(
+		(updater: QueryHookOperationUpdater<T>) => setState(prevState => {
+
+			const newValue = updater(prevState.value);
+
+			if (newValue === prevState.value) {
+				return prevState;
+			}
+
+			return {
+				...prevState,
+				value: newValue,
+			};
+
+		}),
+		[setState],
+	);
 
 	let valueToReturn = state.value;
 
@@ -61,38 +90,18 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 		setState({
 			restUrl,
 			query,
-			value: {
-				loading: true,
-				hasError: false,
-				data: undefined,
-			},
+			value: valueToReturn,
 		});
 
 	}
 
-	// Display the current value for this hook in React DevTools.
-	useDebugValue(valueToReturn);
-
-	// It is important not to subscribe while rendering because this can lead to memory leaks.
-	// (Learn more at reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects)
-	// Instead, we wait until the commit phase to attach our handler.
-	//
-	// We intentionally use a passive effect (useEffect) rather than a synchronous one (useLayoutEffect)
-	// so that we don't stretch the commit phase.
-	// This also has an added benefit when multiple components are subscribed to the same source:
-	// It allows each of the event handlers to safely schedule work without potentially removing an another handler.
-	// (Learn more at https://codesandbox.io/s/k0yvr5970o)
 	useEffect(() => {
 
-		let didUnsubscribe = false;
+		let didCleanup = false;
 
 		const executeQuery = async () => {
 
-			// It's possible that this callback will be invoked even after being unsubscribed,
-			// if it's removed as a result of a subscription event/update.
-			// In this case, React will log a DEV warning about an update from an unmounted component.
-			// We can avoid triggering that warning with this check.
-			if (didUnsubscribe) {
+			if (didCleanup) {
 				return;
 			}
 
@@ -114,7 +123,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 				};
 			}
 
-			if (didUnsubscribe) {
+			if (didCleanup) {
 				console.warn('finished but unsubscribed');
 				return;
 			}
@@ -138,20 +147,17 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryOperation<T> => {
 
 		};
 
-		// Because we're subscribing in a passive effect,
-		// it's possible that an update has occurred between render and our effect handler.
-		// Check for this and schedule an update if work has occurred.
 		// noinspection JSIgnoredPromiseFromCall
 		executeQuery();
 
 		return () => {
-			console.log('didUnsubscribe = true');
-			didUnsubscribe = true;
+			console.log('[useQuery] didCleanup = true');
+			didCleanup = true;
 		};
 
 	}, [restUrl, query]);
 
 	// Return the current value for our caller to use while rendering.
-	return valueToReturn;
+	return { op: valueToReturn, updateOp };
 
 };

@@ -32,7 +32,7 @@ const TeamsPage = () => {
 
 	useDocumentTitle(t`titles.teams`);
 
-	const op = useQuery(findAllTeams);
+	const { op } = useQuery(findAllTeams);
 
 	if (op.loading) {
 		return (

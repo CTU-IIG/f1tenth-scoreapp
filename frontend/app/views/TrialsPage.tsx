@@ -17,7 +17,7 @@ const TrialsPage = () => {
 
 	useDocumentTitle(t`titles.trials`);
 
-	const op = useQuery(findAllTrials);
+	const { op } = useQuery(findAllTrials);
 
 	if (op.loading) {
 		return (
