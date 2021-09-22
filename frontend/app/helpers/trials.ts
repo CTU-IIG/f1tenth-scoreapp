@@ -5,6 +5,7 @@ import { useQuery } from './data';
 import { findOneTrialById } from './queries';
 import { useLiveTrialData } from '../ws/hooks';
 import { EnhancedCrossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_UNFINISHED } from '../types';
+import { isDefined } from './common';
 
 
 export const useTrialData = (id: number) => {
@@ -12,14 +13,16 @@ export const useTrialData = (id: number) => {
 	const latestData = useLiveTrialData(id);
 
 	const query = useMemo(() => findOneTrialById(id), [id]);
-	const op = useQuery(query);
+	const { op } = useQuery(query);
 
 	if (!op.loading && !op.hasError && op.data !== undefined) {
-		// TODO: Which data are the latest?
-		return {
-			...op,
-			data: latestData ?? op.data, // here we suppose that data from WS are latest
-		};
+		if (isDefined(latestData) && latestData.updatedAt > (op.data.updatedAt ?? -1)) {
+			return {
+				...op,
+				data: latestData,
+			};
+		}
+		return op;
 	}
 
 	return op;
