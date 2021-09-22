@@ -175,7 +175,24 @@ func setCrossingIgnore(c echo.Context, ignored bool) error {
 	if err := db.First(&crossing, crossing.ID).Error; err != nil {
 		return err
 	}
-	if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
+	err := db.Transaction(func(tx *gorm.DB) error {
+
+		if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
+			return err
+		}
+
+		// also update associated Trial's (if any) UpdatedAt field
+		// so the frontend can find out what is the latest version
+		if crossing.TrialID != 0 {
+			if err := db.Model(&Trial{}).Where("id = ?", crossing.TrialID).Update("UpdatedAt", time.Now()).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+
+	})
+	if err != nil {
 		return err
 	}
 	if err := broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}}); err != nil {
@@ -231,6 +248,8 @@ func barrierSimulator(hub *Hub, db *gorm.DB) {
 	time.Sleep(1 * time.Second)
 	for {
 		log.Printf("New crossing")
+		// this also updates Trial's UpdatedAt which is what we want
+		// so the frontend can find out what is the latest version
 		db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
 		broadcastTrial(&trial)
 
