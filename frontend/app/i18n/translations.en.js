@@ -108,4 +108,20 @@ export default {
 		},
 		title: `Login`,
 	},
+	webSocketInfo: {
+		heading: `WebSocket Connection State`,
+		state: {
+			unknown: `Unknown state`,
+			urlNotSet: `URL is not set`,
+			notConnected: `Not connected`,
+			connecting: `Connecting`,
+			connected: `Connected`,
+			disconnectedMaxRetriesReached: `Disconnected, max retries reached`,
+		},
+		url: `URL`,
+		attempt: `Attempt`,
+		reconnect: `Reconnect`,
+		disconnect: `Disconnect`,
+		changeUrlInSettings: `Change URL is Settings`,
+	},
 };

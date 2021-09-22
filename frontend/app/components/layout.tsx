@@ -4,6 +4,7 @@ import React from 'react';
 import { NavLink } from '../router/compoments';
 import { useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { R_ROOT, R_SETTINGS, R_TEAMS, R_TRIALS } from '../routes';
+import { WebSocketInfo } from './ws';
 
 
 export const AppHeader = React.memo((props) => {
@@ -37,6 +38,9 @@ export const AppHeader = React.memo((props) => {
 					<ul className="right">
 						<li>
 							<NavLink name={R_SETTINGS}>{t`titles.settings`}</NavLink>
+						</li>
+						<li>
+							<WebSocketInfo />
 						</li>
 					</ul>
 				</nav>
