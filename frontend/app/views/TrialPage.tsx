@@ -1,13 +1,8 @@
 "use strict";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-	useDocumentTitle,
-	useFormatMessageId,
-	useFormatMessageIdAsTagFn,
-	useStoreValueRestUrl,
-} from '../helpers/hooks';
+import { useDocumentTitle, useFormatMessageId, useStoreValueRestUrl } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
@@ -15,12 +10,13 @@ import { Breadcrumbs } from '../components/breadcrumbs';
 import { R_TRIAL, R_TRIALS } from '../routes';
 import { Link } from '../router/compoments';
 import { TimerDisplay, TrialTimers } from '../components/timers';
-import { EnhancedCrossing, TRIAL_STATE_FINISHED, TRIAL_STATE_RUNNING, TRIAL_STATE_UNFINISHED } from '../types';
+import { EnhancedCrossing, TRIAL_STATE_BEFORE_START, TRIAL_STATE_RUNNING } from '../types';
 import classNames from 'classnames';
 import { Button } from '../components/common';
 import { ToggleInput } from '../components/inputs';
 import { useTrialDataExperimental } from '../helpers/trials-experimental';
-import { ignoreCrossing, unignoreCrossing } from '../helpers/queries';
+import { cancelTrial, ignoreCrossing, startTrial, stopTrial, unignoreCrossing } from '../helpers/queries';
+import { QueryButton } from '../components/data';
 
 
 interface CrossingRowProps {
@@ -128,7 +124,7 @@ const TrialNotFound = ({ id }) => {
 
 const TrialPage = () => {
 
-	const t = useFormatMessageIdAsTagFn();
+	const t = useFormatMessageId();
 
 	const { route } = useRoute();
 	const idStr = route?.payload?.trialId as string;
@@ -142,11 +138,16 @@ const TrialPage = () => {
 		setIsEditMode(prev => !prev);
 	}, [setIsEditMode]);
 
+	// TODO: maybe use just one useMemo
+	const startThisTrial = useMemo(() => startTrial(id), [id]);
+	const stopThisTrial = useMemo(() => stopTrial(id), [id]);
+	const cancelThisTrial = useMemo(() => cancelTrial(id), [id]);
+
 	const op = useTrialDataExperimental(id);
 
 	const pageTitle = op.loading ?
-		t`titles.loading`
-		: !isDefined(op.data) ? t`titles.notFound` : op.data.trial.id.toString();
+		t(`titles.loading`)
+		: !isDefined(op.data) ? t(`titles.notFound`) : op.data.trial.id.toString();
 
 	useDocumentTitle(pageTitle);
 
@@ -193,22 +194,14 @@ const TrialPage = () => {
 			/>
 
 			<p>
-				ID: {trial.id}
-				<br />Round: {trial.round}
-				<br />Team: {trial.team.name}
-				<br />State: {trial.state}
+				{t(`trial.id`)}: {trial.id}
+				<br />{t(`trial.round`)}: {trial.round}
+				<br />{t(`trial.team`)}: {trial.team.name}
+				<br />{t(`trial.state`)}: {t(`trial.states.${trial.state}`)}
 			</p>
 
 			<h2 className="trial-state">
-				{(() => {
-					if (trial.state === TRIAL_STATE_RUNNING) {
-						return "Race in progress";
-					} else if (trial.state === TRIAL_STATE_UNFINISHED) {
-						return "Race cancelled";
-					} else if (trial.state === TRIAL_STATE_FINISHED) {
-						return "Race finished";
-					}
-				})()}
+				{t(`trial.states.${trial.state}`)}
 			</h2>
 
 			<div className="btn-group">
@@ -218,15 +211,29 @@ const TrialPage = () => {
 					label={`trialPage.${isEditMode ? 'switchToDisplayMode' : 'switchToEditMode'}`}
 				/>
 
-				<Button
-					style="default"
-					label="trialPage.stopTrial"
-				/>
+				{trial.state === TRIAL_STATE_BEFORE_START && (
+					<QueryButton
+						query={startThisTrial}
+						style="default"
+						label="trialPage.startTrial"
+					/>
+				)}
 
-				<Button
-					style="default"
-					label="trialPage.cancelTrial"
-				/>
+				{trial.state === TRIAL_STATE_RUNNING && (
+					<QueryButton
+						query={stopThisTrial}
+						style="default"
+						label="trialPage.stopTrial"
+					/>
+				)}
+
+				{trial.state === TRIAL_STATE_RUNNING && (
+					<QueryButton
+						query={cancelThisTrial}
+						style="default"
+						label="trialPage.cancelTrial"
+					/>
+				)}
 
 			</div>
 

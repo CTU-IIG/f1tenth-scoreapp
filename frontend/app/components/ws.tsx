@@ -48,7 +48,7 @@ export const WebSocketInfo = (props: WebSocketInfoProps) => {
 	}, [manager]);
 
 	return (
-		<button className={`ws-info ws-info--${style}`}>
+		<div className={`ws-info ws-info--${style}`} tabIndex={0}>
 			<div className="ws-info-dot" />
 			<div className="ws-info-details">
 				<div className="ws-info-heading">{t(`webSocketInfo.heading`)}</div>
@@ -82,7 +82,7 @@ export const WebSocketInfo = (props: WebSocketInfoProps) => {
 					)}
 				</div>
 			</div>
-		</button>
+		</div>
 	);
 
 };

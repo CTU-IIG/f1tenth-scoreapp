@@ -28,8 +28,8 @@ export const TrialCard = (
 			</header>
 
 			<div className="card-content">
-				Round: {trial.round}
-				<br />{trial.state}
+				{t(`trial.round`)}: {trial.round}
+				<br />{t(`trial.state`)}: {t(`trial.states.${trial.state}`)}
 			</div>
 
 			<div className="card-actions">

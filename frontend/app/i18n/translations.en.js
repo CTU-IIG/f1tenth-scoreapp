@@ -4,7 +4,7 @@ export default {
 	locales: {
 		auto: `automatically (according to the browser language)`,
 		en: `English`,
-		cs: 'Czech',
+		cs: `Czech`,
 	},
 	titles: {
 		home: `Home`,
@@ -12,9 +12,9 @@ export default {
 		login: `Login`,
 		notFound: `Page not found`,
 		settings: `Settings`,
-		teams: 'Teams',
-		trials: 'Trials',
-		presentation: 'Presentation',
+		teams: `Teams`,
+		trials: `Trials`,
+		presentation: `Presentation`,
 	},
 	header: {
 		appName: `ScoreApp`,
@@ -23,8 +23,18 @@ export default {
 		sourceCode: `Source code on`,
 	},
 	trial: {
+		id: `ID`,
+		round: `Round`,
+		team: `Team`,
+		state: `State`,
+		states: {
+			before_start: `Not yet started`,
+			running: `In progress`,
+			finished: `Finished`,
+			unfinished: `Cancelled`,
+		},
 		actions: {
-			detail: 'Trial detail',
+			detail: `Trial detail`,
 		},
 	},
 	ui: {
@@ -32,8 +42,8 @@ export default {
 		pageHeader: {
 			toggle: `Open/Close menu`,
 		},
-		loading: 'Loading ...',
-		loadingError: 'An error occurred while loading data.',
+		loading: `Loading ...`,
+		loadingError: `An error occurred while loading data.`,
 	},
 	forms: {
 		selectAll: `Select all`,
@@ -71,7 +81,9 @@ export default {
 			welcome: `Welcome to F1Tenth ScoreApp!`,
 		},
 	},
-	trialsPage: {},
+	trialsPage: {
+		createTrial: `Create trial with teamId=1 (then please refresh page)`,
+	},
 	trialPage: {
 		notFoundHeading: `Trial not found`,
 		notFoundMessage: `The trial with ID {id} was not found.`,
@@ -85,8 +97,8 @@ export default {
 	},
 	teamsPage: {
 		columns: {
-			id: 'ID',
-			name: 'Name',
+			id: `ID`,
+			name: `Name`,
 		},
 	},
 	teamPage: {
@@ -95,7 +107,7 @@ export default {
 		backToTrials: `Back to all teams`,
 	},
 	settingsPage: {
-		serverUrlsHeading: 'Server URLs',
+		serverUrlsHeading: `Server URLs`,
 	},
 	notFoundPage: {
 		backToHomePageBtn: `Return to the home page`,
