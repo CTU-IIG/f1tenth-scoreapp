@@ -55,6 +55,8 @@ Implemented endpoints:
 - `/ws` – websocket. All connected clients will automatically receive
   updates about the current (2) trial.
   - Testing: `websocat ws://localhost:4110/ws`
+- `/barrier/:id` – websocket for receiving barriers data
+  - Testing: `echo "{\"timestamp\":$(date +%s%6N)}"|websocat ws://localhost:4110/barrier/1`
 
   Note: [websocat home page][websocat]
 
