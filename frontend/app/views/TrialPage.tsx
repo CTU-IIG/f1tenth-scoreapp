@@ -2,7 +2,12 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { useDocumentTitle, useFormatMessageId, useFormatMessageIdAsTagFn } from '../helpers/hooks';
+import {
+	useDocumentTitle,
+	useFormatMessageId,
+	useFormatMessageIdAsTagFn,
+	useStoreValueRestUrl,
+} from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
@@ -10,11 +15,12 @@ import { Breadcrumbs } from '../components/breadcrumbs';
 import { R_TRIAL, R_TRIALS } from '../routes';
 import { Link } from '../router/compoments';
 import { TimerDisplay, TrialTimers } from '../components/timers';
-import { computeStats, useTrialData } from '../helpers/trials';
 import { EnhancedCrossing, TRIAL_STATE_FINISHED, TRIAL_STATE_RUNNING, TRIAL_STATE_UNFINISHED } from '../types';
 import classNames from 'classnames';
 import { Button } from '../components/common';
 import { ToggleInput } from '../components/inputs';
+import { useTrialDataExperimental } from '../helpers/trials-experimental';
+import { ignoreCrossing, unignoreCrossing } from '../helpers/queries';
 
 
 interface CrossingRowProps {
@@ -27,14 +33,27 @@ const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
 
 	const { id, ignored, start, lap } = crossing;
 
-	const toggle = showToggle ? <ToggleInput
-		id="crossing--ignore"
-		name="valid"
-		label="Valid"
-		checked={!ignored}
-		onChange={() => {}}
-	/> : undefined;
+	const [restUrl] = useStoreValueRestUrl();
 
+	const toggleIgnore = useCallback(() => {
+
+		(ignored ? unignoreCrossing(id) : ignoreCrossing(id))(restUrl)
+			.then(result => {
+				console.log(`[toggleIgnore] id=${id}`, result);
+			})
+			.catch(err => {
+				console.error(`[toggleIgnore] error`, err);
+			});
+
+	}, [id, ignored, restUrl]);
+
+	const toggle = showToggle ? <ToggleInput
+		id={`crossing-ignore-${id}`}
+		name="ignore"
+		label="trialPage.ignore"
+		checked={!ignored}
+		onChange={toggleIgnore}
+	/> : undefined;
 
 	return (
 		<div
@@ -123,11 +142,11 @@ const TrialPage = () => {
 		setIsEditMode(prev => !prev);
 	}, [setIsEditMode]);
 
-	const op = useTrialData(id);
+	const op = useTrialDataExperimental(id);
 
 	const pageTitle = op.loading ?
 		t`titles.loading`
-		: !isDefined(op.data) ? t`titles.notFound` : op.data.id.toString();
+		: !isDefined(op.data) ? t`titles.notFound` : op.data.trial.id.toString();
 
 	useDocumentTitle(pageTitle);
 
@@ -150,12 +169,7 @@ const TrialPage = () => {
 		);
 	}
 
-	const trial = op.data;
-
-	console.log('trial', trial);
-
-	const isActive = trial.state === TRIAL_STATE_RUNNING;
-
+	const trial = op.data.trial;
 	const {
 		startTime,
 		stopTime,
@@ -164,7 +178,11 @@ const TrialPage = () => {
 		bestLapCrossingId,
 		currentLapStartTime,
 		enhancedCrossings,
-	} = computeStats(trial);
+	} = op.data.stats;
+
+	console.log('trial', trial);
+
+	const isActive = trial.state === TRIAL_STATE_RUNNING;
 
 	return (
 		<>

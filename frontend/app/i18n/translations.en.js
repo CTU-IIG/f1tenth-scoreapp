@@ -81,6 +81,7 @@ export default {
 		startTrial: `Start trial`,
 		cancelTrial: `Cancel trial`,
 		stopTrial: `Stop trial`,
+		ignore: `Ignore`,
 	},
 	teamsPage: {
 		columns: {
