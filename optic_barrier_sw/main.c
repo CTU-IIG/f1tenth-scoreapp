@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
                     start = local_detect_time;
                     after_start = true;
 
-                    printf("{\"timestamp\":\"%ld.%03ld\"}\n", local_detect_time.tv_sec, local_detect_time.tv_usec/1000);
+                    printf("{\"timestamp\":%lld}\n", local_detect_time.tv_sec * 1000000LL + local_detect_time.tv_usec);
                 }
             } else {
                 detect_in_progress = false;
