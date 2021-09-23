@@ -9,27 +9,42 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	barrierPingPeriod = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	barrierPongWait = (barrierPingPeriod * 11) / 10
+)
+
 type Barrier struct {
 	// The websocket connection.
 	conn *websocket.Conn
 	hub  *Hub
 
-	// Barrier ID (0 if not yet known)
-	id uint
+	// Barrier ID
+	Id uint
+
+	RegistrationOk chan bool
 }
 
 // reader reads messages from the barrier, updates the database and notifies the hub
-func (b *Barrier) reader() {
-	name := fmt.Sprintf("barrier%d", b.id)
+func (b *Barrier) reader(conn *websocket.Conn) {
+	b.conn = conn
+
+	go b.pinger()
+
+	name := fmt.Sprintf("barrier%d", b.Id)
 	defer func() {
 		log.Println(name + ": closing websocket")
-		delete(barriers, b.id)
 		b.conn.Close()
+		b.hub.unregisterBarrier <- b
 	}()
 	b.conn.SetReadLimit(maxMessageSize)
-	// 	const pongWait = 10 * time.Second
-	// 	b.conn.SetReadDeadline(time.Now().Add(pongWait))
-	// 	b.conn.SetPongHandler(func(string) error { b.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
+	b.conn.SetReadDeadline(time.Now().Add(barrierPongWait))
+	b.conn.SetPongHandler(func(string) error { b.conn.SetReadDeadline(time.Now().Add(barrierPongWait)); return nil })
 
 	for {
 		_, message, err := b.conn.ReadMessage()
@@ -62,6 +77,21 @@ func (b *Barrier) reader() {
 			// so the frontend can find out what is the latest version
 			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: ts, Ignored: false})
 			broadcastTrial(&trial)
+		}
+	}
+}
+
+func (b *Barrier) pinger() {
+	ticker := time.NewTicker(barrierPingPeriod)
+	defer func() {
+		ticker.Stop()
+		b.conn.Close()
+	}()
+	for {
+		<-ticker.C
+		b.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		if err := b.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			return
 		}
 	}
 }

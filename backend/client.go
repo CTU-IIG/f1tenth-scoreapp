@@ -101,7 +101,7 @@ func websockHandler(c echo.Context, hub *Hub) error {
 		return err
 	}
 	client := &Client{hub: hub, conn: ws, send: make(chan []byte, 256)}
-	client.hub.register <- client
+	client.hub.registerClient <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.

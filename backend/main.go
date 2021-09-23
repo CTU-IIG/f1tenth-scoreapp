@@ -47,9 +47,8 @@ type Crossing struct {
 }
 
 var (
-	db       *gorm.DB
-	hub      *Hub
-	barriers map[uint]*Barrier = make(map[uint]*Barrier)
+	db  *gorm.DB
+	hub *Hub
 )
 
 func getTrial(c echo.Context) error {
@@ -268,16 +267,19 @@ func barrierWebsockHandler(c echo.Context) error {
 	if err := echo.PathParamsBinder(c).MustUint("id", &id).BindError(); err != nil {
 		return err
 	}
-	if _, ok := barriers[id]; ok {
+
+	barrier := &Barrier{Id: id, hub: hub, RegistrationOk: make(chan bool)}
+	hub.registerBarrier <- barrier
+	if ok := <-barrier.RegistrationOk; !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, "Barrier already connected")
 	}
+
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
 	}
-	barrier := &Barrier{conn: ws, id: id}
-	barriers[id] = barrier
-	go barrier.reader()
+
+	go barrier.reader(ws)
 	return nil
 }
 
