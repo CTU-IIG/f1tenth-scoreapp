@@ -363,7 +363,7 @@ func main() {
 		go barrierSimulator(hub, db)
 	}
 
-	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World! TODO") })
+	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "F1tenth ScoreApp works!") })
 	e.GET("/ws", func(c echo.Context) error { return websockHandler(c, hub) })
 	e.GET("/barrier/:id", barrierWebsockHandler)
 	e.GET("/teams", getAllTeams)

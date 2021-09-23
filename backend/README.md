@@ -16,7 +16,7 @@
 
         ./scoreapp
 
-## Testing
+## Usage
 
 The backend listens on port 4110. Point your web browser to
 http://localhost:4110 and you should see a "Hello world" page.
@@ -25,8 +25,9 @@ The backend creates a database called `scoreapp.db` in the current
 directory and prefills it with some testing data. You can safely
 delete the file and start from scratch.
 
-The light barrier is simulated and produces trial updates, which get
-stored to the database and broadcasted to web sockets.
+If started with `-sim` switch, the light barrier is simulated and
+produces trial updates, which get stored to the database and
+broadcasted to web sockets.
 
 Implemented endpoints:
 
