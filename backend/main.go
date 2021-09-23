@@ -304,6 +304,7 @@ func checkKey(key string, c echo.Context) (bool, error) {
 
 func main() {
 	sim := flag.Bool("sim", false, "Simulate barrier")
+	loopback := flag.Bool("loopback", false, "Listen only on lo interface (127.0.0.1)")
 	keysFile := flag.String("keys", "", "File with JSON-encoded API keys")
 	flag.Parse()
 
@@ -379,5 +380,9 @@ func main() {
 	e.POST("/crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
 	e.POST("/crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
 
-	e.Logger.Fatal(e.Start(":4110")) // Port mnemonic f1/10
+	var host string = ""
+	if *loopback {
+		host = "localhost"
+	}
+	e.Logger.Fatal(e.Start(host + ":4110")) // Port mnemonic f1/10
 }
