@@ -61,3 +61,22 @@ Implemented endpoints:
   Note: [websocat home page][websocat]
 
 [websocat]: https://github.com/vi/websocat
+
+### Authorization
+
+When `-keys` command line parameter specifies a JSON file like this:
+
+    {
+        "/barrier/1": "secretkey",
+        "/barrier/2": "otherkey",
+        "POST": "secret$$$$"
+    }
+
+Then all POST requests are required to have an `Authorization`
+header`with correct key. This can tested with:
+
+    curl -X POST -H "Authorization: Bearer secret$$$$" http://localhost:4110/trials/1/stop
+
+Barriers use separate authorization keys. Example:
+
+    echo "{\"timestamp\":$(date +%s%6N)}"|websocat ws://localhost:4110/barrier/1 -H "Authorization: secretkey"

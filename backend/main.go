@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -47,8 +48,9 @@ type Crossing struct {
 }
 
 var (
-	db  *gorm.DB
-	hub *Hub
+	db   *gorm.DB
+	hub  *Hub
+	keys map[string]string
 )
 
 func getTrial(c echo.Context) error {
@@ -268,6 +270,15 @@ func barrierWebsockHandler(c echo.Context) error {
 		return err
 	}
 
+	if len(keys) > 0 {
+		key, ok := keys[c.Request().URL.Path]
+		if !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, "No key configured for %s", c.Request().URL.Path)
+		}
+		if c.Request().Header.Get(echo.HeaderAuthorization) != key {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid key")
+		}
+	}
 	barrier := &Barrier{Id: id, hub: hub, RegistrationOk: make(chan bool)}
 	hub.registerBarrier <- barrier
 	if ok := <-barrier.RegistrationOk; !ok {
@@ -283,9 +294,27 @@ func barrierWebsockHandler(c echo.Context) error {
 	return nil
 }
 
+func checkKey(key string, c echo.Context) (bool, error) {
+	if postKey, ok := keys["POST"]; ok {
+		return key == postKey, nil
+	} else {
+		return false, fmt.Errorf("no POST key configured")
+	}
+}
+
 func main() {
 	sim := flag.Bool("sim", false, "Simulate barrier")
+	keysFile := flag.String("keys", "", "File with JSON-encoded API keys")
 	flag.Parse()
+
+	if *keysFile != "" {
+		content, err := os.ReadFile(*keysFile)
+		if err != nil {
+			log.Fatalf("key reading: %v", err)
+		}
+
+		json.Unmarshal(content, &keys)
+	}
 
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -313,6 +342,17 @@ func main() {
 		// Allow browsers to cache preflight requests for 1 hour.
 		MaxAge: 3600,
 	}))
+	if len(keys) > 0 {
+		// Check auth. key for all POST requests. Barrier keys (GET)
+		// are checked in barrierWebsockHandler.
+		e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			Skipper: func(c echo.Context) bool {
+				// No auth for GET requests
+				return c.Request().Method == "GET"
+			},
+			Validator: checkKey,
+		}))
+	}
 
 	db = initDb()
 
