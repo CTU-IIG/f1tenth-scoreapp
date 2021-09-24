@@ -50,7 +50,8 @@ type Crossing struct {
 	Ignored   bool `json:"ignored"`
 	BarrierId uint `json:"barrierId"`
 	TeamA     bool `json:"teamA"`
-	RaceID    uint `json:"-"`
+	// If 0, the crossing is not associated to any race
+	RaceID uint `json:"-"`
 }
 
 var (
