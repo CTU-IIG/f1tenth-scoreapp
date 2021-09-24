@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useDocumentTitle, useFormatMessageId, useStoreValueRestUrl } from '../helpers/hooks';
+import { useDocumentTitle, useFormatMessageId } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
@@ -10,13 +10,14 @@ import { Breadcrumbs } from '../components/breadcrumbs';
 import { R_RACE, R_RACES } from '../routes';
 import { Link } from '../router/compoments';
 import { RaceTimers, TimerDisplay } from '../components/timers';
-import { EnhancedCrossing, RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
+import { AppState, EnhancedCrossing, RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
 import classNames from 'classnames';
 import { Button } from '../components/common';
 import { ToggleInput } from '../components/inputs';
 import { useRaceDataExperimental } from '../helpers/races-experimental';
 import { cancelRace, ignoreCrossing, startRace, stopRace, unignoreCrossing } from '../helpers/queries';
 import { QueryButton } from '../components/data';
+import { useStore } from '../store/hooks';
 
 
 interface CrossingRowProps {
@@ -29,11 +30,14 @@ const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
 
 	const { id, ignored, start, lap } = crossing;
 
-	const [restUrl] = useStoreValueRestUrl();
+	const store = useStore<AppState>();
 
 	const toggleIgnore = useCallback(() => {
 
-		(ignored ? unignoreCrossing(id) : ignoreCrossing(id))(restUrl)
+		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
+
+		(ignored ? unignoreCrossing(id) : ignoreCrossing(id))(restUrl, token)
 			.then(result => {
 				console.log(`[toggleIgnore] id=${id}`, result);
 			})
@@ -41,7 +45,7 @@ const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
 				console.error(`[toggleIgnore] error`, err);
 			});
 
-	}, [id, ignored, restUrl]);
+	}, [id, ignored, store]);
 
 	const toggle = showToggle ? <ToggleInput
 		id={`crossing-ignore-${id}`}
