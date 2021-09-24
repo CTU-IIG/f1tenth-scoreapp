@@ -65,18 +65,24 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 			log.Printf(name+": missing timestamp in: %v", string(message))
 			continue
 		}
-		var trial Trial
-		if err := db.Last(&trial, "state = ?", Running).Error; err != nil {
-			log.Printf(name+": error obtaining running trial: %v", err)
-		} else if trial.ID == 0 {
-			log.Printf(name + ": could not generate new crossing because: there is no trial")
+		var race Race
+		if err := db.Last(&race, "state = ?", Running).Error; err != nil {
+			log.Printf(name+": error obtaining running race: %v", err)
+			// TODO: save crossing without race association
+		} else if race.ID == 0 {
+			log.Printf(name + ": could not generate new crossing because: there is no race")
+			// TODO: save crossing without race association
 		} else {
 			ts := Time(time.UnixMicro(msg.Timestamp))
-			log.Printf(name+": adding new crossing for trial %d at %v", trial.ID, time.Time(ts))
-			// this also updates Trial's UpdatedAt which is what we want
+			log.Printf(name+": adding new crossing for race %d at %v", race.ID, time.Time(ts))
+			// this also updates Race's UpdatedAt which is what we want
 			// so the frontend can find out what is the latest version
-			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: ts, Ignored: false})
-			broadcastTrial(&trial)
+			db.Model(&race).Association("Crossings").Append(&Crossing{
+				Time:      ts,
+				Ignored:   false,
+				BarrierId: b.Id,
+			})
+			broadcastRace(&race)
 		}
 	}
 }

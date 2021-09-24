@@ -26,16 +26,20 @@ type CommonModelFields struct {
 
 type Team struct {
 	CommonModelFields
-	Name   string  `gorm:"uniqueIndex" json:"name"`
-	Trials []Trial `json:"-"`
+	Name string `gorm:"uniqueIndex" json:"name"`
+	// Races []Race `json:"-"` // can not be easily specified when using TeamA, TeamB instead of just Team
 }
 
-type Trial struct {
+type Race struct {
 	CommonModelFields
-	TeamID    uint       `json:"teamId" query:"team_id"`
-	Team      Team       `json:"team"`
-	Round     uint32     `json:"round"`
-	State     TrialState `json:"state" gorm:"index"`
+	Type    RaceType `json:"type" gorm:"index"`
+	Round   uint32   `json:"round"`
+	TeamAID uint     `json:"teamAId" query:"team_a_id"`
+	TeamA   Team     `json:"teamA"`
+	// TODO: Nullable TeamB? TeamB is returned even when TeamBID == 0
+	TeamBID   uint       `json:"teamBId" query:"team_b_id"`
+	TeamB     Team       `json:"teamB"`
+	State     RaceState  `json:"state" gorm:"index"`
 	Crossings []Crossing `json:"crossings"`
 }
 
@@ -44,7 +48,9 @@ type Crossing struct {
 	UpdatedAt Time `json:"updatedAt"`
 	Time      Time `json:"time"`
 	Ignored   bool `json:"ignored"`
-	TrialID   uint `json:"-"`
+	BarrierId uint `json:"barrierId"`
+	TeamA     bool `json:"teamA"`
+	RaceID    uint `json:"-"`
 }
 
 var (
@@ -53,27 +59,27 @@ var (
 	keys map[string]string
 )
 
-func getTrial(c echo.Context) error {
-	var trial Trial
-	if err := c.Bind(&trial); err != nil {
+func getRace(c echo.Context) error {
+	var race Race
+	if err := c.Bind(&race); err != nil {
 		return err
 	}
-	if err := db.Preload("Team").Preload("Crossings").First(&trial, trial.ID).Error; err != nil {
+	if err := db.Preload("TeamA").Preload("TeamB").Preload("Crossings").First(&race, race.ID).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, trial)
+	return c.JSON(http.StatusOK, race)
 }
 
-func setTrialState(c echo.Context, state TrialState) error {
-	var trial Trial
-	if err := c.Bind(&trial); err != nil {
+func setRaceState(c echo.Context, state RaceState) error {
+	var race Race
+	if err := c.Bind(&race); err != nil {
 		return err
 	}
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&trial, trial.ID).Error; err != nil {
+		if err := tx.First(&race, race.ID).Error; err != nil {
 			return err
 		}
-		var expectedState TrialState
+		var expectedState RaceState
 		switch state {
 		case Running:
 			expectedState = BeforeStart
@@ -82,13 +88,13 @@ func setTrialState(c echo.Context, state TrialState) error {
 		case Unfinished:
 			expectedState = Running
 		default:
-			return fmt.Errorf("Unsupported state '%s'.", string(state))
+			return fmt.Errorf("unsupported state '%s'", string(state))
 		}
-		if trial.State != expectedState {
-			return fmt.Errorf("State should be '%s', not '%s'.",
-				string(expectedState), string(trial.State))
+		if race.State != expectedState {
+			return fmt.Errorf("state should be '%s', not '%s'",
+				string(expectedState), string(race.State))
 		}
-		if err := tx.Model(&trial).Updates(&Trial{State: state}).Error; err != nil {
+		if err := tx.Model(&race).Updates(&Race{State: state}).Error; err != nil {
 			return err
 		}
 		return nil
@@ -96,10 +102,10 @@ func setTrialState(c echo.Context, state TrialState) error {
 	if err != nil {
 		return err
 	}
-	if err := broadcastTrial(&trial); err != nil {
+	if err := broadcastRace(&race); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, trial)
+	return c.JSON(http.StatusOK, race)
 }
 
 func getAllTeams(c echo.Context) error {
@@ -132,41 +138,58 @@ func updateTeam(c echo.Context) error {
 	return c.JSON(http.StatusOK, team)
 }
 
-func getAllTrials(c echo.Context) error {
-	var trials []Trial
-	if err := db.Preload("Team").Find(&trials).Error; err != nil {
+func getAllRaces(c echo.Context) error {
+	var races []Race
+	if err := db.Preload("TeamA").Preload("TeamB").Find(&races).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, trials)
+	return c.JSON(http.StatusOK, races)
 }
 
-func createTrial(c echo.Context) error {
-	var trial Trial
-	if err := c.Bind(&trial); err != nil {
+func createRace(c echo.Context) error {
+	var race Race
+	if err := c.Bind(&race); err != nil {
 		return err
 	}
-	if trial.TeamID == 0 {
-		return fmt.Errorf("teamId not specified")
+	// TODO: Maybe require also the `round` field.
+	if race.Type == "" {
+		return fmt.Errorf("type not specified")
 	}
-	if err := db.Model(&trial).Association("Team").Find(&trial.Team); err != nil {
+	if race.TeamAID == 0 {
+		return fmt.Errorf("teamAId not specified")
+	}
+	if err := db.Model(&race).Association("TeamA").Find(&race.TeamA); err != nil {
 		return err
 	}
-	if trial.Team.ID == 0 {
-		return fmt.Errorf("no team with id %d", trial.TeamID)
+	if race.TeamA.ID == 0 {
+		return fmt.Errorf("no team with id %d", race.TeamAID)
 	}
-	trial.State = BeforeStart
-	if err := db.Omit("Team").Create(&trial).Error; err != nil {
+	if race.Type == HeadToHead {
+		if race.TeamBID == 0 {
+			return fmt.Errorf("teamBId not specified but required for head_to_head race type")
+		}
+		// TODO: We might want to check that TeamAID != TeamBID
+		if err := db.Model(&race).Association("TeamB").Find(&race.TeamB); err != nil {
+			return err
+		}
+		if race.TeamB.ID == 0 {
+			return fmt.Errorf("no team with id %d", race.TeamBID)
+		}
+	}
+	// always force BeforeStart state
+	race.State = BeforeStart
+	if err := db.Omit("TeamA", "TeamB").Create(&race).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, &trial)
+	return c.JSON(http.StatusOK, &race)
 }
 
-func getFinishedTrials(c echo.Context) error {
-	var trials []Trial
-	if err := db.Where(&Trial{State: Finished}).Preload("Team").Find(&trials).Error; err != nil {
+func getFinishedRaces(c echo.Context) error {
+	var races []Race
+	if err := db.Where(&Race{State: Finished}).Preload("TeamA").Preload("TeamB").Find(&races).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, trials)
+	return c.JSON(http.StatusOK, races)
 }
 
 func setCrossingIgnore(c echo.Context, ignored bool) error {
@@ -183,10 +206,10 @@ func setCrossingIgnore(c echo.Context, ignored bool) error {
 			return err
 		}
 
-		// also update associated Trial's (if any) UpdatedAt field
+		// also update associated Race's (if any) UpdatedAt field
 		// so the frontend can find out what is the latest version
-		if crossing.TrialID != 0 {
-			if err := db.Model(&Trial{}).Where("id = ?", crossing.TrialID).Update("UpdatedAt", time.Now()).Error; err != nil {
+		if crossing.RaceID != 0 {
+			if err := db.Model(&Race{}).Where("id = ?", crossing.RaceID).Update("UpdatedAt", time.Now()).Error; err != nil {
 				return err
 			}
 		}
@@ -197,7 +220,7 @@ func setCrossingIgnore(c echo.Context, ignored bool) error {
 	if err != nil {
 		return err
 	}
-	if err := broadcastTrial(&Trial{CommonModelFields: CommonModelFields{ID: crossing.TrialID}}); err != nil {
+	if err := broadcastRace(&Race{CommonModelFields: CommonModelFields{ID: crossing.RaceID}}); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, crossing)
@@ -208,35 +231,59 @@ func initDb() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&Team{}, &Trial{}, &Crossing{})
+	err = db.AutoMigrate(&Team{}, &Race{}, &Crossing{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	//db = db.Debug()
+	// db = db.Debug()
 
-	// Create objects for testing
+	// create initial testing data
+
 	var team Team
-	db.FirstOrCreate(&team, Team{Name: "Ředkvičky"})
+	db.FirstOrCreate(&team, Team{
+		Name: "Ředkvičky",
+	})
 
-	var trial Trial
-	db.FirstOrCreate(&trial, &Trial{TeamID: team.ID, Round: uint32(1), State: Finished})
-	db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now().Add(-12 * time.Second)), Ignored: false})
-	db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
+	var race1 Race
+	db.FirstOrCreate(&race1, &Race{
+		Type:    TimeTrial,
+		Round:   uint32(1),
+		TeamAID: team.ID,
+		State:   Finished,
+	})
+	db.Model(&race1).Association("Crossings").Append(&Crossing{
+		Time:      Time(time.Now().Add(-12 * time.Second)),
+		Ignored:   false,
+		BarrierId: 1,
+	})
+	db.Model(&race1).Association("Crossings").Append(&Crossing{
+		Time:      Time(time.Now()),
+		Ignored:   false,
+		BarrierId: 1,
+	})
 
-	var trial2 Trial
-	db.FirstOrCreate(&trial2, &Trial{TeamID: team.ID, Round: uint32(2), State: Running})
+	var race2 Race
+	db.FirstOrCreate(&race2, &Race{
+		Type:    TimeTrial,
+		Round:   uint32(2),
+		TeamAID: team.ID,
+		State:   Running,
+	})
 
 	return db
 }
 
-func broadcastTrial(trial *Trial) error {
+func broadcastRace(race *Race) error {
 	type Message struct {
-		Trial *Trial `json:"trial"`
+		Race *Race `json:"race"`
 	}
 
-	var fullTrial Trial
-	if err := db.Model(&Trial{}).Preload("Crossings").Preload("Team").First(&fullTrial, trial.ID).Error; err != nil {
+	var fullRace Race
+	if err := db.Model(&Race{}).Preload("Crossings").Preload("TeamA").Preload("TeamB").First(&fullRace, race.ID).Error; err != nil {
 		return err
 	}
-	b, err := json.Marshal(&Message{&fullTrial})
+	b, err := json.Marshal(&Message{&fullRace})
 	if err != nil {
 		return err
 	}
@@ -247,18 +294,22 @@ func broadcastTrial(trial *Trial) error {
 func barrierSimulator(hub *Hub, db *gorm.DB) {
 	time.Sleep(1 * time.Second)
 	for {
-		var trial Trial
-		if err := db.Last(&trial, "state = ?", Running).Error; err != nil {
+		var race Race
+		if err := db.Last(&race, "state = ?", Running).Error; err != nil {
 			log.Printf("could not generate new crossing because: %s", err)
-		} else if trial.ID == 0 {
-			log.Printf("could not generate new crossing because: there is no trial")
+		} else if race.ID == 0 {
+			log.Printf("could not generate new crossing because: there is no race")
 		} else {
-			log.Printf("adding new crossing for trial %d", trial.ID)
-			// this also updates Trial's UpdatedAt which is what we want
+			log.Printf("adding new crossing for race %d", race.ID)
+			// this also updates Race's UpdatedAt which is what we want
 			// so the frontend can find out what is the latest version
-			db.Model(&trial).Association("Crossings").Append(&Crossing{Time: Time(time.Now()), Ignored: false})
-			broadcastTrial(&trial)
-			// reset the trial id so that next time gorm will rerun the query
+			db.Model(&race).Association("Crossings").Append(&Crossing{
+				Time:      Time(time.Now()),
+				Ignored:   false,
+				BarrierId: 1,
+			})
+			broadcastRace(&race)
+			// reset the race id so that next time gorm will rerun the query
 		}
 		time.Sleep(time.Duration(5_000+rand.Intn(3_000)) * time.Millisecond)
 	}
@@ -370,15 +421,16 @@ func main() {
 	e.GET("/teams", getAllTeams)
 	e.POST("/teams", createTeam)
 	e.POST("/teams/:id", updateTeam)
-	e.GET("/trials", getAllTrials)
-	e.POST("/trials", createTrial)
-	e.GET("/trials/:id", getTrial)
-	e.POST("/trials/:id/start", func(c echo.Context) error { return setTrialState(c, Running) })
-	e.POST("/trials/:id/stop", func(c echo.Context) error { return setTrialState(c, Finished) })
-	e.POST("/trials/:id/cancel", func(c echo.Context) error { return setTrialState(c, Unfinished) })
-	e.GET("/trials/finished", getFinishedTrials)
+	e.GET("/races", getAllRaces)
+	e.POST("/races", createRace)
+	e.GET("/races/:id", getRace)
+	e.POST("/races/:id/start", func(c echo.Context) error { return setRaceState(c, Running) })
+	e.POST("/races/:id/stop", func(c echo.Context) error { return setRaceState(c, Finished) })
+	e.POST("/races/:id/cancel", func(c echo.Context) error { return setRaceState(c, Unfinished) })
+	e.GET("/races/finished", getFinishedRaces)
 	e.POST("/crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
 	e.POST("/crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
+	// TODO: /crossings/:id/ setTeamA to true/false
 
 	var host string = ""
 	if *loopback {

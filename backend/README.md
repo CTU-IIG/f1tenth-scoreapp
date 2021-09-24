@@ -26,7 +26,7 @@ directory and prefills it with some testing data. You can safely
 delete the file and start from scratch.
 
 If started with `-sim` switch, the light barrier is simulated and
-produces trial updates, which get stored to the database and
+produces race updates, which get stored to the database and
 broadcasted to web sockets.
 
 Implemented endpoints:
@@ -36,25 +36,25 @@ Implemented endpoints:
   - Testing: `curl -H 'Content-Type: application/json' -d '{"name": "HokusPokus"}' -X POST 'http://localhost:4110/teams'`
 - POST `/teams/<num>` - edits a team
   - Testing: `curl -H 'Content-Type: application/json' -d '{"name": "SomeName"}' -X POST 'http://localhost:4110/teams/1'`
-- GET `/trials` – returns JSON of all trials (without crossings).
-- POST `/trials` – creates a new trial
-  - Testing: `curl -H 'Content-Type: application/json' -d '{"teamId": 1}' -X POST 'http://localhost:4110/trials'`
-- GET `/trials/<num>` – returns JSON of the trial `<num>`. Currently,
+- GET `/races` – returns JSON of all races (without crossings).
+- POST `/races` – creates a new race
+  - Testing: `curl -H 'Content-Type: application/json' -d '{"type":"time_trial","teamAId":1,"round":1}' -X POST 'http://localhost:4110/races'`
+- GET `/races/<num>` – returns JSON of the race `<num>`. Currently,
   we have only 1 and 2.
-  - Testing: `curl http://localhost:4110/trials/1`
-- POST `/trials/<num>/start` – changes trial's state from
+  - Testing: `curl http://localhost:4110/races/1`
+- POST `/races/<num>/start` – changes race's state from
   `before_start` to `running`.
-- POST `/trials/<num>/stop` – changes trial's state from
+- POST `/races/<num>/stop` – changes race's state from
   `running` to `finished`.
-- POST `/trials/<num>/cancel` – changes trial's state from
+- POST `/races/<num>/cancel` – changes race's state from
   `running` to `unfinished`.
-- GET `/trials/finished` – returns JSON of all finished trials (without crossings).
+- GET `/races/finished` – returns JSON of all finished races (without crossings).
 - POST `/crossings/<num>/ignore` – set `ignored` field of the given
   crossing to `true`
 - POST `/crossings/<num>/unignore` – set `ignored` field of the given
   crossing to `false`
 - `/ws` – websocket. All connected clients will automatically receive
-  updates about the current (2) trial.
+  updates about the current (2) race.
   - Testing: `websocat ws://localhost:4110/ws`
 - `/barrier/:id` – websocket for receiving barriers data
   - Testing: `echo "{\"timestamp\":$(date +%s%6N)}"|websocat ws://localhost:4110/barrier/1`
