@@ -241,9 +241,12 @@ func initDb() *gorm.DB {
 	// create initial testing data
 
 	var team Team
-	db.FirstOrCreate(&team, Team{
-		Name: "Ředkvičky",
-	})
+	db.FirstOrCreate(&team, Team{Name: "Formula Trinity Autonomous"})
+	db.FirstOrCreate(&team, Team{Name: "HiPeRT Modena"})
+	db.FirstOrCreate(&team, Team{Name: "Rasoul Najakhani"})
+	db.FirstOrCreate(&team, Team{Name: "Super TU Kart"})
+	db.FirstOrCreate(&team, Team{Name: "TU Wien"})
+	db.FirstOrCreate(&team, Team{Name: "Ředkvičky"})
 
 	var race1 Race
 	db.FirstOrCreate(&race1, &Race{
