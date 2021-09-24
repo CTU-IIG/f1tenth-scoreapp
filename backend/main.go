@@ -240,39 +240,12 @@ func initDb() *gorm.DB {
 
 	// create initial testing data
 
-	var team Team
-	db.FirstOrCreate(&team, Team{Name: "Formula Trinity Autonomous"})
-	db.FirstOrCreate(&team, Team{Name: "HiPeRT Modena"})
-	db.FirstOrCreate(&team, Team{Name: "Rasoul Najakhani"})
-	db.FirstOrCreate(&team, Team{Name: "Super TU Kart"})
-	db.FirstOrCreate(&team, Team{Name: "TU Wien"})
-	db.FirstOrCreate(&team, Team{Name: "Ředkvičky"})
-
-	var race1 Race
-	db.FirstOrCreate(&race1, &Race{
-		Type:    TimeTrial,
-		Round:   uint32(1),
-		TeamAID: team.ID,
-		State:   Finished,
-	})
-	db.Model(&race1).Association("Crossings").Append(&Crossing{
-		Time:      Time(time.Now().Add(-12 * time.Second)),
-		Ignored:   false,
-		BarrierId: 1,
-	})
-	db.Model(&race1).Association("Crossings").Append(&Crossing{
-		Time:      Time(time.Now()),
-		Ignored:   false,
-		BarrierId: 1,
-	})
-
-	var race2 Race
-	db.FirstOrCreate(&race2, &Race{
-		Type:    TimeTrial,
-		Round:   uint32(2),
-		TeamAID: team.ID,
-		State:   Running,
-	})
+	db.FirstOrCreate(new(Team), Team{Name: "Formula Trinity Autonomous"})
+	db.FirstOrCreate(new(Team), Team{Name: "HiPeRT Modena"})
+	db.FirstOrCreate(new(Team), Team{Name: "Rasoul Najakhani"})
+	db.FirstOrCreate(new(Team), Team{Name: "Super TU Kart"})
+	db.FirstOrCreate(new(Team), Team{Name: "TU Wien"})
+	db.FirstOrCreate(new(Team), Team{Name: "Ředkvičky"})
 
 	return db
 }
