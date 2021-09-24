@@ -2,17 +2,17 @@
 
 import { useMemo } from 'react';
 import { useQuery } from './data';
-import { findOneTrialById } from './queries';
-import { useLiveTrialData } from '../ws/hooks';
-import { EnhancedCrossing, FullTrial, TRIAL_STATE_FINISHED, TRIAL_STATE_UNFINISHED } from '../types';
+import { findOneRaceById } from './queries';
+import { useLiveRaceData } from '../ws/hooks';
+import { EnhancedCrossing, FullRace, RACE_STATE_FINISHED, RACE_STATE_UNFINISHED, RACE_TYPE_TIME_TRIAL } from '../types';
 import { isDefined } from './common';
 
 
-export const useTrialData = (id: number) => {
+export const useRaceData = (id: number) => {
 
-	const latestData = useLiveTrialData(id);
+	const latestData = useLiveRaceData(id);
 
-	const query = useMemo(() => findOneTrialById(id), [id]);
+	const query = useMemo(() => findOneRaceById(id), [id]);
 	const { op } = useQuery(query);
 
 	if (!op.loading && !op.hasError && op.data !== undefined) {
@@ -29,7 +29,7 @@ export const useTrialData = (id: number) => {
 
 };
 
-export interface TrialStats {
+export interface RaceStats {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
@@ -39,7 +39,9 @@ export interface TrialStats {
 	enhancedCrossings: EnhancedCrossing[];
 }
 
-export const computeStats = (trial: FullTrial): TrialStats => {
+export const computeStats = (race: FullRace): RaceStats => {
+
+	// TODO: RACE_TYPE_HEAD_TO_HEAD
 
 	let startTime = -1;
 	let stopTime = -1;
@@ -50,7 +52,9 @@ export const computeStats = (trial: FullTrial): TrialStats => {
 	let bestLapCrossingId = -1;
 
 	// for performance reasons, we do not copy crossings, and instead we directly mutate it
-	const enhancedCrossings: EnhancedCrossing[] = trial.crossings;
+	const enhancedCrossings: EnhancedCrossing[] = race.type === RACE_TYPE_TIME_TRIAL
+		? race.crossings.filter(c => c.barrierId === 1) // time trial use only the barrier with id 1
+		: race.crossings; // RACE_TYPE_HEAD_TO_HEAD uses both barriers
 
 	enhancedCrossings.forEach(c => {
 
@@ -91,7 +95,7 @@ export const computeStats = (trial: FullTrial): TrialStats => {
 
 	});
 
-	if (last !== -1 && (trial.state === TRIAL_STATE_FINISHED || trial.state === TRIAL_STATE_UNFINISHED)) {
+	if (last !== -1 && (race.state === RACE_STATE_FINISHED || race.state === RACE_STATE_UNFINISHED)) {
 		// TODO: maybe different stopTime logic?
 		stopTime = last;
 	}

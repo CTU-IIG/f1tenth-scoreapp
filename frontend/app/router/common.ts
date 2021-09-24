@@ -19,17 +19,17 @@ export interface PayloadTransformer {
 }
 
 export interface LocationListener {
-	(route?: Route | undefined): void
+	(route?: Route | undefined): void;
 }
 
 export type UnlistenFunction = () => void;
 
 export interface RouteUrlGenerator {
-	(payload?: any): string | undefined
+	(payload?: any): string | undefined;
 }
 
 export interface RouteMatcher {
-	(pathname: string): Route | undefined
+	(pathname: string): Route | undefined;
 }
 
 export type RouteToUrlMap = Map<string, RouteUrlGenerator>;

@@ -1,7 +1,8 @@
 "use strict";
 
 import { doRequest, METHOD_POST } from './api';
-import { Crossing, FullTrial, Team, Trial } from '../types';
+import { Crossing, FullRace, Race, RACE_TYPE_TIME_TRIAL, Team } from '../types';
+
 
 export const findAllTeams =
 	(restUrl: string) =>
@@ -27,45 +28,45 @@ export const updateTeam = (id: number, name: string) =>
 			},
 		);
 
-export const findAllTrials =
+export const findAllRaces =
 	(restUrl: string) =>
-		doRequest<Trial[]>(`${restUrl}/trials`);
+		doRequest<Race[]>(`${restUrl}/races`);
 
-export const findOneTrialById = (id: number) =>
+export const findOneRaceById = (id: number) =>
 	(restUrl: string) =>
-		doRequest<FullTrial | undefined>(
-			`${restUrl}/trials/${id}`,
+		doRequest<FullRace | undefined>(
+			`${restUrl}/races/${id}`,
 			{ returnUndefinedForNotFoundError: true },
 		);
 
-export const createTrial = (teamId: number) =>
+export const createRace = (teamAId: number) =>
 	(restUrl: string) =>
-		doRequest<Trial>(
-			`${restUrl}/trials`,
+		doRequest<Race>(
+			`${restUrl}/races`,
 			{
 				method: METHOD_POST,
-				body: { teamId },
+				body: { type: RACE_TYPE_TIME_TRIAL, teamAId },
 			},
 		);
 
-export const startTrial = (id: number) =>
+export const startRace = (id: number) =>
 	(restUrl: string) =>
-		doRequest<FullTrial>(
-			`${restUrl}/trials/${id}/start`,
+		doRequest<FullRace>(
+			`${restUrl}/races/${id}/start`,
 			{ method: METHOD_POST },
 		);
 
-export const stopTrial = (id: number) =>
+export const stopRace = (id: number) =>
 	(restUrl: string) =>
-		doRequest<FullTrial>(
-			`${restUrl}/trials/${id}/stop`,
+		doRequest<FullRace>(
+			`${restUrl}/races/${id}/stop`,
 			{ method: METHOD_POST },
 		);
 
-export const cancelTrial = (id: number) =>
+export const cancelRace = (id: number) =>
 	(restUrl: string) =>
-		doRequest<FullTrial>(
-			`${restUrl}/trials/${id}/cancel`,
+		doRequest<FullRace>(
+			`${restUrl}/races/${id}/cancel`,
 			{ method: METHOD_POST },
 		);
 

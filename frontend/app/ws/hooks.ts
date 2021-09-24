@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import WebSocketManagerContext from './WebSocketManagerContext';
 import WebSocketManager, { ManagerState } from './WebSocketManager';
 import { useSubscription } from '../helpers/useSubscription';
-import { FullTrial } from '../types';
+import { FullRace } from '../types';
 
 
 export const useWebSocketManager = () => useContext<WebSocketManager>(WebSocketManagerContext);
@@ -23,31 +23,31 @@ export const useWebSocketManagerState = (): { manager: WebSocketManager, state: 
 
 };
 
-interface UseTrialDataInnerState {
+interface UseRaceDataInnerState {
 	manager: WebSocketManager;
-	trialId: number;
-	latestData: FullTrial | undefined;
+	raceId: number;
+	latestData: FullRace | undefined;
 }
 
-export const useLiveTrialData = (trialId: number): FullTrial | undefined => {
+export const useLiveRaceData = (raceId: number): FullRace | undefined => {
 
 	const manager = useWebSocketManager();
 
-	const [state, setState] = useState<UseTrialDataInnerState>({
+	const [state, setState] = useState<UseRaceDataInnerState>({
 		manager,
-		trialId,
+		raceId,
 		latestData: undefined,
 	});
 
 	let valueToReturn = state.latestData;
 
-	if (state.manager !== manager || state.trialId !== trialId) {
+	if (state.manager !== manager || state.raceId !== raceId) {
 
 		valueToReturn = undefined;
 
 		setState({
 			manager,
-			trialId,
+			raceId,
 			latestData: valueToReturn,
 		});
 
@@ -57,7 +57,7 @@ export const useLiveTrialData = (trialId: number): FullTrial | undefined => {
 
 		let didUnsubscribe = false;
 
-		const unlisten = manager.listenForTrialData(trialId, trial => {
+		const unlisten = manager.listenForRaceData(raceId, race => {
 
 			if (didUnsubscribe) {
 				return;
@@ -67,16 +67,16 @@ export const useLiveTrialData = (trialId: number): FullTrial | undefined => {
 
 				if (
 					prevState.manager !== manager ||
-					prevState.trialId !== trialId
+					prevState.raceId !== raceId
 				) {
 					return prevState;
 				}
 
-				if (prevState.latestData === trial) {
+				if (prevState.latestData === race) {
 					return prevState;
 				}
 
-				return { ...prevState, latestData: trial };
+				return { ...prevState, latestData: race };
 
 			});
 
@@ -87,7 +87,7 @@ export const useLiveTrialData = (trialId: number): FullTrial | undefined => {
 			unlisten();
 		};
 
-	}, [manager, trialId]);
+	}, [manager, raceId]);
 
 	return valueToReturn;
 

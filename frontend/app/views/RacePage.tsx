@@ -7,15 +7,15 @@ import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { R_TRIAL, R_TRIALS } from '../routes';
+import { R_RACE, R_RACES } from '../routes';
 import { Link } from '../router/compoments';
-import { TimerDisplay, TrialTimers } from '../components/timers';
-import { EnhancedCrossing, TRIAL_STATE_BEFORE_START, TRIAL_STATE_RUNNING } from '../types';
+import { RaceTimers, TimerDisplay } from '../components/timers';
+import { EnhancedCrossing, RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
 import classNames from 'classnames';
 import { Button } from '../components/common';
 import { ToggleInput } from '../components/inputs';
-import { useTrialDataExperimental } from '../helpers/trials-experimental';
-import { cancelTrial, ignoreCrossing, startTrial, stopTrial, unignoreCrossing } from '../helpers/queries';
+import { useRaceDataExperimental } from '../helpers/races-experimental';
+import { cancelRace, ignoreCrossing, startRace, stopRace, unignoreCrossing } from '../helpers/queries';
 import { QueryButton } from '../components/data';
 
 
@@ -46,7 +46,7 @@ const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
 	const toggle = showToggle ? <ToggleInput
 		id={`crossing-ignore-${id}`}
 		name="ignore"
-		label="trialPage.ignore"
+		label="racePage.ignore"
 		checked={!ignored}
 		onChange={toggleIgnore}
 	/> : undefined;
@@ -106,28 +106,28 @@ const CrossingsList = ({ showIgnored, bestLapCrossingId, crossings }: CrossingsL
 
 };
 
-const TrialNotFound = ({ id }) => {
+const RaceNotFound = ({ id }) => {
 
 	const t = useFormatMessageId();
 
 	return (
 		<>
-			<h1>{t(`trialPage.notFoundHeading`)}</h1>
+			<h1>{t(`racePage.notFoundHeading`)}</h1>
 			<p>
-				{t(`trialPage.notFoundMessage`, { id })}
+				{t(`racePage.notFoundMessage`, { id })}
 			</p>
-			<Link name={R_TRIALS}>{t(`trialPage.backToTrials`)}</Link>
+			<Link name={R_RACES}>{t(`racePage.backToRaces`)}</Link>
 		</>
 	);
 };
 
 
-const TrialPage = () => {
+const RacePage = () => {
 
 	const t = useFormatMessageId();
 
 	const { route } = useRoute();
-	const idStr = route?.payload?.trialId as string;
+	const idStr = route?.payload?.raceId as string;
 	const id = parseInt(idStr);
 	console.log('id = ', id);
 
@@ -139,15 +139,15 @@ const TrialPage = () => {
 	}, [setIsEditMode]);
 
 	// TODO: maybe use just one useMemo
-	const startThisTrial = useMemo(() => startTrial(id), [id]);
-	const stopThisTrial = useMemo(() => stopTrial(id), [id]);
-	const cancelThisTrial = useMemo(() => cancelTrial(id), [id]);
+	const startThisRace = useMemo(() => startRace(id), [id]);
+	const stopThisRace = useMemo(() => stopRace(id), [id]);
+	const cancelThisRace = useMemo(() => cancelRace(id), [id]);
 
-	const op = useTrialDataExperimental(id);
+	const op = useRaceDataExperimental(id);
 
 	const pageTitle = op.loading ?
 		t(`titles.loading`)
-		: !isDefined(op.data) ? t(`titles.notFound`) : op.data.trial.id.toString();
+		: !isDefined(op.data) ? t(`titles.notFound`) : op.data.race.id.toString();
 
 	useDocumentTitle(pageTitle);
 
@@ -166,11 +166,11 @@ const TrialPage = () => {
 
 	if (!isDefined(op.data)) {
 		return (
-			<TrialNotFound id={id} />
+			<RaceNotFound id={id} />
 		);
 	}
 
-	const trial = op.data.trial;
+	const race = op.data.race;
 	const {
 		startTime,
 		stopTime,
@@ -181,65 +181,65 @@ const TrialPage = () => {
 		enhancedCrossings,
 	} = op.data.stats;
 
-	console.log('trial', trial);
+	console.log('race', race);
 
-	const isActive = trial.state === TRIAL_STATE_RUNNING;
+	const isActive = race.state === RACE_STATE_RUNNING;
 
 	return (
 		<>
 
 			<Breadcrumbs
-				name={R_TRIAL}
-				trialId={trial.id}
+				name={R_RACE}
+				raceId={race.id}
 			/>
 
 			<p>
-				{t(`trial.id`)}: {trial.id}
-				<br />{t(`trial.round`)}: {trial.round}
-				<br />{t(`trial.team`)}: {trial.team.name}
-				<br />{t(`trial.state`)}: {t(`trial.states.${trial.state}`)}
+				{t(`race.id`)}: {race.id}
+				<br />{t(`race.round`)}: {race.round}
+				<br />{t(`race.team`)}: {race.teamA.name}
+				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
 			</p>
 
-			<h2 className="trial-state">
-				{t(`trial.states.${trial.state}`)}
+			<h2 className="race-state">
+				{t(`race.states.${race.state}`)}
 			</h2>
 
 			<div className="btn-group">
 				<Button
 					style="default"
 					onClick={handleSwitchToEditMode}
-					label={`trialPage.${isEditMode ? 'switchToDisplayMode' : 'switchToEditMode'}`}
+					label={`racePage.${isEditMode ? 'switchToDisplayMode' : 'switchToEditMode'}`}
 				/>
 
-				{trial.state === TRIAL_STATE_BEFORE_START && (
+				{race.state === RACE_STATE_BEFORE_START && (
 					<QueryButton
-						query={startThisTrial}
+						query={startThisRace}
 						style="default"
-						label="trialPage.startTrial"
+						label="racePage.startRace"
 					/>
 				)}
 
-				{trial.state === TRIAL_STATE_RUNNING && (
+				{race.state === RACE_STATE_RUNNING && (
 					<QueryButton
-						query={stopThisTrial}
+						query={stopThisRace}
 						style="default"
-						label="trialPage.stopTrial"
+						label="racePage.stopRace"
 					/>
 				)}
 
-				{trial.state === TRIAL_STATE_RUNNING && (
+				{race.state === RACE_STATE_RUNNING && (
 					<QueryButton
-						query={cancelThisTrial}
+						query={cancelThisRace}
 						style="default"
-						label="trialPage.cancelTrial"
+						label="racePage.cancelRace"
 					/>
 				)}
 
 			</div>
 
-			<div className="trial-layout">
+			<div className="race-layout">
 
-				<TrialTimers
+				<RaceTimers
 					startTime={startTime}
 					stopTime={stopTime}
 					numLaps={numLaps}
@@ -261,4 +261,4 @@ const TrialPage = () => {
 
 };
 
-export default TrialPage;
+export default RacePage;

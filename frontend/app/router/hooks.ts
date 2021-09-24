@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import RouterContext from './RouterContext';
 import { useSubscription } from '../helpers/useSubscription';

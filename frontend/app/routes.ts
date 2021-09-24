@@ -8,9 +8,9 @@ export const R_TEAMS = 'R_TEAMS';
 export const R_TEAM_NEW = 'R_TEAM_NEW';
 export const R_TEAM = 'R_TEAM';
 
-export const R_TRIALS = 'R_TRIALS';
-export const R_TRIAL_NEW = 'R_TRIAL_NEW';
-export const R_TRIAL = 'R_TRIAL';
+export const R_RACES = 'R_RACES';
+export const R_RACE_NEW = 'R_RACE_NEW';
+export const R_RACE = 'R_RACE';
 
 export const R_PRESENTATION = 'R_PRESENTATION';
 
@@ -19,9 +19,9 @@ export const routesMap = new Map([
 	[R_TEAM_NEW, '/team/new'],
 	[R_TEAM, '/teams/:teamId'],
 	[R_TEAMS, '/teams'],
-	[R_TRIAL_NEW, '/trial/new'],
-	[R_TRIAL, '/trials/:trialId'],
-	[R_TRIALS, '/trials'],
+	[R_RACE_NEW, '/race/new'],
+	[R_RACE, '/races/:raceId'],
+	[R_RACES, '/races'],
 	[R_PRESENTATION, '/presentation'],
 	[R_SETTINGS, '/settings'],
 	[R_ROOT, '/'],

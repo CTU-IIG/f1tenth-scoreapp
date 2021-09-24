@@ -8,9 +8,9 @@ export const isFunctionalCreator = <K, V>(creator: KeyValueCreator<K, V>): creat
 
 export class SmartMap<K, V> {
 
-	private readonly store: Map<K, V>;
 	readonly canKeyBeSafelyDeleted: (key: K, value: V) => boolean;
 	readonly createValueForKey: KeyValueCreator<K, V>;
+	private readonly store: Map<K, V>;
 
 	constructor(canBeKeySafelyDeleted: (key: K, value: V) => boolean, fallback: KeyValueCreator<K, V>) {
 		this.store = new Map();

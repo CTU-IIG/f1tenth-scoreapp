@@ -1,18 +1,18 @@
 "use strict";
 
 import { QueryOperation } from './data';
-import { FullTrial } from '../types';
+import { FullRace } from '../types';
 import { useWebSocketManager } from '../ws/hooks';
 import { useStoreValueRestUrl } from './hooks';
 import { useEffect, useState } from 'react';
-import { findOneTrialById } from './queries';
+import { findOneRaceById } from './queries';
 import { isDefined } from './common';
-import { computeStats, TrialStats } from './trials';
+import { computeStats, RaceStats } from './races';
 
 
-interface UseTrialDataInnerState {
+interface UseRaceDataInnerState {
 	deps: any[];
-	op: QueryOperation<FullTrialAndStats | undefined>;
+	op: QueryOperation<FullRaceAndStats | undefined>;
 }
 
 export const staleDeps = (prevDeps: any[], currentDeps: any[]) => {
@@ -27,20 +27,20 @@ export const staleDeps = (prevDeps: any[], currentDeps: any[]) => {
 
 };
 
-export interface FullTrialAndStats {
-	trial: FullTrial;
-	stats: TrialStats;
+export interface FullRaceAndStats {
+	race: FullRace;
+	stats: RaceStats;
 }
 
-export const useTrialDataExperimental = (trialId: number): QueryOperation<FullTrialAndStats | undefined> => {
+export const useRaceDataExperimental = (raceId: number): QueryOperation<FullRaceAndStats | undefined> => {
 
 	const manager = useWebSocketManager();
 
 	const [restUrl] = useStoreValueRestUrl();
 
-	const deps = [trialId, manager, restUrl];
+	const deps = [raceId, manager, restUrl];
 
-	const [state, setState] = useState<UseTrialDataInnerState>(() => ({
+	const [state, setState] = useState<UseRaceDataInnerState>(() => ({
 		deps,
 		op: {
 			loading: true,
@@ -76,10 +76,10 @@ export const useTrialDataExperimental = (trialId: number): QueryOperation<FullTr
 				return;
 			}
 
-			let op: QueryOperation<FullTrial | undefined>;
+			let op: QueryOperation<FullRace | undefined>;
 
 			try {
-				const data = await findOneTrialById(trialId)(restUrl);
+				const data = await findOneRaceById(raceId)(restUrl);
 				op = {
 					loading: false,
 					hasError: false,
@@ -115,14 +115,14 @@ export const useTrialDataExperimental = (trialId: number): QueryOperation<FullTr
 
 				// rewrite prevState.op when REST query result arrives before
 				// any WS update or the REST result is more up-to-date than WS
-				if (!isDefined(prevState.op.data) || prevState.op.data.trial.updatedAt < op.data.updatedAt) {
+				if (!isDefined(prevState.op.data) || prevState.op.data.race.updatedAt < op.data.updatedAt) {
 					return {
 						...prevState,
 						op: {
 							loading: false,
 							hasError: false,
 							data: {
-								trial: op.data,
+								race: op.data,
 								stats: computeStats(op.data),
 							},
 						},
@@ -135,7 +135,7 @@ export const useTrialDataExperimental = (trialId: number): QueryOperation<FullTr
 
 		};
 
-		const unlisten = manager.listenForTrialData(trialId, trial => {
+		const unlisten = manager.listenForRaceData(raceId, race => {
 
 			if (didUnsubscribe) {
 				return;
@@ -147,15 +147,15 @@ export const useTrialDataExperimental = (trialId: number): QueryOperation<FullTr
 					return prevState;
 				}
 
-				if (!isDefined(prevState.op.data) || prevState.op.data.trial.updatedAt < trial.updatedAt) {
+				if (!isDefined(prevState.op.data) || prevState.op.data.race.updatedAt < race.updatedAt) {
 					return {
 						...prevState,
 						op: {
 							loading: false,
 							hasError: false,
 							data: {
-								trial,
-								stats: computeStats(trial),
+								race,
+								stats: computeStats(race),
 							},
 						},
 					};

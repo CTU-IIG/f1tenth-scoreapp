@@ -3,7 +3,7 @@
 import { isDefined } from '../helpers/common';
 import { createSmartMapOfSets, SmartMap } from '../helpers/maps';
 import { linearRetryPolicy, RetryPolicy } from '../helpers/retry-policy';
-import { FullTrial } from '../types';
+import { FullRace } from '../types';
 
 
 export interface ManagerOptions {
@@ -42,18 +42,18 @@ export type ManagerState = ManagerStateUrlNotSet | ManagerStateUrlSet;
 
 export type ManagerStateChangeListener = (state: ManagerState) => void;
 
-export type TrialDataListener = (trial: FullTrial) => void;
+export type RaceDataListener = (race: FullRace) => void;
 
 class WebSocketManager {
 
 	public static NORMAL_CLOSURE_CODE = 4444;
 	public static NORMAL_CLOSURE_REASON = 'destroy';
 
-	private readonly stateChangeListeners: Set<ManagerStateChangeListener>;
-	private readonly trialDataListeners: SmartMap<number, Set<TrialDataListener>>;
-
 	public readonly stateGetter: () => ManagerState;
 	public readonly registerStateChangeListener: (onChange: ManagerStateChangeListener) => () => void;
+
+	private readonly stateChangeListeners: Set<ManagerStateChangeListener>;
+	private readonly raceDataListeners: SmartMap<number, Set<RaceDataListener>>;
 
 	private readonly options: ManagerOptions;
 
@@ -65,7 +65,7 @@ class WebSocketManager {
 	constructor(options?: Partial<ManagerOptions>, url?: string | undefined) {
 
 		this.stateChangeListeners = new Set();
-		this.trialDataListeners = createSmartMapOfSets();
+		this.raceDataListeners = createSmartMapOfSets();
 
 		this.stateGetter = () => this.getState();
 		this.registerStateChangeListener = onChange => this.listenForStateChange(onChange);
@@ -139,6 +139,31 @@ class WebSocketManager {
 
 		this.state.name = MANAGER_STATE_NOT_CONNECTED;
 		this.notifyStateChangeListeners();
+
+	}
+
+	public getState(): ManagerState {
+		return { ...this.state }; // return copy to prevent accidental mutations
+	}
+
+	public listenForStateChange(onChange: ManagerStateChangeListener): () => void {
+
+		this.stateChangeListeners.add(onChange);
+
+		return () => {
+			this.stateChangeListeners.delete(onChange);
+		};
+
+	}
+
+	public listenForRaceData(raceId: number, onData: RaceDataListener): () => void {
+
+		this.raceDataListeners.get(raceId).add(onData);
+
+		return () => {
+			this.raceDataListeners.get(raceId)?.delete(onData);
+			this.raceDataListeners.safeDelete(raceId);
+		};
 
 	}
 
@@ -261,10 +286,6 @@ class WebSocketManager {
 
 	}
 
-	public getState(): ManagerState {
-		return { ...this.state }; // return copy to prevent accidental mutations
-	}
-
 	private processMessage(data: string) {
 
 		let msg: any;
@@ -276,30 +297,9 @@ class WebSocketManager {
 			return;
 		}
 
-		if (isDefined(msg?.trial)) {
-			this.notifyTrialDataListeners(msg.trial as FullTrial);
+		if (isDefined(msg?.race)) {
+			this.notifyRaceDataListeners(msg.race as FullRace);
 		}
-
-	}
-
-	public listenForStateChange(onChange: ManagerStateChangeListener): () => void {
-
-		this.stateChangeListeners.add(onChange);
-
-		return () => {
-			this.stateChangeListeners.delete(onChange);
-		};
-
-	}
-
-	public listenForTrialData(trialId: number, onData: TrialDataListener): () => void {
-
-		this.trialDataListeners.get(trialId).add(onData);
-
-		return () => {
-			this.trialDataListeners.get(trialId)?.delete(onData);
-			this.trialDataListeners.safeDelete(trialId);
-		};
 
 	}
 
@@ -307,13 +307,13 @@ class WebSocketManager {
 		this.stateChangeListeners.forEach(fn => fn(this.getState()));
 	}
 
-	private notifyTrialDataListeners(trial: FullTrial) {
+	private notifyRaceDataListeners(race: FullRace) {
 
-		if (!this.trialDataListeners.has(trial.id)) {
+		if (!this.raceDataListeners.has(race.id)) {
 			return;
 		}
 
-		this.trialDataListeners.get(trial.id).forEach(fn => fn(trial));
+		this.raceDataListeners.get(race.id).forEach(fn => fn(race));
 
 	}
 

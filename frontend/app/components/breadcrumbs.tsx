@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from '../router/compoments';
-import { R_ROOT, R_SETTINGS, R_TEAM, R_TEAM_NEW, R_TEAMS, R_TRIAL, R_TRIAL_NEW, R_TRIALS } from '../routes';
+import { R_RACE, R_RACE_NEW, R_RACES, R_ROOT, R_SETTINGS, R_TEAM, R_TEAM_NEW, R_TEAMS } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
 
 
@@ -12,9 +12,9 @@ export type BreadcrumbsProps =
 	| { name: typeof R_TEAMS; }
 	| { name: typeof R_TEAM_NEW; }
 	| { name: typeof R_TEAM; teamId: number; }
-	| { name: typeof R_TRIALS; }
-	| { name: typeof R_TRIAL_NEW; }
-	| { name: typeof R_TRIAL; trialId: number; }
+	| { name: typeof R_RACES; }
+	| { name: typeof R_RACE_NEW; }
+	| { name: typeof R_RACE; raceId: number; }
 
 export type BreadcrumbsLink = {
 	name: string;
@@ -77,32 +77,32 @@ export const breadcrumbsPropsToLinks = (t: ReturnType<typeof useFormatMessageId>
 
 	}
 
-	if (props.name === R_TRIALS || props.name === R_TRIAL_NEW || props.name === R_TRIAL) {
+	if (props.name === R_RACES || props.name === R_RACE_NEW || props.name === R_RACE) {
 
 		links.push({
-			name: R_TRIALS,
-			label: t(`titles.trials`),
+			name: R_RACES,
+			label: t(`titles.races`),
 		});
 
-		if (props.name === R_TRIALS) {
+		if (props.name === R_RACES) {
 			return links;
 		}
 
-		if (props.name === R_TRIAL_NEW) {
+		if (props.name === R_RACE_NEW) {
 			links.push({
-				name: R_TRIAL_NEW,
-				label: t(`titles.newTrial`),
+				name: R_RACE_NEW,
+				label: t(`titles.newRace`),
 			});
 			return links;
 		}
 
-		if (props.name === R_TRIAL) {
+		if (props.name === R_RACE) {
 			links.push({
-				name: R_TRIAL,
+				name: R_RACE,
 				payload: {
-					trialId: props.trialId,
+					raceId: props.raceId,
 				},
-				label: props.trialId.toString(),
+				label: props.raceId.toString(),
 			});
 			return links;
 		}

@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { Link } from '../router/compoments';
-import { R_PRESENTATION, R_TEAMS, R_TRIALS } from '../routes';
+import { R_PRESENTATION, R_RACES, R_TEAMS } from '../routes';
 
 
 const HomePage = () => {
@@ -24,7 +24,7 @@ const HomePage = () => {
 
 			<ul>
 				<li><Link name={R_TEAMS}>{t`titles.teams`}</Link></li>
-				<li><Link name={R_TRIALS}>{t`titles.trials`}</Link></li>
+				<li><Link name={R_RACES}>{t`titles.races`}</Link></li>
 				<li><Link name={R_PRESENTATION}>{t`titles.presentation`}</Link></li>
 			</ul>
 

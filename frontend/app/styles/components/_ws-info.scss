@@ -29,9 +29,11 @@
 	&.ws-info--danger .ws-info-dot {
 		background-color: $brand-danger;
 	}
+
 	&.ws-info--warning .ws-info-dot {
 		background-color: $brand-warning;
 	}
+
 	&.ws-info--success .ws-info-dot {
 		background-color: darken($brand-success, 10%);
 	}
@@ -75,6 +77,7 @@
 
 		.btn-group {
 			margin: 10px 0 0 0;
+
 			.btn {
 				margin-bottom: 0;
 			}

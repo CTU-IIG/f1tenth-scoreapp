@@ -5,15 +5,15 @@ import React from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { useRoute } from '../router/hooks';
 
-import { R_PRESENTATION, R_ROOT, R_SETTINGS, R_TEAMS, R_TRIAL, R_TRIALS } from '../routes';
+import { R_PRESENTATION, R_RACE, R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
 
 import NotFoundPage from '../views/NotFoundPage';
 import SettingsPage from '../views/SettingsPage';
 import HomePage from '../views/HomePage';
 import MissingRoutePage from '../views/MissingRoutePage';
 
-import TrialsPage from '../views/TrialsPage';
-import TrialPage from '../views/TrialPage';
+import RacesPage from '../views/RacesPage';
+import RacePage from '../views/RacePage';
 
 import PresentationPage from '../views/PresentationPage';
 import TeamsPage from '../views/TeamsPage';
@@ -41,12 +41,12 @@ const PageRouter = () => {
 		return <TeamsPage />;
 	}
 
-	if (name === R_TRIAL) {
-		return <TrialPage />;
+	if (name === R_RACE) {
+		return <RacePage />;
 	}
 
-	if (name === R_TRIALS) {
-		return <TrialsPage />;
+	if (name === R_RACES) {
+		return <RacesPage />;
 	}
 
 	if (name === R_PRESENTATION) {

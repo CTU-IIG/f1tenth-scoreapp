@@ -13,7 +13,7 @@ export default {
 		notFound: `Page not found`,
 		settings: `Settings`,
 		teams: `Teams`,
-		trials: `Trials`,
+		races: `Races`,
 		presentation: `Presentation`,
 	},
 	header: {
@@ -22,7 +22,7 @@ export default {
 	footer: {
 		sourceCode: `Source code on`,
 	},
-	trial: {
+	race: {
 		id: `ID`,
 		round: `Round`,
 		team: `Team`,
@@ -34,7 +34,7 @@ export default {
 			unfinished: `Cancelled`,
 		},
 		actions: {
-			detail: `Trial detail`,
+			detail: `Race detail`,
 		},
 	},
 	ui: {
@@ -81,30 +81,33 @@ export default {
 			welcome: `Welcome to F1Tenth ScoreApp!`,
 		},
 	},
-	trialsPage: {
-		createTrial: `Create trial with teamId=1 (then please refresh page)`,
+	racesPage: {
+		createRace: `Create race with teamId=1 (then please refresh page)`,
+		createRaceViaTeamsPage: `Create a new race`,
 	},
-	trialPage: {
-		notFoundHeading: `Trial not found`,
-		notFoundMessage: `The trial with ID {id} was not found.`,
-		backToTrials: `Back to all trials`,
+	racePage: {
+		notFoundHeading: `Race not found`,
+		notFoundMessage: `The race with ID {id} was not found.`,
+		backToRaces: `Back to all races`,
 		switchToDisplayMode: `Switch to display mode`,
 		switchToEditMode: `Switch to edit mode`,
-		startTrial: `Start trial`,
-		cancelTrial: `Cancel trial`,
-		stopTrial: `Stop trial`,
+		startRace: `Start race`,
+		cancelRace: `Cancel race`,
+		stopRace: `Stop race`,
 		ignore: `Ignore`,
 	},
 	teamsPage: {
+		createRace: `Create a new race`,
 		columns: {
 			id: `ID`,
 			name: `Name`,
+			actions: `Actions`,
 		},
 	},
 	teamPage: {
 		notFoundHeading: `Team not found`,
 		notFoundMessage: `The team with ID {id} was not found.`,
-		backToTrials: `Back to all teams`,
+		backToRaces: `Back to all teams`,
 	},
 	settingsPage: {
 		serverUrlsHeading: `Server URLs`,

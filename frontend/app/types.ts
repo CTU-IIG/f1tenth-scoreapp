@@ -17,31 +17,41 @@ export interface Team extends Entity {
 	name: string;
 }
 
-export const TRIAL_STATE_BEFORE_START = 'before_start';
-export const TRIAL_STATE_RUNNING = 'running';
-export const TRIAL_STATE_FINISHED = 'finished';
-export const TRIAL_STATE_UNFINISHED = 'unfinished';
+export const RACE_TYPE_TIME_TRIAL = 'time_trial';
+export const RACE_TYPE_HEAD_TO_HEAD = 'head_to_head';
 
-export type TrialState =
-	typeof TRIAL_STATE_BEFORE_START
-	| typeof TRIAL_STATE_RUNNING
-	| typeof TRIAL_STATE_FINISHED
-	| typeof TRIAL_STATE_UNFINISHED;
+export type RaceType =
+	| typeof RACE_TYPE_TIME_TRIAL
+	| typeof RACE_TYPE_HEAD_TO_HEAD;
 
-export interface Trial extends Entity {
+export const RACE_STATE_BEFORE_START = 'before_start';
+export const RACE_STATE_RUNNING = 'running';
+export const RACE_STATE_FINISHED = 'finished';
+export const RACE_STATE_UNFINISHED = 'unfinished';
+
+export type RaceState =
+	| typeof RACE_STATE_BEFORE_START
+	| typeof RACE_STATE_RUNNING
+	| typeof RACE_STATE_FINISHED
+	| typeof RACE_STATE_UNFINISHED;
+
+export interface Race extends Entity {
+	type: RaceType;
 	round: number;
-	teamId: number;
-	team: Team;
-	state: TrialState;
+	teamAId: number;
+	teamA: Team;
+	state: RaceState;
 }
 
-export interface FullTrial extends Trial {
+export interface FullRace extends Race {
 	crossings: Crossing[],
 }
 
 export interface Crossing extends Entity {
 	time: number; // Unix timestamp in UTC milliseconds
 	ignored: boolean;
+	barrierId: number;
+	// teamA: boolean; TODO: team marking for RACE_TYPE_HEAD_TO_HEAD
 }
 
 export interface ComputedLap {

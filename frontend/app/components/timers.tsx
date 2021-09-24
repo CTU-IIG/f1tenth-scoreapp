@@ -152,7 +152,7 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 };
 
-export interface TrialTimersProps {
+export interface RaceTimersProps {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
@@ -161,7 +161,7 @@ export interface TrialTimersProps {
 	active: boolean;
 }
 
-export const TrialTimers = (
+export const RaceTimers = (
 	{
 		startTime,
 		stopTime,
@@ -169,7 +169,7 @@ export const TrialTimers = (
 		bestLapTime,
 		currentLapStartTime,
 		active,
-	}: TrialTimersProps,
+	}: RaceTimersProps,
 ) => (
 	<div className="timers">
 		<Timer

@@ -5,15 +5,17 @@ import { QueryExecutor } from '../helpers/data';
 import { useStore } from '../store/hooks';
 import { AppState } from '../types';
 import React, { useCallback, useState } from 'react';
+import { isDefined } from '../helpers/common';
 
 
-export interface MutationButtonProps extends ButtonProps {
+export interface MutationButtonProps<Result> extends ButtonProps {
 	query: QueryExecutor<any>;
+	onSuccess?: (result: Result) => boolean;
 }
 
 // Note: This is not ideal as we do not work with the result,
 // but for now it should work ...
-export const QueryButton = ({ query, ...otherProps }: MutationButtonProps) => {
+export const QueryButton = <Result extends any>({ query, onSuccess, ...otherProps }: MutationButtonProps<Result>) => {
 
 	const store = useStore<AppState>();
 
@@ -31,7 +33,13 @@ export const QueryButton = ({ query, ...otherProps }: MutationButtonProps) => {
 			.then(result => {
 				console.log(`[QueryButton] result`, result);
 				// this is problematic as it can be called even after the component is unmounted
-				setState(prevState => ({ loading: false }));
+				let changeState = true;
+				if (isDefined(onSuccess)) {
+					changeState = onSuccess(result);
+				}
+				if (changeState) {
+					setState(prevState => ({ loading: false }));
+				}
 			})
 			.catch(err => {
 				console.error(`[QueryButton] error`, err);

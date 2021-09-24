@@ -29,8 +29,7 @@ export const copyOnClick = event => {
 		const result = document.execCommand('copy');
 		if (result) {
 			console.log(`Copied target to clipboard!`);
-		}
-		else {
+		} else {
 			console.warn(`Unable to copy target to clipboard!`);
 		}
 	} catch (err) {

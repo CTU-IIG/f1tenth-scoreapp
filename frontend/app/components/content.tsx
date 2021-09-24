@@ -2,20 +2,20 @@
 
 import React from 'react';
 import { Link } from '../router/compoments';
-import { R_TRIAL } from '../routes';
+import { R_RACE } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
-import { Trial } from '../types';
+import { Race } from '../types';
 import { copyOnClick } from '../helpers/copy';
 
 
-export interface TrialCardProps {
-	trial: Trial;
+export interface RaceCardProps {
+	race: Race;
 }
 
-export const TrialCard = (
+export const RaceCard = (
 	{
-		trial,
-	}: TrialCardProps,
+		race,
+	}: RaceCardProps,
 ) => {
 
 	const t = useFormatMessageId();
@@ -24,16 +24,16 @@ export const TrialCard = (
 		<section className="card package">
 
 			<header className="card-heading">
-				<h3 className="heading">#{trial.id} {trial.team.name}</h3>
+				<h3 className="heading">#{race.id} {race.teamA.name}</h3>
 			</header>
 
 			<div className="card-content">
-				{t(`trial.round`)}: {trial.round}
-				<br />{t(`trial.state`)}: {t(`trial.states.${trial.state}`)}
+				{t(`race.round`)}: {race.round}
+				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
 			</div>
 
 			<div className="card-actions">
-				<Link name={R_TRIAL} payload={{ trialId: trial.id }}>{t('trial.actions.detail')}</Link>
+				<Link name={R_RACE} payload={{ raceId: race.id }}>{t('race.actions.detail')}</Link>
 			</div>
 
 		</section>

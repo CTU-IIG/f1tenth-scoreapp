@@ -39,6 +39,6 @@
 	background: darken($brand-success, 5%);
 }
 
-.toggle-checkbox-input:focus +.toggle-checkbox-label {
+.toggle-checkbox-input:focus + .toggle-checkbox-label {
 	border-color: lighten($brand-primary, 20%);
 }
