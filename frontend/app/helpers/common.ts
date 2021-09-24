@@ -69,3 +69,16 @@ export interface TypedMap<T extends object> extends Map<keyof T, T[keyof T]> {
 export const typedMapConstructor = <T extends object>(entries: ReadonlyArray<[keyof T, T[keyof T]]>): TypedMap<T> => {
 	return new Map(entries) as TypedMap<T>;
 };
+
+
+export const staleDeps = (prevDeps: any[], currentDeps: any[]) => {
+
+	const r = prevDeps.length !== currentDeps.length || !prevDeps.every((d, i) => d === currentDeps[i]);
+
+	if (r) {
+		console.log('stale deps', prevDeps, currentDeps);
+	}
+
+	return r;
+
+};

@@ -1,31 +1,19 @@
 "use strict";
 
 import { QueryOperation } from './data';
-import { FullRace } from '../types';
+import { AppState, FullRace } from '../types';
 import { useWebSocketManager } from '../ws/hooks';
-import { useStoreValueRestUrl } from './hooks';
 import { useEffect, useState } from 'react';
 import { findOneRaceById } from './queries';
-import { isDefined } from './common';
+import { isDefined, staleDeps } from './common';
 import { computeStats, RaceStats } from './races';
+import { useStore } from '../store/hooks';
 
 
 interface UseRaceDataInnerState {
 	deps: any[];
 	op: QueryOperation<FullRaceAndStats | undefined>;
 }
-
-export const staleDeps = (prevDeps: any[], currentDeps: any[]) => {
-
-	const r = prevDeps.length !== currentDeps.length || !prevDeps.every((d, i) => d === currentDeps[i]);
-
-	if (r) {
-		console.log('stale deps', prevDeps, currentDeps);
-	}
-
-	return r;
-
-};
 
 export interface FullRaceAndStats {
 	race: FullRace;
@@ -36,9 +24,9 @@ export const useRaceDataExperimental = (raceId: number): QueryOperation<FullRace
 
 	const manager = useWebSocketManager();
 
-	const [restUrl] = useStoreValueRestUrl();
+	const store = useStore<AppState>();
 
-	const deps = [raceId, manager, restUrl];
+	const deps = [raceId, manager, store];
 
 	const [state, setState] = useState<UseRaceDataInnerState>(() => ({
 		deps,
@@ -78,8 +66,11 @@ export const useRaceDataExperimental = (raceId: number): QueryOperation<FullRace
 
 			let op: QueryOperation<FullRace | undefined>;
 
+			const restUrl = store.get('restUrl');
+			const token = store.get('authToken');
+
 			try {
-				const data = await findOneRaceById(raceId)(restUrl);
+				const data = await findOneRaceById(raceId)(restUrl, token);
 				op = {
 					loading: false,
 					hasError: false,

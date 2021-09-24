@@ -15,11 +15,13 @@ export const useAppStateValueSetter = <K extends keyof AppState>(path: K) => use
 
 export const useStoreValueLocale = () => useAppSateValue('locale');
 
-export const useStoreValueSoundEffects = () => useAppSateValue('soundEffects');
-
 export const useStoreValueRestUrl = () => useAppSateValue('restUrl');
 
 export const useStoreValueWebSocketUrl = () => useAppSateValue('webSocketUrl');
+
+export const useStoreValueAuthToken = () => useAppSateValue('authToken');
+
+export const useStoreValueSoundEffects = () => useAppSateValue('soundEffects');
 
 
 // ### i18n

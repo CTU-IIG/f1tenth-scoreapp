@@ -26,10 +26,11 @@ export const QueryButton = <Result extends any>({ query, onSuccess, ...otherProp
 	const handleClick = useCallback(event => {
 
 		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
 
 		setState(prevState => ({ loading: true }));
 
-		query(restUrl)
+		query(restUrl, token)
 			.then(result => {
 				console.log(`[QueryButton] result`, result);
 				// this is problematic as it can be called even after the component is unmounted

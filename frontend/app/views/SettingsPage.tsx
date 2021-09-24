@@ -1,24 +1,26 @@
 "use strict";
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
 	createFormatMessageId,
 	createGetRawIntlMessage,
 	fnToTemplateTag,
 	useDocumentTitle,
+	useStoreValueAuthToken,
 	useStoreValueLocale,
 	useStoreValueRestUrl,
 	useStoreValueSoundEffects,
 	useStoreValueWebSocketUrl,
 } from '../helpers/hooks';
-import { Option, SelectInput, ToggleInput } from '../components/inputs';
+import { Input, Option, SelectInput, ToggleInput } from '../components/inputs';
 import { isDefined } from '../helpers/common';
 import { useIntl } from 'react-intl';
 import { Form } from '../forms-experimental/compoments';
 import { FormInput } from '../forms-experimental/inputs';
 import { CopyableCode } from '../components/content';
 import { OnSubmitHandler } from '../forms-experimental/common';
+import { Button } from '../components/common';
 
 
 const LOCALE_OPTIONS: Option[] = [
@@ -58,10 +60,10 @@ const SettingsPage = () => {
 	useDocumentTitle(t`titles.settings`);
 
 	const [locale, setLocale] = useStoreValueLocale();
-	const [soundEffects, setSoundEffects] = useStoreValueSoundEffects();
-
 	const [restUrl, setRestUrl] = useStoreValueRestUrl();
 	const [webSocketUrl, setWebSocketUrl] = useStoreValueWebSocketUrl();
+	const [authToken, setAuthToken] = useStoreValueAuthToken();
+	const [soundEffects, setSoundEffects] = useStoreValueSoundEffects();
 
 	if (!isDefined(locale)) {
 		throw new Error(`[LocaleLoader] locale undefined`);
@@ -75,10 +77,37 @@ const SettingsPage = () => {
 		setSoundEffects(event.target.checked);
 	}, [setSoundEffects]);
 
+	const handleAuthTokenChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((event) => {
+		if (event.target.value === '') {
+			setAuthToken(undefined);
+		} else {
+			setAuthToken(event.target.value);
+		}
+	}, [setAuthToken]);
+
 	const handleChangeServerUrls = useCallback<OnSubmitHandler<ServerUrlsFormShape>>((data) => {
 		setRestUrl(normalizeRestUrl(data.restUrl));
 		setWebSocketUrl(data.webSocketUrl);
 	}, [setRestUrl, setWebSocketUrl]);
+
+	const handleClickUseLocalUrlsPreset = useCallback((event) => {
+		event.preventDefault();
+		setRestUrl('http://localhost:4110');
+		setWebSocketUrl('ws://localhost:4110/ws');
+	}, [setRestUrl, setWebSocketUrl]);
+
+	const handleClickUseProductionUrlsPreset = useCallback((event) => {
+		event.preventDefault();
+		setRestUrl('https://f1tenth-scoreapp.iid.ciirc.cvut.cz');
+		setWebSocketUrl('wss://f1tenth-scoreapp.iid.ciirc.cvut.cz/ws');
+	}, [setRestUrl, setWebSocketUrl]);
+
+	const serverUrlsFormInitialValues = useMemo<ServerUrlsFormShape>(() => ({
+		restUrl,
+		webSocketUrl,
+	}), [restUrl, webSocketUrl]);
+
+	console.log('authToken = ', authToken);
 
 	return (
 		<>
@@ -107,14 +136,31 @@ const SettingsPage = () => {
 				onChange={handleSoundEffectsChange}
 			/>
 
+			<Input
+				id="settings-form--authToken"
+				name="authToken"
+				label="settingsForm.labels.authToken"
+				value={authToken ?? ''}
+				onChange={handleAuthTokenChange}
+				helpBlock={<p className="help-block">{t`settingsForm.authTokenNote`}</p>}
+			/>
+
 			<h2>{t`settingsPage.serverUrlsHeading`}</h2>
+
+			<div className="btn-group">
+				<Button
+					label="settingsPage.useLocalUrlsPreset"
+					onClick={handleClickUseLocalUrlsPreset}
+				/>
+				<Button
+					label="settingsPage.useProductionUrlsPreset"
+					onClick={handleClickUseProductionUrlsPreset}
+				/>
+			</div>
 
 			<Form<ServerUrlsFormShape>
 				name="serverUrls"
-				initialValues={{
-					restUrl,
-					webSocketUrl,
-				}}
+				initialValues={serverUrlsFormInitialValues}
 				onSubmit={handleChangeServerUrls}
 			>
 

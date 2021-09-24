@@ -1,10 +1,12 @@
 "use strict";
 
 import { useCallback, useEffect, useState } from 'react';
-import { useAppSateValue } from './hooks';
+import { useStore } from '../store/hooks';
+import { AppState } from '../types';
+import Store from '../store/Store';
 
 
-export type QueryExecutor<QueryResult> = (restUrl: string) => Promise<QueryResult>;
+export type QueryExecutor<QueryResult> = (restUrl: string, token: string | undefined) => Promise<QueryResult>;
 
 export interface QueryOperationLoading<T> {
 	loading: true;
@@ -29,7 +31,7 @@ export type QueryOperation<T> = QueryOperationLoading<T> | QueryOperationSuccess
 
 
 interface QueryHookState<T> {
-	restUrl: string;
+	store: Store<AppState>;
 	query: QueryExecutor<T>;
 	value: QueryOperation<T>;
 }
@@ -47,10 +49,10 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 
 	// NOTE: This hook is based on useSubscription. See useSubscription.ts for reasoning and comments.
 
-	const [restUrl] = useAppSateValue('restUrl');
+	const store = useStore<AppState>();
 
 	const [state, setState] = useState<QueryHookState<T>>(() => ({
-		restUrl,
+		store,
 		query,
 		value: {
 			loading: true,
@@ -79,7 +81,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 
 	let valueToReturn = state.value;
 
-	if (state.restUrl !== restUrl || state.query !== query) {
+	if (state.store !== store || state.query !== query) {
 
 		valueToReturn = {
 			loading: true,
@@ -88,7 +90,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 		};
 
 		setState({
-			restUrl,
+			store,
 			query,
 			value: valueToReturn,
 		});
@@ -107,8 +109,11 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 
 			let value: QueryOperation<T>;
 
+			const restUrl = store.get('restUrl');
+			const token = store.get('authToken');
+
 			try {
-				const data = await query(restUrl);
+				const data = await query(restUrl, token);
 				value = {
 					loading: false,
 					hasError: false,
@@ -134,7 +139,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 				// Since we subscribe an unsubscribe in a passive effect,
 				// it's possible that this callback will be invoked for a stale (previous) subscription.
 				// This check avoids scheduling an update for that stale subscription.
-				if (prevState.restUrl !== restUrl || prevState.query !== query) {
+				if (prevState.store !== store || prevState.query !== query) {
 					return prevState;
 				}
 
@@ -155,7 +160,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 			didCleanup = true;
 		};
 
-	}, [restUrl, query]);
+	}, [store, query]);
 
 	// Return the current value for our caller to use while rendering.
 	return { op: valueToReturn, updateOp };

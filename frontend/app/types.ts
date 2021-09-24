@@ -5,6 +5,7 @@ export interface AppState {
 	locale: string;
 	restUrl: string;
 	webSocketUrl: string;
+	authToken: string | undefined;
 	soundEffects: boolean;
 }
 

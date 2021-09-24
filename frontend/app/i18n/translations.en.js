@@ -73,7 +73,9 @@ export default {
 			effectiveRestUrl: `Currently used`,
 			webSocketUrl: `WebSocket API URL`,
 			effectiveWebSocketUrl: `Currently used`,
+			authToken: `Authentication token`,
 		},
+		authTokenNote: `Enter token to authenticate POST requests, leave empty for no token.`,
 		saveServerUrls: `Save URLs changes`,
 	},
 	homePage: {
@@ -111,6 +113,8 @@ export default {
 	},
 	settingsPage: {
 		serverUrlsHeading: `Server URLs`,
+		useLocalUrlsPreset: `Use localhost:4110 (http, ws)`,
+		useProductionUrlsPreset: `Use f1tenth-scoreapp.iid.ciirc.cvut.cz (https, wss)`,
 	},
 	notFoundPage: {
 		backToHomePageBtn: `Return to the home page`,
