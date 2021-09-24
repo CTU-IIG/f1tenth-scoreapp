@@ -25,17 +25,24 @@ export const TimerDisplayValue = ({ time }: TimeDisplayValueProps) => {
 		);
 	}
 
-	const mm = Math.floor((time / 60000) % 60);
-	const ss = Math.floor((time / 1000) % 60);
-	const ms = Math.floor((time / 10) % 100);
+	const hh = Math.floor(time / 3600000); // whole hours [0, inf)
+	const mm = Math.floor((time / 60000) % 60); // minutes [0, 59]
+	const ss = Math.floor((time / 1000) % 60); // seconds [0, 59]
+	const cs = Math.floor((time / 10) % 100); // centiseconds (hundredths) [0, 99]
 
 	return (
-		<div className="display-value">
+		<div className={'display-value' + (hh !== 0 ? ' display-value--overflow' : '')}>
+			{hh !== 0 && (
+				<>
+					<span className="digits">{hh}</span>
+					<span className="divider">:</span>
+				</>
+			)}
 			<span className="digits">{minTwoDigits(mm)}</span>
 			<span className="divider">:</span>
 			<span className="digits">{minTwoDigits(ss)}</span>
 			<span className="divider">.</span>
-			<span className="digits">{minTwoDigits(ms)}</span>
+			<span className="digits">{minTwoDigits(cs)}</span>
 		</div>
 	);
 
