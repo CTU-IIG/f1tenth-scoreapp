@@ -102,17 +102,20 @@ export interface TimerProps {
 	className?: any;
 }
 
+const isStopped = (currentTime: number, stopTime: number | undefined) =>
+	isDefined(stopTime) && stopTime !== -1 && currentTime >= stopTime;
+
 export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 	const [currentTime, setCurrentTime] = useState(() => Date.now());
 
+	// schedule auto-updates using rAF
+	// only if the timer is active and the start time is set
+	const refreshActive = active && start !== -1;
+
 	useEffect(() => {
 
-		if (isDefined(stop) && stop !== -1 && Date.now() >= stop) {
-			return;
-		}
-
-		if (!active) {
+		if (!refreshActive || isStopped(Date.now(), stop)) {
 			return;
 		}
 
@@ -125,7 +128,15 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 				return;
 			}
 
-			setCurrentTime(Date.now());
+			const time = Date.now();
+
+			setCurrentTime(time);
+
+			// do not schedule next update if the timer reached the stop time
+			if (isStopped(time, stop)) {
+				return;
+			}
+
 			req = window.requestAnimationFrame(update);
 
 		};
@@ -143,7 +154,7 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 		};
 
-	}, [active, stop, setCurrentTime]);
+	}, [refreshActive, stop, setCurrentTime]);
 
 	const diff = start !== -1
 		? (isDefined(stop) && stop !== -1 ? stop : currentTime) - start
