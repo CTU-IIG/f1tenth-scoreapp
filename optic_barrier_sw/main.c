@@ -288,7 +288,6 @@ int main(int argc, char *argv[])
                     after_start = true;
 
                     printf("{\"timestamp\":%lld}\n", local_detect_time.tv_sec * 1000000LL + local_detect_time.tv_usec);
-                    fflush(stdout);
                 }
             } else {
                 detect_in_progress = false;
