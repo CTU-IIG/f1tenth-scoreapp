@@ -1,6 +1,6 @@
 # Projekt opticke zavory
 ---
-#####[1] Seznam součástek
+##### [1] Seznam součástek
 https://www.conrad.cz/reflexni-svetelna-zavora-datalogic-s100-pr-2-b00-pk.k1488410
 https://www.conrad.cz/reflektor-datalogic-s940700075-r5-provedeni-kulate.k1488406
 https://rpishop.cz/headery/1891-2x20pinovy-gpio-nastavec-stohovaci-122mm.html
@@ -10,7 +10,7 @@ https://www.amazon.com/2-23inch-OLED-Display-HAT-Interface/dp/B07Z1ZHPBZ
 Další součástky v adresáři **optic_barrier_hw** soubor **basket.pdf**
 
 ---
-#####[2] Užitečné příkazy a odkazy
+##### [2] Užitečné příkazy a odkazy
 * Odkaz na knihovnu pro komunikace s OLED displejem
 >https://www.waveshare.com/wiki/2.23inch_OLED_HAT
 * Zapnutí/vypnutí služby
