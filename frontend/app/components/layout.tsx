@@ -5,6 +5,8 @@ import { Link, NavLink } from '../router/compoments';
 import { useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
 import { WebSocketInfo } from './ws';
+import classNames from 'classnames';
+import { isDefined } from '../helpers/common';
 
 
 export const AppHeader = React.memo((props) => {
@@ -56,12 +58,25 @@ export const AppHeader = React.memo((props) => {
 
 });
 
-export const App = ({ children }) => {
+const routeNameToClassName = (routeName: string) =>
+	routeName.toLowerCase().slice(2);
+
+export interface AppProps {
+	withFooter?: boolean;
+	routeName?: string;
+	children: React.ReactNode,
+}
+
+export const App = ({ children, withFooter = true, routeName }: AppProps) => {
 
 	const t = useFormatMessageIdAsTagFn();
 
 	return (
-		<div className="app">
+		<div className={classNames(
+			'app',
+			isDefined(routeName) ? `app--${routeNameToClassName(routeName)}` : undefined,
+			{ 'app--no-footer': !withFooter },
+		)}>
 			<AppHeader />
 
 			<main className="app-content">
@@ -70,10 +85,13 @@ export const App = ({ children }) => {
 				</div>
 			</main>
 
-			<footer className="app-footer">
-				<p>&copy; 2021 <a href="https://github.com/CTU-IIG">IIRC, CTU in Prague</a></p>
-				<p>{t`footer.sourceCode`} <a href="https://github.com/CTU-IIG/f1tenth-scoreapp">GitHub</a></p>
-			</footer>
+			{withFooter && (
+				<footer className="app-footer">
+					<p>&copy; 2021 <a href="https://github.com/CTU-IIG">IIRC, CTU in Prague</a></p>
+					<p>{t`footer.sourceCode`} <a href="https://github.com/CTU-IIG/f1tenth-scoreapp">GitHub</a></p>
+				</footer>
+			)}
+
 		</div>
 	);
 

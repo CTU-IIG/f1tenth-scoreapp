@@ -10,10 +10,9 @@ import RouterContext from '../router/RouterContext';
 import Router from '../router/Router';
 
 import LocaleLoader from './LocaleLoader';
-import PageRouter from './PageRouter';
+import TopLevelRouter from './TopLevelRouter';
 
 import { AppState } from '../types';
-import { App } from '../components/layout';
 
 
 export interface RootProps {
@@ -29,9 +28,7 @@ const Root = ({ store, manager, router }: RootProps) => {
 			<WebSocketManagerContext.Provider value={manager}>
 				<RouterContext.Provider value={router}>
 					<LocaleLoader>
-						<App>
-							<PageRouter />
-						</App>
+						<TopLevelRouter />
 					</LocaleLoader>
 				</RouterContext.Provider>
 			</WebSocketManagerContext.Provider>
