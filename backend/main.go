@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -54,10 +55,16 @@ type Crossing struct {
 	RaceID uint `json:"-"`
 }
 
+type CurrentRace struct {
+	race  *Race
+	mutex sync.Mutex
+}
+
 var (
-	db   *gorm.DB
-	hub  *Hub
-	keys map[string]string
+	db          *gorm.DB
+	hub         *Hub
+	keys        map[string]string
+	currentRace CurrentRace
 )
 
 func getRace(c echo.Context) error {
@@ -71,18 +78,39 @@ func getRace(c echo.Context) error {
 	return c.JSON(http.StatusOK, race)
 }
 
+func (cr *CurrentRace) MarshalJSON() ([]byte, error) {
+	type RaceID struct {
+		Id uint `json:"id"`
+	}
+	var msg struct {
+		CurrentRace *RaceID `json:"currentRace"`
+	}
+
+	if cr.race != nil {
+		msg.CurrentRace = &RaceID{Id: cr.race.ID}
+	}
+
+	return json.Marshal(&msg)
+}
+
 func setRaceState(c echo.Context, state RaceState) error {
 	var race Race
 	if err := c.Bind(&race); err != nil {
 		return err
 	}
 	err := db.Transaction(func(tx *gorm.DB) error {
+		currentRace.mutex.Lock()
+		defer currentRace.mutex.Unlock()
+
 		if err := tx.First(&race, race.ID).Error; err != nil {
 			return err
 		}
 		var expectedState RaceState
 		switch state {
 		case Running:
+			if currentRace.race != nil {
+				return fmt.Errorf("race %d already running", currentRace.race.ID)
+			}
 			expectedState = BeforeStart
 		case Finished:
 			expectedState = Running
@@ -97,6 +125,22 @@ func setRaceState(c echo.Context, state RaceState) error {
 		}
 		if err := tx.Model(&race).Updates(&Race{State: state}).Error; err != nil {
 			return err
+		}
+		// Database updates completed, update also currentRace.
+		switch state {
+		case Running:
+			currentRace.race = &race
+		case Finished:
+			currentRace.race = nil
+		case Unfinished:
+			currentRace.race = nil
+		}
+		if b, err := json.Marshal(&currentRace); err == nil {
+			// TODO: Is it OK to send current race before
+			// the race itself or it should be vice versa?
+			hub.broadcast <- b
+		} else {
+			return fmt.Errorf("current race marshal error: %v", err)
 		}
 		return nil
 	})
@@ -247,6 +291,21 @@ func initDb() *gorm.DB {
 	db.FirstOrCreate(new(Team), Team{Name: "Super TU Kart"})
 	db.FirstOrCreate(new(Team), Team{Name: "TU Wien"})
 	db.FirstOrCreate(new(Team), Team{Name: "Ředkvičky"})
+
+	// Find running races
+	var races []Race
+
+	if err := db.Where(&Race{State: Running}).Find(&races).Error; err != nil {
+		log.Panicf("error finding running races: %v\n", err)
+	} else {
+		if len(races) > 1 {
+			log.Printf("Warning: %d running races", len(races))
+		}
+		if len(races) > 0 && races[0].ID != 0 {
+			currentRace.race = &races[0]
+			log.Printf("Running race: #%d", races[0].ID)
+		}
+	}
 	return db
 }
 

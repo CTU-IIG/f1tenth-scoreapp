@@ -5,6 +5,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -107,5 +109,17 @@ func websockHandler(c echo.Context, hub *Hub) error {
 	// new goroutines.
 	go client.writePump()
 	//go client.readPump()
+
+	{
+		// Inform the newly connected client about current race
+		currentRace.mutex.Lock()
+		b, err := json.Marshal(&currentRace)
+		currentRace.mutex.Unlock()
+		if err != nil {
+			return fmt.Errorf("initial current race marshall error: %v", err)
+		}
+		client.send <- b
+	}
+
 	return nil
 }
