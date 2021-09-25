@@ -49,9 +49,7 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 	for {
 		_, message, err := b.conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf(name+": %v", err)
-			}
+			log.Printf(name+": %v", err)
 			break
 		}
 		var msg struct {
