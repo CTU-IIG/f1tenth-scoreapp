@@ -1,7 +1,7 @@
 "use strict";
 
 import React from 'react';
-import { NavLink } from '../router/compoments';
+import { Link, NavLink } from '../router/compoments';
 import { useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
 import { WebSocketInfo } from './ws';
@@ -16,9 +16,14 @@ export const AppHeader = React.memo((props) => {
 
 			<div className="container">
 
-				<div className="app-name">
+				<input id="app-navigation-toggle" type="checkbox" />
+				<label id="app-navigation-toggle-label" htmlFor="app-navigation-toggle">
+					{t`header.toggleMenu`}
+				</label>
+
+				<Link name={R_ROOT} className="app-name">
 					{t`header.appName`}
-				</div>
+				</Link>
 
 				<nav className="app-navigation">
 					<ul className="left">
@@ -39,11 +44,10 @@ export const AppHeader = React.memo((props) => {
 						<li>
 							<NavLink name={R_SETTINGS}>{t`titles.settings`}</NavLink>
 						</li>
-						<li>
-							<WebSocketInfo />
-						</li>
 					</ul>
 				</nav>
+
+				<WebSocketInfo />
 
 			</div>
 
@@ -57,7 +61,7 @@ export const App = ({ children }) => {
 	const t = useFormatMessageIdAsTagFn();
 
 	return (
-		<>
+		<div className="app">
 			<AppHeader />
 
 			<main className="app-content">
@@ -70,7 +74,7 @@ export const App = ({ children }) => {
 				<p>&copy; 2021 <a href="https://github.com/CTU-IIG">IIRC, CTU in Prague</a></p>
 				<p>{t`footer.sourceCode`} <a href="https://github.com/CTU-IIG/f1tenth-scoreapp">GitHub</a></p>
 			</footer>
-		</>
+		</div>
 	);
 
 };

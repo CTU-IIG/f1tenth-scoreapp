@@ -18,6 +18,7 @@ export default {
 	},
 	header: {
 		appName: `ScoreApp`,
+		toggleMenu: `Menu`,
 	},
 	footer: {
 		sourceCode: `Source code on`,
