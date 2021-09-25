@@ -2,6 +2,18 @@
 // WebSocketInfo
 // --------------------------------------------------
 
+@keyframes ws-info-dot-warning-blinking {
+	0% {
+		background-color: $brand-warning;
+	}
+	50% {
+		background-color: $yellow;
+	}
+	100% {
+		background-color: $brand-warning;
+	}
+}
+
 .ws-info {
 	background-image: none;
 	background-color: $gray-lighter;
@@ -32,6 +44,7 @@
 
 	&.ws-info--warning .ws-info-dot {
 		background-color: $brand-warning;
+		animation: 2s infinite ease-in-out ws-info-dot-warning-blinking;
 	}
 
 	&.ws-info--success .ws-info-dot {
