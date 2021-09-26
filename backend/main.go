@@ -75,6 +75,12 @@ func getRace(c echo.Context) error {
 		return err
 	}
 	if err := db.Preload("TeamA").Preload("TeamB").Preload("Crossings").First(&race, race.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(
+				http.StatusNotFound,
+				fmt.Sprintf("race with id %d not found", race.ID),
+			)
+		}
 		return err
 	}
 	return c.JSON(http.StatusOK, race)
