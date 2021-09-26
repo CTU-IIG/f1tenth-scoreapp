@@ -17,6 +17,7 @@ const LocalizedDate = (
 		hour12,
 		timeZone, // = 'Europe/Prague',
 		timeZoneName,
+		fractionalSecondDigits,
 		...otherProps // such as className
 	}: LocalizedDateProps, // TODO
 ) => {
@@ -33,6 +34,10 @@ const LocalizedDate = (
 				hour12,
 				timeZone,
 				timeZoneName,
+				// TODO: There is a bug in @formatjs/intl
+				//   fractionalSecondDigits is missing in dateTime.ts DATE_TIME_FORMAT_OPTIONS
+				//   see https://github.com/formatjs/formatjs/blob/main/packages/intl/src/dateTime.ts#L7
+				fractionalSecondDigits,
 			})}
 		</time>
 	);
