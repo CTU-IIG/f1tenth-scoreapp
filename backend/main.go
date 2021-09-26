@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -33,14 +34,16 @@ type Team struct {
 
 type Race struct {
 	CommonModelFields
-	Type      RaceType   `json:"type" gorm:"index"`
-	State     RaceState  `json:"state" gorm:"index"`
-	Round     uint32     `json:"round"`
-	TeamAID   uint       `json:"teamAId" query:"team_a_id"`
-	TeamA     Team       `json:"teamA"`
-	TeamBID   *int       `json:"teamBId" query:"team_b_id"` // if Type != HeadToHead then TeamBId == nil
-	TeamB     *Team      `json:"teamB"`                     // if Type != HeadToHead then TeamB == nil
-	Crossings []Crossing `json:"crossings"`
+	Type         RaceType   `json:"type" gorm:"index"`
+	State        RaceState  `json:"state" gorm:"index"`
+	Round        uint32     `json:"round"`
+	TeamAID      uint       `json:"teamAId" query:"team_a_id"`
+	TeamA        Team       `json:"teamA"`
+	TimeDuration *Duration  `json:"timeDuration,omitempty"`              // if Type != TimeTrial then TimeDuration == nil
+	LapsDuration *uint      `json:"lapsDuration,omitempty"`              // if Type != HeadToHead then LapsDuration == nil
+	TeamBID      *int       `json:"teamBId,omitempty" query:"team_b_id"` // if Type != HeadToHead then TeamBId == nil
+	TeamB        *Team      `json:"teamB,omitempty"`                     // if Type != HeadToHead then TeamB == nil
+	Crossings    []Crossing `json:"crossings"`
 }
 
 type Crossing struct {
@@ -217,7 +220,26 @@ func createRace(c echo.Context) error {
 			fmt.Sprintf("no team with id %d", race.TeamAID),
 		)
 	}
+	if race.Type == TimeTrial {
+		if race.LapsDuration != nil {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				"lapsDuration must not be specified for time_trial race type",
+			)
+		}
+		if race.TimeDuration == nil {
+			// TODO: Is this correct? Where will the variable be allocated?
+			var defaultTimeDuration = Duration(300 * 1e9) // defaults to 5 min
+			race.TimeDuration = &defaultTimeDuration
+		}
+	}
 	if race.Type == HeadToHead {
+		if race.TimeDuration != nil {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				"timeDuration must not be specified for head_to_head race type",
+			)
+		}
 		if race.TeamBID == nil || *race.TeamBID == 0 {
 			return echo.NewHTTPError(
 				http.StatusBadRequest,
@@ -233,6 +255,11 @@ func createRace(c echo.Context) error {
 				http.StatusBadRequest,
 				fmt.Sprintf("no team with id %d", race.TeamBID),
 			)
+		}
+		if race.LapsDuration == nil {
+			// TODO: Is this correct? Where will the variable be allocated?
+			var defaultLapsDuration uint = 10 // defaults to 10 laps
+			race.LapsDuration = &defaultLapsDuration
 		}
 	}
 	// always force BeforeStart state
