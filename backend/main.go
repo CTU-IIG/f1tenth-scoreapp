@@ -33,14 +33,13 @@ type Team struct {
 
 type Race struct {
 	CommonModelFields
-	Type    RaceType `json:"type" gorm:"index"`
-	Round   uint32   `json:"round"`
-	TeamAID uint     `json:"teamAId" query:"team_a_id"`
-	TeamA   Team     `json:"teamA"`
-	// TODO: Nullable TeamB? TeamB is returned even when TeamBID == 0
-	TeamBID   uint       `json:"teamBId" query:"team_b_id"`
-	TeamB     Team       `json:"teamB"`
+	Type      RaceType   `json:"type" gorm:"index"`
 	State     RaceState  `json:"state" gorm:"index"`
+	Round     uint32     `json:"round"`
+	TeamAID   uint       `json:"teamAId" query:"team_a_id"`
+	TeamA     Team       `json:"teamA"`
+	TeamBID   *int       `json:"teamBId" query:"team_b_id"` // if Type != HeadToHead then TeamBId == nil
+	TeamB     *Team      `json:"teamB"`                     // if Type != HeadToHead then TeamB == nil
 	Crossings []Crossing `json:"crossings"`
 }
 
@@ -196,29 +195,44 @@ func createRace(c echo.Context) error {
 	if err := c.Bind(&race); err != nil {
 		return err
 	}
-	// TODO: Maybe require also the `round` field.
 	if race.Type == "" {
-		return fmt.Errorf("type not specified")
+		return echo.NewHTTPError(http.StatusBadRequest, "type not specified")
 	}
+	// TODO: Maybe enable this check on the `round` field.
+	// if race.Round == 0 {
+	// 	return echo.NewHTTPError(
+	// 		http.StatusBadRequest,
+	// 		"round not specified or invalid (must be greater than 0)",
+	// 	)
+	// }
 	if race.TeamAID == 0 {
-		return fmt.Errorf("teamAId not specified")
+		return echo.NewHTTPError(http.StatusBadRequest, "teamAId not specified")
 	}
 	if err := db.Model(&race).Association("TeamA").Find(&race.TeamA); err != nil {
 		return err
 	}
 	if race.TeamA.ID == 0 {
-		return fmt.Errorf("no team with id %d", race.TeamAID)
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("no team with id %d", race.TeamAID),
+		)
 	}
 	if race.Type == HeadToHead {
-		if race.TeamBID == 0 {
-			return fmt.Errorf("teamBId not specified but required for head_to_head race type")
+		if race.TeamBID == nil || *race.TeamBID == 0 {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				"teamBId not specified but required for head_to_head race type",
+			)
 		}
-		// TODO: We might want to check that TeamAID != TeamBID
+		// TODO: Maybe check that TeamAID != TeamBID if we want to prevent such cases.
 		if err := db.Model(&race).Association("TeamB").Find(&race.TeamB); err != nil {
 			return err
 		}
 		if race.TeamB.ID == 0 {
-			return fmt.Errorf("no team with id %d", race.TeamBID)
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Sprintf("no team with id %d", race.TeamBID),
+			)
 		}
 	}
 	// always force BeforeStart state
