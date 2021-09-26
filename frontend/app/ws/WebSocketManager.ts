@@ -42,6 +42,10 @@ export type ManagerState = ManagerStateUrlNotSet | ManagerStateUrlSet;
 
 export type ManagerStateChangeListener = (state: ManagerState) => void;
 
+export type BarriersChangeListener = (barriers: number[]) => void;
+
+export type CurrentRaceChangeListener = (currentRaceId: number | null) => void;
+
 export type RaceDataListener = (race: FullRace) => void;
 
 class WebSocketManager {
@@ -49,11 +53,28 @@ class WebSocketManager {
 	public static NORMAL_CLOSURE_CODE = 4444;
 	public static NORMAL_CLOSURE_REASON = 'destroy';
 
+	// START: app specific business logic
+
+	// TODO: Extract the app specific business logic into separate manager.
+
 	public readonly stateGetter: () => ManagerState;
 	public readonly registerStateChangeListener: (onChange: ManagerStateChangeListener) => () => void;
 
+	public readonly barriersGetter: () => number[];
+	public readonly registerBarriersChangeListener: (onChange: BarriersChangeListener) => () => void;
+
+	public readonly currentRaceGetter: () => number | null;
+	public readonly registerCurrentRaceChangeListener: (onChange: CurrentRaceChangeListener) => () => void;
+
+	private barriers: number[];
+	private currentRace: number | null;
+
 	private readonly stateChangeListeners: Set<ManagerStateChangeListener>;
+	private readonly barriersChangeListeners: Set<BarriersChangeListener>;
+	private readonly currentRaceChangeListeners: Set<CurrentRaceChangeListener>;
 	private readonly raceDataListeners: SmartMap<number, Set<RaceDataListener>>;
+
+	// END: app specific business logic
 
 	private readonly options: ManagerOptions;
 
@@ -64,11 +85,22 @@ class WebSocketManager {
 
 	constructor(options?: Partial<ManagerOptions>, url?: string | undefined) {
 
+		this.barriers = [];
+		this.currentRace = null;
+
 		this.stateChangeListeners = new Set();
+		this.barriersChangeListeners = new Set();
+		this.currentRaceChangeListeners = new Set();
 		this.raceDataListeners = createSmartMapOfSets();
 
 		this.stateGetter = () => this.getState();
 		this.registerStateChangeListener = onChange => this.listenForStateChange(onChange);
+
+		this.barriersGetter = () => this.barriers;
+		this.registerBarriersChangeListener = onChange => this.listenForBarriersChange(onChange);
+
+		this.currentRaceGetter = () => this.currentRace;
+		this.registerCurrentRaceChangeListener = onChange => this.listenForCurrentRaceChange(onChange);
 
 		this.options = {
 			reconnectPolicy: linearRetryPolicy(10, 1000),
@@ -147,13 +179,24 @@ class WebSocketManager {
 	}
 
 	public listenForStateChange(onChange: ManagerStateChangeListener): () => void {
-
 		this.stateChangeListeners.add(onChange);
-
 		return () => {
 			this.stateChangeListeners.delete(onChange);
 		};
+	}
 
+	public listenForBarriersChange(onChange: BarriersChangeListener): () => void {
+		this.barriersChangeListeners.add(onChange);
+		return () => {
+			this.barriersChangeListeners.delete(onChange);
+		};
+	}
+
+	public listenForCurrentRaceChange(onChange: CurrentRaceChangeListener): () => void {
+		this.currentRaceChangeListeners.add(onChange);
+		return () => {
+			this.currentRaceChangeListeners.delete(onChange);
+		};
 	}
 
 	public listenForRaceData(raceId: number, onData: RaceDataListener): () => void {
@@ -293,14 +336,45 @@ class WebSocketManager {
 		try {
 			msg = JSON.parse(data);
 		} catch (err) {
-			console.error('ws: could not parse message as JSON', err, data, typeof data);
+			console.error('[Manager] could not parse message as JSON', err, data, typeof data);
 			return;
 		}
 
-		if (isDefined(msg?.race)) {
-			this.notifyRaceDataListeners(msg.race as FullRace);
+		if (!isDefined(msg)) {
+			console.error('[Manager] msg not defined', msg);
+			return;
 		}
 
+		if (isDefined(msg.race)) {
+			this.notifyRaceDataListeners(msg.race);
+		}
+
+		if (isDefined(msg.barriers)) {
+			this.barriers = msg.barriers;
+			this.notifyBarriersChangeListeners();
+		}
+
+		// The server server sends two types of current race change messages:
+		// 1. { "currentRace": null }
+		// 2. { "currentRace": { "id": x } } where is x is number
+		if (msg.currentRace === null) {
+			console.log('setting to null');
+			this.currentRace = null;
+			this.notifyCurrentRaceChangeListeners();
+		} else if (Number.isInteger(msg.currentRace?.id)) {
+			console.log('setting to number', msg.currentRace.id);
+			this.currentRace = msg.currentRace.id;
+			this.notifyCurrentRaceChangeListeners();
+		}
+
+	}
+
+	private notifyBarriersChangeListeners() {
+		this.barriersChangeListeners.forEach(fn => fn(this.barriers));
+	}
+
+	private notifyCurrentRaceChangeListeners() {
+		this.currentRaceChangeListeners.forEach(fn => fn(this.currentRace));
 	}
 
 	private notifyStateChangeListeners() {

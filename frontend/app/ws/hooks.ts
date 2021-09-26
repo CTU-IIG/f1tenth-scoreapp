@@ -23,6 +23,32 @@ export const useWebSocketManagerState = (): { manager: WebSocketManager, state: 
 
 };
 
+export const useOnlineBarriers = (): { manager: WebSocketManager, onlineBarriers: number[] } => {
+
+	const manager = useWebSocketManager();
+
+	const barriers = useSubscription({
+		getCurrentValue: manager.barriersGetter,
+		subscribe: manager.registerBarriersChangeListener,
+	});
+
+	return { manager, onlineBarriers: barriers };
+
+};
+
+export const useCurrentRace = (): { manager: WebSocketManager, currentRace: number | null } => {
+
+	const manager = useWebSocketManager();
+
+	const currentRace = useSubscription({
+		getCurrentValue: manager.currentRaceGetter,
+		subscribe: manager.registerCurrentRaceChangeListener,
+	});
+
+	return { manager, currentRace };
+
+};
+
 interface UseRaceDataInnerState {
 	manager: WebSocketManager;
 	raceId: number;
