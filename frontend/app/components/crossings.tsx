@@ -11,7 +11,7 @@ import LocalizedDate from './LocalizedDate';
 import IconEye from '-!svg-react-loader?name=IconEye!../images/icons/eye-solid.svg';
 import IconEyeSlash from '-!svg-react-loader?name=IconEyeSlash!../images/icons/eye-slash-solid.svg';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckboxOptionBox } from './inputs';
 
 
@@ -127,24 +127,38 @@ export const CrossingRow = (
 
 
 export interface CrossingsListProps {
+
+	bestLapCrossingId: number;
+	crossings: EnhancedCrossing[],
+
 	showIgnored: boolean;
 	showAbsoluteTime?: boolean;
 	showDebugInfo?: boolean;
+
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
-	bestLapCrossingId: number;
-	crossings: EnhancedCrossing[],
+
+	autoScroll?: boolean;
+	setAutoScroll?: (autoScroll: boolean) => void;
+
 }
 
 export const CrossingsList = (
 	{
+
+		bestLapCrossingId,
+		crossings,
+
 		showIgnored,
 		showAbsoluteTime,
 		showDebugInfo,
-		bestLapCrossingId,
-		crossings,
+
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
+
+		autoScroll = true,
+		setAutoScroll,
+
 	}: CrossingsListProps,
 ) => {
 
@@ -152,10 +166,57 @@ export const CrossingsList = (
 		? crossings
 		: crossings.filter(c => !c.ignored);
 
-	// TODO: auto scroll effect
+	const count = cs.length;
+
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+
+		const el = ref.current;
+
+		if (isDefined(el) && autoScroll) {
+			// auto scroll to the bottom of the element
+			el.scrollTop = el.scrollHeight;
+		}
+
+	}, [count, autoScroll]);
+
+	useEffect(() => {
+
+		if (!isDefined(setAutoScroll)) {
+			return;
+		}
+
+		const el = ref.current;
+
+		if (!isDefined(el)) {
+			return;
+		}
+
+		const checkScrollPosition = (event: Event) => {
+			const scrolledToBottom = el.scrollHeight - Math.abs(el.scrollTop) === el.clientHeight;
+			const currentAutoScroll = el.dataset.autoScroll === 'true';
+			if (currentAutoScroll !== scrolledToBottom) {
+				setAutoScroll(scrolledToBottom);
+			}
+		};
+
+		// see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#improving_scrolling_performance_with_passive_listeners
+		el.addEventListener('scroll', checkScrollPosition, { passive: true });
+
+		return () => {
+			el.removeEventListener('scroll', checkScrollPosition);
+		};
+
+
+	}, [setAutoScroll]);
 
 	return (
-		<div className="crossings-list">
+		<div
+			data-auto-scroll={autoScroll}
+			className="crossings-list crossings-list--scrollable"
+			ref={ref}
+		>
 			{cs.map(c =>
 				<CrossingRow
 					key={c.id}
@@ -193,9 +254,8 @@ export const CrossingsView = (
 		showIgnored: true,
 		showAbsoluteTime: false,
 		showDebugInfo: true,
+		autoScroll: true,
 	}));
-
-	// TODO: auto scroll effect
 
 	const handleOptionChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((event) => {
 
@@ -203,6 +263,7 @@ export const CrossingsView = (
 			event.target.name === 'showIgnored'
 			|| event.target.name === 'showAbsoluteTime'
 			|| event.target.name === 'showDebugInfo'
+			|| event.target.name === 'autoScroll'
 		) {
 			return setState(prevState => ({
 				...prevState,
@@ -212,6 +273,15 @@ export const CrossingsView = (
 
 	}, [setState]);
 
+	const setAutoScroll = useMemo(() => (autoScroll: boolean) => setState(prevState => {
+
+		if (prevState.autoScroll === autoScroll) {
+			return prevState;
+		}
+
+		return { ...prevState, autoScroll };
+
+	}), [setState]);
 
 	const handleUpdateCrossing = useCallback((event) => {
 
@@ -290,15 +360,30 @@ export const CrossingsView = (
 					selected={state.showDebugInfo}
 					onChange={handleOptionChange}
 				/>
+				<CheckboxOptionBox
+					name="autoScroll"
+					id="crossings-options--autoScroll"
+					label={t('racePage.autoScroll')}
+					value="autoScroll"
+					selected={state.autoScroll}
+					onChange={handleOptionChange}
+				/>
 			</ul>
 			<CrossingsList
+
+				bestLapCrossingId={bestLapCrossingId}
+				crossings={crossings}
+
 				showIgnored={state.showIgnored}
 				showAbsoluteTime={state.showAbsoluteTime}
 				showDebugInfo={state.showDebugInfo}
+
 				// onUpdateCrossingTeam={isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
 				onUpdateCrossingIgnored={isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
-				bestLapCrossingId={bestLapCrossingId}
-				crossings={crossings}
+
+				autoScroll={state.autoScroll}
+				setAutoScroll={setAutoScroll}
+
 			/>
 		</div>
 	);

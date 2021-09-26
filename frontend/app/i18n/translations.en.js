@@ -119,6 +119,7 @@ export default {
 		showIgnored: `Show ignored`,
 		showAbsoluteTime: `Show absolute time`,
 		showDebugInfo: `Show debug info`,
+		autoScroll: `Auto scroll`,
 	},
 	teamsPage: {
 		createRace: `Create a new race`,
