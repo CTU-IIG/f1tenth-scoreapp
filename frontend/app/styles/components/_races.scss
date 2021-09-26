@@ -50,6 +50,32 @@
 	}
 }
 
+.crossings-view {
+
+	.crossings-view-options {
+		display: flex;
+		gap: 15px;
+		margin: 0 0 15px 0;
+		padding: 15px;
+		border: 1px solid $gray-lighter;
+
+		.option-label {
+			display: flex;
+			margin: 0;
+			font-weight: normal;
+			cursor: pointer;
+			padding: 0;
+			align-items: center;
+			font-size: 1rem;
+		}
+
+		.option {
+			display: flex;
+		}
+	}
+
+}
+
 .crossings-list {
 	display: flex;
 	flex-direction: column;
@@ -63,32 +89,72 @@
 		padding: 15px;
 		border: 1px solid $gray-lighter;
 		align-items: center;
+		gap: 30px;
 
-		.lap-number-prefix, .lap-time-prefix {
+		time {
 			display: block;
+		}
+
+		.team-setter {
+			display: flex;
+
+			.btn {
+				display: block;
+				margin: 0;
+			}
+		}
+
+		.prefix, .start {
 			opacity: .8;
 			margin: 0 15px 0 0;
 		}
 
+		.lap-number, .lap-time {
+			display: flex;
+			align-items: center;
+		}
+
 		.lap-number {
-			display: block;
-			font-size: 1.5rem;
-			margin: 0 30px 0 0;
-			width: 25px;
-			text-align: right;
+			.prefix {
+				margin: 0 5px 0 0;
+			}
+
+			.value {
+				display: block;
+				font-size: 1.5rem;
+				width: 40px; // 2 digits max
+				text-align: right;
+			}
 		}
 
-		.lap-time {
-			display: block;
+		.crossing-time {
+
 		}
 
-		.crossing-id {
+		.crossing-debug {
 			margin: 0 0 0 auto;
 			opacity: .5;
 		}
 
-		.crossing-toggle {
-			margin: 0 0 0 10px;
+		.btn-ignore {
+			margin: 0 0 0 auto;
+			display: flex;
+			align-items: center;
+			width: 40px;
+			height: 40px;
+			padding: 0;
+			justify-content: center;
+
+			.svg-inline--fa {
+				display: block;
+				width: 20px;
+				// height: 20px;
+				color: inherit;
+			}
+		}
+
+		.crossing-debug + .btn-ignore {
+			margin: 0;
 		}
 
 		&.crossing--ignored {
@@ -107,6 +173,14 @@
 			border-color: $state-warning-border;
 			background-color: $state-warning-bg;
 			// color: $state-warning-text;
+		}
+
+		&.crossing--team-a {
+
+		}
+
+		&.crossing--team-b {
+
 		}
 
 	}
@@ -137,6 +211,10 @@
 	}
 
 	.crossings-list {
+		flex: 1;
+	}
+
+	.crossings-view {
 		flex: 1;
 	}
 

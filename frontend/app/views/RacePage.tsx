@@ -9,106 +9,14 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { R_RACE, R_RACES } from '../routes';
 import { Link } from '../router/compoments';
-import { RaceTimers, TimerDisplay } from '../components/timers';
-import { AppState, EnhancedCrossing, RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
-import classNames from 'classnames';
+import { RaceTimers } from '../components/timers';
+import { RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
 import { Button } from '../components/common';
-import { ToggleInput } from '../components/inputs';
 import { useRaceDataExperimental } from '../helpers/races-experimental';
-import { cancelRace, ignoreCrossing, startRace, stopRace, unignoreCrossing } from '../helpers/queries';
+import { cancelRace, startRace, stopRace } from '../helpers/queries';
 import { QueryButton } from '../components/data';
-import { useStore } from '../store/hooks';
+import { CrossingsView } from '../components/crossings';
 
-
-interface CrossingRowProps {
-	crossing: EnhancedCrossing,
-	isBestLap: boolean;
-	showToggle: boolean;
-}
-
-const CrossingRow = ({ crossing, isBestLap, showToggle }: CrossingRowProps) => {
-
-	const { id, ignored, start, lap } = crossing;
-
-	const store = useStore<AppState>();
-
-	const toggleIgnore = useCallback(() => {
-
-		const restUrl = store.get('restUrl');
-		const token = store.get('authToken');
-
-		(ignored ? unignoreCrossing(id) : ignoreCrossing(id))(restUrl, token)
-			.then(result => {
-				console.log(`[toggleIgnore] id=${id}`, result);
-			})
-			.catch(err => {
-				console.error(`[toggleIgnore] error`, err);
-			});
-
-	}, [id, ignored, store]);
-
-	const toggle = showToggle ? <ToggleInput
-		id={`crossing-ignore-${id}`}
-		name="ignore"
-		label="racePage.ignore"
-		checked={!ignored}
-		onChange={toggleIgnore}
-	/> : undefined;
-
-	return (
-		<div
-			data-id={crossing.id}
-			className={classNames('crossing', {
-				'crossing--ignored': ignored,
-				'crossing--start': start,
-				'crossing--lap': isDefined(lap),
-				'crossing--best-lap': isBestLap,
-			})}
-		>
-			{start && (
-				<span className="lap-number-prefix">Start</span>
-			)}
-			{isDefined(lap) && (
-				<>
-					<span className="lap-number-prefix">Lap</span>
-					<span className="lap-number">{lap.number}</span>
-					<span className="lap-time-prefix">Time</span>
-					<TimerDisplay className="lap-time" time={lap.time} />
-				</>
-			)}
-			<div className="crossing-id">{id}</div>
-			<div className="crossing-toggle">{toggle}</div>
-		</div>
-	);
-
-};
-
-interface CrossingsListProps {
-	showIgnored: boolean;
-	bestLapCrossingId: number;
-	crossings: EnhancedCrossing[],
-}
-
-const CrossingsList = ({ showIgnored, bestLapCrossingId, crossings }: CrossingsListProps) => {
-
-	const cs = showIgnored
-		? crossings
-		: crossings.filter(c => !c.ignored);
-
-	return (
-		<div className="crossings-list">
-			{cs.map(c =>
-				<CrossingRow
-					key={c.id}
-					crossing={c}
-					isBestLap={c.id === bestLapCrossingId}
-					showToggle={showIgnored}
-				/>,
-			)}
-		</div>
-	);
-
-};
 
 const RaceNotFound = ({ id }) => {
 
@@ -147,7 +55,7 @@ const RacePage = () => {
 	const stopThisRace = useMemo(() => stopRace(id), [id]);
 	const cancelThisRace = useMemo(() => cancelRace(id), [id]);
 
-	const op = useRaceDataExperimental(id);
+	const [op, updateCrossing] = useRaceDataExperimental(id);
 
 	const pageTitle = op.loading ?
 		t(`titles.loading`)
@@ -199,9 +107,10 @@ const RacePage = () => {
 
 			<p>
 				{t(`race.id`)}: {race.id}
+				<br />{t(`race.type`)}: {t(`race.types.${race.type}`)}
+				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
 				<br />{t(`race.round`)}: {race.round}
 				<br />{t(`race.team`)}: {race.teamA.name}
-				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
 			</p>
 
 			<h2 className="race-state">
@@ -252,10 +161,10 @@ const RacePage = () => {
 					active={isActive}
 				/>
 
-				<CrossingsList
-					showIgnored={isEditMode}
+				<CrossingsView
 					bestLapCrossingId={bestLapCrossingId}
 					crossings={enhancedCrossings}
+					updateCrossing={updateCrossing}
 				/>
 
 			</div>

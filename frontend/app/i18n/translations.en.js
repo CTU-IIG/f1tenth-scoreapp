@@ -25,9 +25,16 @@ export default {
 	},
 	race: {
 		id: `ID`,
+		type: `Type`,
+		state: `State`,
 		round: `Round`,
 		team: `Team`,
-		state: `State`,
+		teamA: `Team A`,
+		teamB: `Team B`,
+		types: {
+			time_trial: `Time trial`,
+			head_to_head: `Head to head`,
+		},
 		states: {
 			before_start: `Not yet started`,
 			running: `In progress`,
@@ -98,6 +105,20 @@ export default {
 		cancelRace: `Cancel race`,
 		stopRace: `Stop race`,
 		ignore: `Ignore`,
+		unignore: `Unignore`,
+		teamBtn: {
+			a: `A`,
+			b: `B`,
+		},
+		start: `Start`,
+		lap: `Lap`,
+		time: `Time`,
+		absoluteTime: `Absolute time`,
+		barrierId: `BID`,
+		id: `ID`,
+		showIgnored: `Show ignored`,
+		showAbsoluteTime: `Show absolute time`,
+		showDebugInfo: `Show debug info`,
 	},
 	teamsPage: {
 		createRace: `Create a new race`,

@@ -1,7 +1,7 @@
 "use strict";
 
 import { doRequest, METHOD_POST } from './api';
-import { Crossing, FullRace, Race, RACE_TYPE_TIME_TRIAL, Team } from '../types';
+import { Crossing, CrossingTeam, FullRace, Race, RACE_TYPE_TIME_TRIAL, Team } from '../types';
 
 
 export const findAllTeams =
@@ -73,16 +73,13 @@ export const cancelRace = (id: number) =>
 			{ method: METHOD_POST, token },
 		);
 
-export const ignoreCrossing = (id: number) =>
+export const updateCrossing = (id: number, ignored: boolean, team: CrossingTeam) =>
 	(restUrl: string, token: string | undefined) =>
 		doRequest<Crossing>(
-			`${restUrl}/crossings/${id}/ignore`,
-			{ method: METHOD_POST, token },
-		);
-
-export const unignoreCrossing = (id: number) =>
-	(restUrl: string, token: string | undefined) =>
-		doRequest<Crossing>(
-			`${restUrl}/crossings/${id}/unignore`,
-			{ method: METHOD_POST, token },
+			`${restUrl}/crossings/${id}`,
+			{
+				method: METHOD_POST,
+				token,
+				body: { ignored, team },
+			},
 		);

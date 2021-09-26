@@ -1,10 +1,10 @@
 "use strict";
 
 import { QueryOperation } from './data';
-import { AppState, FullRace } from '../types';
+import { AppState, CrossingTeam, FullRace } from '../types';
 import { useWebSocketManager } from '../ws/hooks';
-import { useEffect, useState } from 'react';
-import { findOneRaceById } from './queries';
+import { useEffect, useMemo, useState } from 'react';
+import { findOneRaceById, updateCrossing } from './queries';
 import { isDefined, staleDeps } from './common';
 import { computeStats, RaceStats } from './races';
 import { useStore } from '../store/hooks';
@@ -20,7 +20,9 @@ export interface FullRaceAndStats {
 	stats: RaceStats;
 }
 
-export const useRaceDataExperimental = (raceId: number): QueryOperation<FullRaceAndStats | undefined> => {
+export type CrossingUpdater = (id: number, ignored: boolean, team: CrossingTeam) => void;
+
+export const useRaceDataExperimental = (raceId: number): [QueryOperation<FullRaceAndStats | undefined>, CrossingUpdater] => {
 
 	const manager = useWebSocketManager();
 
@@ -169,6 +171,23 @@ export const useRaceDataExperimental = (raceId: number): QueryOperation<FullRace
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, deps);
 
-	return valueToReturn;
+	const handleUpdateCrossing = useMemo<CrossingUpdater>(() => (id, ignored, team) => {
+
+		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
+
+		// TODO: set actions loading
+
+		updateCrossing(id, ignored, team)(restUrl, token)
+			.then(result => {
+				// TODO: maybe set state
+			})
+			.catch(err => {
+				console.error(`[updateCrossing] error`, err);
+			});
+
+	}, [store]);
+
+	return [valueToReturn, handleUpdateCrossing];
 
 };

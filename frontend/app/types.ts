@@ -36,23 +36,44 @@ export type RaceState =
 	| typeof RACE_STATE_FINISHED
 	| typeof RACE_STATE_UNFINISHED;
 
-export interface Race extends Entity {
+export interface AbstractRace extends Entity {
 	type: RaceType;
+	state: RaceState;
 	round: number;
 	teamAId: number;
 	teamA: Team;
-	state: RaceState;
 }
 
-export interface FullRace extends Race {
-	crossings: Crossing[],
+export interface TimeTrialRace extends AbstractRace {
+	type: typeof RACE_TYPE_TIME_TRIAL;
+	timeDuration: number; // duration of the race in milliseconds
 }
+
+export interface HeadToHeadRace extends AbstractRace {
+	type: typeof RACE_TYPE_HEAD_TO_HEAD;
+	lapsDuration: number; // the first team to successfully complete this number of laps wins
+	teamBId: number;
+	teamB: Team;
+}
+
+export type Race = TimeTrialRace | HeadToHeadRace;
+
+export type FullRace = Race & { crossings: Crossing[] };
+
+export const CROSSING_TEAM_UNSET = 0;
+export const CROSSING_TEAM_A = 1;
+export const CROSSING_TEAM_B = 2;
+
+export type CrossingTeam =
+	| typeof CROSSING_TEAM_UNSET
+	| typeof CROSSING_TEAM_A
+	| typeof CROSSING_TEAM_B;
 
 export interface Crossing extends Entity {
 	time: number; // Unix timestamp in UTC milliseconds
 	ignored: boolean;
 	barrierId: number;
-	// teamA: boolean; TODO: team marking for RACE_TYPE_HEAD_TO_HEAD
+	team: CrossingTeam;
 }
 
 export interface ComputedLap {

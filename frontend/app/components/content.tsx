@@ -29,6 +29,7 @@ export const RaceCard = (
 
 			<div className="card-content">
 				{t(`race.round`)}: {race.round}
+				<br />{t(`race.type`)}: {t(`race.types.${race.type}`)}
 				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
 			</div>
 
