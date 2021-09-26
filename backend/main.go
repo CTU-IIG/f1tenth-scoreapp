@@ -373,16 +373,19 @@ func barrierWebsockHandler(c echo.Context) error {
 	if len(keys) > 0 {
 		key, ok := keys[c.Request().URL.Path]
 		if !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "No key configured for %s", c.Request().URL.Path)
+			return echo.NewHTTPError(
+				http.StatusUnauthorized,
+				fmt.Sprintf("no key configured for %s", c.Request().URL.Path),
+			)
 		}
 		if c.Request().Header.Get(echo.HeaderAuthorization) != key {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid key")
+			return echo.NewHTTPError(http.StatusUnauthorized, "invalid key")
 		}
 	}
 	barrier := &Barrier{Id: id, hub: hub, RegistrationOk: make(chan bool)}
 	hub.registerBarrier <- barrier
 	if ok := <-barrier.RegistrationOk; !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "Barrier already connected")
+		return echo.NewHTTPError(http.StatusBadRequest, "barrier already connected")
 	}
 
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
