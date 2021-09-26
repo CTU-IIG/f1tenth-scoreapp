@@ -52,9 +52,15 @@ type Crossing struct {
 	Time      Time `json:"time"`
 	Ignored   bool `json:"ignored"`
 	BarrierId uint `json:"barrierId"`
-	TeamA     bool `json:"teamA"`
+	Team      uint `json:"team"` // 0 = not set, 1 = team A, 2 = team B
 	// If 0, the crossing is not associated to any race
 	RaceID uint `json:"-"`
+}
+
+type CrossingUpdate struct {
+	ID      uint `param:"id"`
+	Ignored bool `json:"ignored"`
+	Team    uint `json:"team"` // 0 = not set, 1 = team A, 2 = team B
 }
 
 type CurrentRace struct {
@@ -284,17 +290,31 @@ func getFinishedRaces(c echo.Context) error {
 	return c.JSON(http.StatusOK, races)
 }
 
-func setCrossingIgnore(c echo.Context, ignored bool) error {
+func updateCrossing(c echo.Context) error {
 	var crossing Crossing
-	if err := c.Bind(&crossing); err != nil {
+	var update CrossingUpdate
+	if err := c.Bind(&update); err != nil {
 		return err
 	}
-	if err := db.First(&crossing, crossing.ID).Error; err != nil {
+	if update.Team > 2 {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"team value must be either 0 or 1 or 2",
+		)
+	}
+	if err := db.First(&crossing, update.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(
+				http.StatusNotFound,
+				fmt.Sprintf("crossing with id %d not found", update.ID),
+			)
+		}
 		return err
 	}
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		if err := db.Model(&crossing).Update("Ignored", ignored).Error; err != nil {
+		// note: we have to explicitly select Team otherwise GoORM will ignore zero fields
+		if err := db.Model(&crossing).Select("Ignored", "Team").Updates(Crossing{Ignored: update.Ignored, Team: update.Team}).Error; err != nil {
 			return err
 		}
 
@@ -513,9 +533,7 @@ func main() {
 	e.POST("/races/:id/stop", func(c echo.Context) error { return setRaceState(c, Finished) })
 	e.POST("/races/:id/cancel", func(c echo.Context) error { return setRaceState(c, Unfinished) })
 	e.GET("/races/finished", getFinishedRaces)
-	e.POST("/crossings/:id/ignore", func(c echo.Context) error { return setCrossingIgnore(c, true) })
-	e.POST("/crossings/:id/unignore", func(c echo.Context) error { return setCrossingIgnore(c, false) })
-	// TODO: /crossings/:id/ setTeamA to true/false
+	e.POST("/crossings/:id", updateCrossing)
 
 	var host string = ""
 	if *loopback {
