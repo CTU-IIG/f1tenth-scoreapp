@@ -1,22 +1,21 @@
 "use strict";
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 
 import { useDocumentTitle, useFormatMessageId } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
 import { isDefined } from '../helpers/common';
 import { LoadingError, LoadingScreen } from '../components/layout';
-import { Breadcrumbs } from '../components/breadcrumbs';
-import { R_RACE, R_RACES } from '../routes';
+import { R_RACES } from '../routes';
 import { Link } from '../router/compoments';
 import { RaceTimers } from '../components/timers';
 import { RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
-import { Button } from '../components/common';
 import { useRaceDataExperimental } from '../helpers/races-experimental';
-import { cancelRace, startRace, stopRace } from '../helpers/queries';
-import { QueryButton } from '../components/data';
 import { CrossingsView } from '../components/crossings';
 
+import IconArrowLeft from '-!svg-react-loader?name=IconEye!../images/icons/arrow-left-solid.svg';
+import { WebSocketInfo } from '../components/ws';
+import { Button } from '../components/common';
 
 const RaceNotFound = ({ id }) => {
 
@@ -43,19 +42,7 @@ const RacePage = () => {
 	const id = parseInt(idStr);
 	console.log('id = ', id);
 
-	const [isEditMode, setIsEditMode] = useState(false);
-
-	const handleSwitchToEditMode = useCallback((event) => {
-		event.preventDefault();
-		setIsEditMode(prev => !prev);
-	}, [setIsEditMode]);
-
-	// TODO: maybe use just one useMemo
-	const startThisRace = useMemo(() => startRace(id), [id]);
-	const stopThisRace = useMemo(() => stopRace(id), [id]);
-	const cancelThisRace = useMemo(() => cancelRace(id), [id]);
-
-	const [op, updateCrossing] = useRaceDataExperimental(id);
+	const { op, startRace, stopRace, cancelRace, updateCrossing } = useRaceDataExperimental(id);
 
 	const pageTitle = op.loading ?
 		t(`titles.loading`)
@@ -70,7 +57,6 @@ const RacePage = () => {
 	}
 
 	if (op.hasError) {
-		console.log(op.error);
 		return (
 			<LoadingError error={op.error} />
 		);
@@ -98,78 +84,92 @@ const RacePage = () => {
 	const isActive = race.state === RACE_STATE_RUNNING;
 
 	return (
-		<>
+		<div className="race">
 
-			<Breadcrumbs
-				name={R_RACE}
-				raceId={race.id}
-			/>
+			<header className="race-header">
+				<div className="container">
 
-			<p>
-				{t(`race.id`)}: {race.id}
-				<br />{t(`race.type`)}: {t(`race.types.${race.type}`)}
-				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
-				<br />{t(`race.round`)}: {race.round}
-				<br />{t(`race.team`)}: {race.teamA.name}
-			</p>
+					<Link className="btn btn-back" name={R_RACES}>
+						<IconArrowLeft />
+						<span className="sr-only">Back to all races</span>
+					</Link>
 
-			<h2 className="race-state">
-				{t(`race.states.${race.state}`)}
-			</h2>
+					<div className="race-details">
+						{t(`race.types.${race.type}`)} #{race.id}, {race.teamA.name}, round {race.round}
+					</div>
 
-			<div className="btn-group">
-				<Button
-					style="default"
-					onClick={handleSwitchToEditMode}
-					label={`racePage.${isEditMode ? 'switchToDisplayMode' : 'switchToEditMode'}`}
-				/>
+					<WebSocketInfo />
 
-				{race.state === RACE_STATE_BEFORE_START && (
-					<QueryButton
-						query={startThisRace}
-						style="default"
-						label="racePage.startRace"
-					/>
-				)}
+				</div>
+			</header>
 
-				{race.state === RACE_STATE_RUNNING && (
-					<QueryButton
-						query={stopThisRace}
-						style="default"
-						label="racePage.stopRace"
-					/>
-				)}
+			<main className="race-content">
 
-				{race.state === RACE_STATE_RUNNING && (
-					<QueryButton
-						query={cancelThisRace}
-						style="default"
-						label="racePage.cancelRace"
-					/>
-				)}
+				<div className="container">
 
-			</div>
+					<div className="btn-group">
 
-			<div className="race-layout">
+						<h2>{t(`race.states.${race.state}`)}</h2>
 
-				<RaceTimers
-					startTime={startTime}
-					stopTime={stopTime}
-					numLaps={numLaps}
-					bestLapTime={bestLapTime}
-					currentLapStartTime={currentLapStartTime}
-					active={isActive}
-				/>
+						{race.state === RACE_STATE_BEFORE_START && (
+							<Button
+								style="default"
+								label="racePage.startRace"
+								onClick={startRace}
+							/>
+						)}
 
-				<CrossingsView
-					bestLapCrossingId={bestLapCrossingId}
-					crossings={enhancedCrossings}
-					updateCrossing={updateCrossing}
-				/>
+						{race.state === RACE_STATE_RUNNING && (
+							<Button
+								style="default"
+								label="racePage.stopRace"
+								onClick={stopRace}
+							/>
+						)}
 
-			</div>
+						{race.state === RACE_STATE_RUNNING && (
+							<Button
+								style="default"
+								label="racePage.cancelRace"
+								onClick={cancelRace}
+							/>
+						)}
 
-		</>
+					</div>
+
+					<div className="race-layout">
+
+						<RaceTimers
+							startTime={startTime}
+							stopTime={stopTime}
+							numLaps={numLaps}
+							bestLapTime={bestLapTime}
+							currentLapStartTime={currentLapStartTime}
+							active={isActive}
+						/>
+
+						<CrossingsView
+							bestLapCrossingId={bestLapCrossingId}
+							crossings={enhancedCrossings}
+							updateCrossing={updateCrossing}
+						/>
+
+					</div>
+
+				</div>
+
+				{/*<div className="race-info">*/}
+				{/*	{t(`race.id`)}: {race.id}*/}
+				{/*	<br />{t(`race.type`)}: {t(`race.types.${race.type}`)}*/}
+				{/*	<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}*/}
+				{/*	<br />{t(`race.round`)}: {race.round}*/}
+				{/*	<br />{t(`race.team`)}: {race.teamA.name}*/}
+				{/*</div>*/}
+
+			</main>
+
+
+		</div>
 	);
 
 };

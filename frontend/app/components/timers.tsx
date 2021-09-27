@@ -16,11 +16,11 @@ export const TimerDisplayValue = ({ time }: TimeDisplayValueProps) => {
 	if (time === -1) {
 		return (
 			<div className="display-value display-value--disabled">
-				<span className="digits">00</span>
+				<span className="digits minutes">00</span>
 				<span className="divider">:</span>
-				<span className="digits">00</span>
+				<span className="digits seconds">00</span>
 				<span className="divider">.</span>
-				<span className="digits">00</span>
+				<span className="digits centiseconds">00</span>
 			</div>
 		);
 	}
@@ -34,15 +34,15 @@ export const TimerDisplayValue = ({ time }: TimeDisplayValueProps) => {
 		<div className={'display-value' + (hh !== 0 ? ' display-value--overflow' : '')}>
 			{hh !== 0 && (
 				<>
-					<span className="digits">{hh}</span>
+					<span className="digits hours">{hh}</span>
 					<span className="divider">:</span>
 				</>
 			)}
-			<span className="digits">{minTwoDigits(mm)}</span>
+			<span className="digits minutes">{minTwoDigits(mm)}</span>
 			<span className="divider">:</span>
-			<span className="digits">{minTwoDigits(ss)}</span>
+			<span className="digits seconds">{minTwoDigits(ss)}</span>
 			<span className="divider">.</span>
-			<span className="digits">{minTwoDigits(cs)}</span>
+			<span className="digits centiseconds">{minTwoDigits(cs)}</span>
 		</div>
 	);
 
@@ -190,7 +190,7 @@ export const RaceTimers = (
 		active,
 	}: RaceTimersProps,
 ) => (
-	<div className="timers">
+	<div className="race-timers">
 		<Timer
 			className="timer--total-time"
 			name="Total time:"

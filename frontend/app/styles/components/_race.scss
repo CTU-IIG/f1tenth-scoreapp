@@ -1,0 +1,363 @@
+//
+// All races related styles
+// Will split into multiple files soon
+// --------------------------------------------------
+
+
+.race {
+	position: relative;
+	min-width: 280px;
+	height: 100%;
+	display: grid;
+	grid-template-rows: $app-header-size 1fr;
+	grid-template-columns: 100%;
+	grid-template-areas:
+		"header"
+		"content";
+	overflow-x: hidden;
+}
+
+.race-header {
+	grid-area: header;
+	display: block;
+	margin: 0;
+	padding: 0;
+	background-color: $gray-lighter;
+
+	> .container {
+		display: flex;
+		align-items: center;
+	}
+
+	.btn-back {
+		width: $app-header-size;
+		height: $app-header-size;
+		margin: 0 1rem 0 0;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $black;
+		opacity: .5;
+		background-color: darken($gray-lighter, 10%);
+
+		&:hover, &:focus {
+			opacity: 1;
+		}
+
+		.svg-inline--fa {
+			display: block;
+			width: 20px;
+			color: inherit;
+		}
+	}
+
+	.race-details {
+		font-size: 1.2rem;
+	}
+
+	.ws-info {
+		margin: 0 0 0 auto;
+	}
+
+}
+
+.race-content {
+	grid-area: content;
+	display: block;
+	position: relative;
+	margin: 0;
+	padding: 0;
+
+	> .container {
+		display: flex;
+		flex-direction: column;
+		padding: 1rem;
+		overflow: hidden;
+	}
+
+}
+
+
+.timer-display, .value-display {
+	.display-name {
+
+	}
+
+	.display-value {
+		font-size: 1.5rem;
+		font-kerning: none;
+		// font-family: $font-family-monospace;
+		text-align: right;
+
+		&.display-value--disabled {
+			opacity: .2;
+		}
+	}
+}
+
+.crossings-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+
+	.crossings-view-options {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin: 0;
+		padding: 1rem;
+		border: 1px solid $gray-lighter;
+
+		.option-label {
+			display: flex;
+			margin: 0;
+			font-weight: normal;
+			cursor: pointer;
+			padding: 0;
+			align-items: center;
+			font-size: 1rem;
+		}
+
+		.option {
+			display: flex;
+		}
+	}
+
+}
+
+.crossings-list {
+	// display: block;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+
+	// hide the scrollbar, but allows user to manually scroll
+	&.crossings-list--scrollable-no-scrollbar {
+		overflow-y: scroll;
+		// this is standard, currently only supported by Firefox
+		// see https://developer.mozilla.org/en-US/docs/web/CSS/scrollbar-width
+		scrollbar-width: none;
+
+		// ::-webkit-scrollbar is a non-standard, but supported by WebKit, Blink
+		// see https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-scrollbar
+
+		&::-webkit-scrollbar {
+			width: 0;
+		}
+
+		&::-webkit-scrollbar-track {
+			background-color: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background-color: transparent;
+		}
+
+	}
+
+	// show the scrollbar and allow user to manually scroll
+	&.crossings-list--scrollable {
+		overflow-y: auto;
+		// this is standard, currently only supported by Firefox
+		// see https://developer.mozilla.org/en-US/docs/web/CSS/scrollbar-width
+		scrollbar-width: thin;
+		scrollbar-color: $gray-light transparent;
+
+		// ::-webkit-scrollbar is a non-standard, but supported by WebKit, Blink
+		// see https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-scrollbar
+
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background-color: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background-color: $gray-light;
+			border-radius: 3px;
+		}
+
+	}
+
+	.crossing {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0.75rem 0 0 0; // TODO: or 1rem?
+		padding: 0.5rem 1rem; // TODO: or 1rem?
+		border: 1px solid $gray-lighter;
+		align-items: center;
+		column-gap: 1.875rem;
+		row-gap: 0;
+
+		time {
+			display: block;
+		}
+
+		.team-setter {
+			display: flex;
+
+			.btn {
+				display: block;
+				margin: 0;
+			}
+		}
+
+		.prefix, .start {
+			opacity: .8;
+			margin: 0 1rem 0 0;
+		}
+
+		.lap-number, .lap-time {
+			display: flex;
+			align-items: center;
+		}
+
+		.lap-number {
+			.prefix {
+				margin: 0 5px 0 0;
+			}
+
+			.value {
+				display: block;
+				font-size: 1.5rem;
+				width: 40px; // 2 digits max
+				text-align: right;
+			}
+		}
+
+		.crossing-time {
+
+		}
+
+		.crossing-debug {
+			margin: 0 0 0 auto;
+			opacity: .5;
+		}
+
+		.btn-ignore {
+			margin: 0 0 0 auto;
+			display: flex;
+			align-items: center;
+			width: 40px;
+			height: 40px;
+			padding: 0;
+			justify-content: center;
+
+			.svg-inline--fa {
+				display: block;
+				width: 20px;
+				// height: 20px;
+				color: inherit;
+			}
+		}
+
+		.crossing-debug + .btn-ignore {
+			margin: 0;
+		}
+
+		&.crossing--ignored {
+			opacity: .5;
+		}
+
+		&.crossing--start {
+
+		}
+
+		&.crossing--lap {
+
+		}
+
+		&.crossing--best-lap {
+			border-color: $state-warning-border;
+			background-color: $state-warning-bg;
+			// color: $state-warning-text;
+		}
+
+		&.crossing--team-a {
+
+		}
+
+		&.crossing--team-b {
+
+		}
+
+	}
+}
+
+.race-timers {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 1rem;
+
+	.timer-display, .value-display {
+		margin: 0;
+		padding: 1rem;
+		border: 1px solid $gray-lighter;
+
+		.display-name {
+			font-size: 1.125rem;
+			opacity: .8;
+		}
+
+		.display-value {
+			font-size: 2rem;
+		}
+
+	}
+}
+
+.race-layout {
+	flex: 1;
+	display: flex;
+	gap: 1rem;
+	overflow: hidden;
+
+	.race-timers {
+		flex-grow: 0;
+		flex-shrink: 1;
+	}
+
+	.crossings-view {
+		flex-grow: 1;
+		flex-shrink: 1;
+	}
+
+}
+
+
+@media (max-width: 489px) {
+
+	.race-layout {
+		flex-direction: column;
+	}
+
+}
+
+@media (min-width: 490px) and (min-height: 700px){
+
+	.race {
+		overflow: hidden;
+	}
+
+	.race-content {
+		overflow: hidden;
+		height: 100%;
+
+		> .container {
+			overflow: hidden;
+			height: 100%;
+		}
+
+	}
+
+}

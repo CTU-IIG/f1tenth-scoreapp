@@ -66,13 +66,13 @@ const TopLevelRouter = () => {
 	}
 
 	// special layout (no app at all)
-	if (name === R_PRESENTATION) {
+	if (name === R_PRESENTATION || name === R_RACE) {
 		return getViewComponent();
 	}
 
 	return (
 		<App
-			withFooter={name !== R_RACE}
+			withFooter={true}
 			routeName={name}
 		>
 			{getViewComponent()}

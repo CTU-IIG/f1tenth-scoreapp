@@ -4,7 +4,7 @@ import { QueryOperation } from './data';
 import { AppState, CrossingTeam, FullRace } from '../types';
 import { useWebSocketManager } from '../ws/hooks';
 import { useEffect, useMemo, useState } from 'react';
-import { findOneRaceById, updateCrossing } from './queries';
+import { cancelRace, findOneRaceById, startRace, stopRace, updateCrossing } from './queries';
 import { isDefined, staleDeps } from './common';
 import { computeStats, RaceStats } from './races';
 import { useStore } from '../store/hooks';
@@ -22,7 +22,15 @@ export interface FullRaceAndStats {
 
 export type CrossingUpdater = (id: number, ignored: boolean, team: CrossingTeam) => void;
 
-export const useRaceDataExperimental = (raceId: number): [QueryOperation<FullRaceAndStats | undefined>, CrossingUpdater] => {
+export interface UseRaceDataExperimentalHookReturnValue {
+	op: QueryOperation<FullRaceAndStats | undefined>,
+	startRace: () => void;
+	stopRace: () => void;
+	cancelRace: () => void;
+	updateCrossing: CrossingUpdater;
+}
+
+export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimentalHookReturnValue => {
 
 	const manager = useWebSocketManager();
 
@@ -181,13 +189,74 @@ export const useRaceDataExperimental = (raceId: number): [QueryOperation<FullRac
 		updateCrossing(id, ignored, team)(restUrl, token)
 			.then(result => {
 				// TODO: maybe set state
+				console.log(`[handleUpdateCrossing] got result`);
 			})
 			.catch(err => {
-				console.error(`[updateCrossing] error`, err);
+				console.error(`[handleUpdateCrossing] error`, err);
 			});
 
 	}, [store]);
 
-	return [valueToReturn, handleUpdateCrossing];
+	const handleStartRace = useMemo(() => () => {
+
+		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
+
+		// TODO: set actions loading
+
+		startRace(raceId)(restUrl, token)
+			.then(result => {
+				// TODO: maybe set state
+				console.log(`[handleStartRace] got result`);
+			})
+			.catch(err => {
+				console.error(`[handleStartRace] error`, err);
+			});
+
+	}, [raceId, store]);
+
+	const handleStopRace = useMemo(() => () => {
+
+		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
+
+		// TODO: set actions loading
+
+		stopRace(raceId)(restUrl, token)
+			.then(result => {
+				// TODO: maybe set state
+				console.log(`[handleStartRace] got result`);
+			})
+			.catch(err => {
+				console.error(`[handleStartRace] error`, err);
+			});
+
+	}, [raceId, store]);
+
+	const handleCancelRace = useMemo(() => () => {
+
+		const restUrl = store.get('restUrl');
+		const token = store.get('authToken');
+
+		// TODO: set actions loading
+
+		cancelRace(raceId)(restUrl, token)
+			.then(result => {
+				// TODO: maybe set state
+				console.log(`[handleStartRace] got result`);
+			})
+			.catch(err => {
+				console.error(`[handleStartRace] error`, err);
+			});
+
+	}, [raceId, store]);
+
+	return {
+		op: valueToReturn,
+		startRace: handleStartRace,
+		stopRace: handleStopRace,
+		cancelRace: handleCancelRace,
+		updateCrossing: handleUpdateCrossing,
+	};
 
 };
