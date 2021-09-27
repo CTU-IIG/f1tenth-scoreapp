@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useStore } from '../store/hooks';
 import { AppState } from '../types';
 import Store from '../store/Store';
+import { IS_DEVELOPMENT } from './common';
 
 
 export type QueryExecutor<QueryResult> = (restUrl: string, token: string | undefined) => Promise<QueryResult>;
@@ -129,7 +130,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 			}
 
 			if (didCleanup) {
-				console.warn('finished but unsubscribed');
+				IS_DEVELOPMENT && console.warn('finished but unsubscribed');
 				return;
 			}
 
@@ -156,7 +157,7 @@ export const useQuery = <T>(query: QueryExecutor<T>): QueryHookReturnValue<T> =>
 		executeQuery();
 
 		return () => {
-			console.log('[useQuery] didCleanup = true');
+			IS_DEVELOPMENT && console.log('[useQuery] didCleanup = true');
 			didCleanup = true;
 		};
 

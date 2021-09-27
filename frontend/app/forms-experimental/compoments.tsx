@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import { OnSubmitHandler } from './common';
 import FormContext, { FormContextShape } from './FormContext';
 import FormController from './FormController';
+import { IS_DEVELOPMENT } from '../helpers/common';
 
 
 export interface FormProps<DataShape>
@@ -42,11 +43,11 @@ export const Form = <DataShape extends any>(
 	// this is safe to be changed during render
 	contextRef.current.controller.onSubmit = onSubmit;
 
-	console.log(`[Form] rendering`, name);
+	IS_DEVELOPMENT && console.log(`[Form] rendering`, name);
 
 	useEffect(() => {
 
-		console.log(`[Form] applying changes to the controller (name, initialValues)`, name);
+		IS_DEVELOPMENT && console.log(`[Form] applying changes to the controller (name, initialValues)`, name);
 
 		if (contextRef.current !== null) {
 			contextRef.current.controller.name = name;
@@ -54,7 +55,7 @@ export const Form = <DataShape extends any>(
 		}
 
 		return () => {
-			console.log(`[Form] useEffect:cleanup`, name);
+			IS_DEVELOPMENT && console.log(`[Form] useEffect:cleanup`, name);
 		};
 
 	}, [name, initialValues]);

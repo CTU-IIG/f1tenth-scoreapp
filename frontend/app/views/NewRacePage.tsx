@@ -30,8 +30,6 @@ const NewRacePage = () => {
 
 	const handleSubmit = useCallback((data: CreateRaceData) => {
 
-		console.log(data);
-
 		const restUrl = store.get('restUrl');
 		const token = store.get('authToken');
 
@@ -65,7 +63,6 @@ const NewRacePage = () => {
 	}
 
 	if (op.hasError) {
-		console.log(op.error);
 		return (
 			<LoadingError error={op.error} />
 		);

@@ -5,6 +5,7 @@ import { IntlFormatters, IntlShape, MessageDescriptor, useIntl } from 'react-int
 import { useStoreValue, useStoreValueSetter } from '../store/hooks';
 import { useEffect } from 'react';
 import { AppState } from '../types';
+import { IS_DEVELOPMENT } from './common';
 
 
 // ### app state
@@ -89,7 +90,7 @@ export const useDocumentTitle = (title: string | undefined, template: DocumentTi
 
 		const finalTitle = template(title);
 
-		console.log(`[useDocumentTitle] setting title to '${finalTitle}'`);
+		IS_DEVELOPMENT && console.log(`[useDocumentTitle] setting title to '${finalTitle}'`);
 
 		document.title = finalTitle;
 

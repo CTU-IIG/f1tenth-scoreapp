@@ -107,8 +107,6 @@ const SettingsPage = () => {
 		webSocketUrl,
 	}), [restUrl, webSocketUrl]);
 
-	console.log('authToken = ', authToken);
-
 	return (
 		<>
 

@@ -5,7 +5,7 @@ import { QueryExecutor } from '../helpers/data';
 import { useStore } from '../store/hooks';
 import { AppState } from '../types';
 import React, { useCallback, useState } from 'react';
-import { isDefined } from '../helpers/common';
+import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 
 
 export interface MutationButtonProps<Result> extends ButtonProps {
@@ -32,7 +32,7 @@ export const QueryButton = <Result extends any>({ query, onSuccess, ...otherProp
 
 		query(restUrl, token)
 			.then(result => {
-				console.log(`[QueryButton] result`, result);
+				IS_DEVELOPMENT && console.log(`[QueryButton] result`, result);
 				// this is problematic as it can be called even after the component is unmounted
 				let changeState = true;
 				if (isDefined(onSuccess)) {

@@ -50,7 +50,6 @@ const TeamsPage = () => {
 	}
 
 	if (op.hasError) {
-		console.log(op.error);
 		return (
 			<LoadingError error={op.error} />
 		);

@@ -112,9 +112,6 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 		enhancedCrossings,
 	} = op.data.stats;
 
-	// TODO: Maybe remove this log in production to prevent memory leaks.
-	console.log('race', race);
-
 	const isActive = race.state === RACE_STATE_RUNNING;
 
 	return (

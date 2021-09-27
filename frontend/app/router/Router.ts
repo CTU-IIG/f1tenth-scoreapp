@@ -249,7 +249,7 @@ class Router {
 		this.urlToRouteMap = createUrlToRouteMap(routesMap);
 		this.listeners = new Set();
 		this.popstateHandler = event => {
-			console.log('[Router] popstate', location, event);
+			IS_DEVELOPMENT && console.log('[Router] popstate', location, event);
 			this.updateRoute(event);
 		};
 
@@ -288,18 +288,18 @@ class Router {
 
 	private updateRoute(event?: PopStateEvent): void {
 
-		console.log(`[Router] updateRoute ${isDefined(event) ? '(due to a PopStateEvent)' : '(manual)'}`);
+		IS_DEVELOPMENT && console.log(`[Router] updateRoute ${isDefined(event) ? '(due to a PopStateEvent)' : '(manual)'}`);
 
 		this.pathname = location.pathname;
 
 		const route = this.convertUrlToRoute(this.pathname);
 
 		if (areRoutesEqual(this.route, route)) {
-			console.log('[Router] areRoutesEqual === true', route);
+			IS_DEVELOPMENT && console.log('[Router] areRoutesEqual === true', route);
 			return;
 		}
 
-		console.log('[Router] updating route', route);
+		IS_DEVELOPMENT && console.log('[Router] updating route', route);
 		this.route = route;
 		this.notify();
 
@@ -309,7 +309,7 @@ class Router {
 	private historyPush(url: string | null, data?: any) {
 
 		if (location.href === url /* && history.state === data */) {
-			console.log(`[Router] ignoring historyPush`, url);
+			IS_DEVELOPMENT && console.log(`[Router] ignoring historyPush`, url);
 			return;
 		}
 
@@ -327,7 +327,7 @@ class Router {
 	private historyReplace(url: string | null, data?: any) {
 
 		if (location.href === url /* && history.state === data */) {
-			console.log(`[Router] ignoring historyReplace`, url);
+			IS_DEVELOPMENT && console.log(`[Router] ignoring historyReplace`, url);
 			return;
 		}
 

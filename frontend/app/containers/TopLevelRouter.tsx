@@ -35,7 +35,7 @@ const TopLevelRouter = () => {
 
 	const { route } = useRoute();
 
-	console.log(`[TopLevelRouter] route changed`, route);
+	IS_DEVELOPMENT && console.log(`[TopLevelRouter] route changed`, route);
 
 	// 404: no route matched
 	if (!isDefined(route)) {

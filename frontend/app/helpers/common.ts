@@ -75,7 +75,7 @@ export const staleDeps = (prevDeps: any[], currentDeps: any[]) => {
 
 	const r = prevDeps.length !== currentDeps.length || !prevDeps.every((d, i) => d === currentDeps[i]);
 
-	if (r) {
+	if (IS_DEVELOPMENT && r) {
 		console.log('stale deps', prevDeps, currentDeps);
 	}
 

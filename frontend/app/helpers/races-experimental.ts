@@ -5,7 +5,7 @@ import { AppState, CrossingTeam, FullRace } from '../types';
 import { useWebSocketManager } from '../ws/hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { cancelRace, findOneRaceById, startRace, stopRace, updateCrossing } from './queries';
-import { isDefined, staleDeps } from './common';
+import { IS_DEVELOPMENT, isDefined, staleDeps } from './common';
 import { computeStats, RaceStats } from './races';
 import { useStore } from '../store/hooks';
 
@@ -96,7 +96,7 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 			}
 
 			if (didUnsubscribe) {
-				console.warn('finished but unsubscribed');
+				IS_DEVELOPMENT && console.warn('finished but unsubscribed');
 				return;
 			}
 
@@ -225,10 +225,10 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 		stopRace(raceId)(restUrl, token)
 			.then(result => {
 				// TODO: maybe set state
-				console.log(`[handleStartRace] got result`);
+				console.log(`[handleStopRace] got result`);
 			})
 			.catch(err => {
-				console.error(`[handleStartRace] error`, err);
+				console.error(`[handleStopRace] error`, err);
 			});
 
 	}, [raceId, store]);
@@ -243,10 +243,10 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 		cancelRace(raceId)(restUrl, token)
 			.then(result => {
 				// TODO: maybe set state
-				console.log(`[handleStartRace] got result`);
+				console.log(`[handleCancelRace] got result`);
 			})
 			.catch(err => {
-				console.error(`[handleStartRace] error`, err);
+				console.error(`[handleCancelRace] error`, err);
 			});
 
 	}, [raceId, store]);

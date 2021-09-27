@@ -354,6 +354,7 @@ class WebSocketManager {
 		if (Array.isArray(msg.barriers)) {
 			this.barriers = msg.barriers;
 			this.barriers.sort();
+			console.log(`[barriers] new value = [${this.barriers.join(', ')}]`);
 			this.notifyBarriersChangeListeners();
 		}
 
@@ -361,11 +362,11 @@ class WebSocketManager {
 		// 1. { "currentRace": null }
 		// 2. { "currentRace": { "id": x } } where is x is number
 		if (msg.currentRace === null) {
-			console.log('setting to null');
+			console.log(`[currentRace] setting to null`);
 			this.currentRace = null;
 			this.notifyCurrentRaceChangeListeners();
 		} else if (Number.isInteger(msg.currentRace?.id)) {
-			console.log('setting to number', msg.currentRace.id);
+			console.log(`[currentRace] setting to number ${msg.currentRace.id}`);
 			this.currentRace = msg.currentRace.id;
 			this.notifyCurrentRaceChangeListeners();
 		}
