@@ -3,7 +3,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
-import { R_RACE_NEW, R_RACES } from '../routes';
+import { R_RACE, R_RACE_NEW, R_RACES } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { Option } from '../components/inputs';
 import { QueryOperation, useQuery } from '../helpers/data';
@@ -42,8 +42,8 @@ const NewRacePage = () => {
 		}));
 
 		createRace(data)(restUrl, token)
-			.then(result => {
-				router.push(R_RACES);
+			.then((race) => {
+				router.push(R_RACE, { raceId: race.id });
 			})
 			.catch(error => {
 				setState(prevState => ({
