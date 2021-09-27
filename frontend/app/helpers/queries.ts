@@ -1,7 +1,7 @@
 "use strict";
 
 import { doRequest, METHOD_POST } from './api';
-import { Crossing, CrossingTeam, FullRace, Race, RACE_TYPE_TIME_TRIAL, Team } from '../types';
+import { CreateRaceData, Crossing, CrossingTeam, FullRace, Race, Team } from '../types';
 
 
 export const findAllTeams =
@@ -41,14 +41,14 @@ export const findOneRaceById = (id: number) =>
 			{ returnUndefinedForNotFoundError: true },
 		);
 
-export const createRace = (teamAId: number) =>
+export const createRace = (data: CreateRaceData) =>
 	(restUrl: string, token: string | undefined) =>
 		doRequest<Race>(
 			`${restUrl}/races`,
 			{
 				method: METHOD_POST,
 				token,
-				body: { type: RACE_TYPE_TIME_TRIAL, teamAId },
+				body: data,
 			},
 		);
 

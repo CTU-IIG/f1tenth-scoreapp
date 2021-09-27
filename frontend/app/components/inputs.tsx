@@ -19,6 +19,7 @@ export interface SelectInputProps
 	label: string;
 	valid?: boolean;
 	error?: string;
+	translateOptionsLabels?: boolean;
 	translateError?: boolean;
 	helpBlock?: React.ReactNode;
 	inputRef?: Ref<HTMLSelectElement>;
@@ -39,7 +40,8 @@ export const SelectInput = (
 
 		valid,
 		error,
-		translateError,
+		translateOptionsLabels = true,
+		translateError = true,
 
 		inputRef,
 
@@ -74,7 +76,7 @@ export const SelectInput = (
 			>
 				{isDefined(prompt) && <option value="">{t(prompt)}</option>}
 				{options.map(({ value, label }) =>
-					<option key={value} value={value}>{t(label)}</option>)
+					<option key={value} value={value}>{translateOptionsLabels ? t(label) : label}</option>)
 				}
 			</select>
 			{!isEmpty(error) && <p className="form-control-feedback">{translateError ? t(error) : error}</p>}
@@ -159,7 +161,7 @@ export const ToggleInput = (
 
 		valid,
 		error,
-		translateError,
+		translateError = true,
 
 		inputRef,
 
@@ -275,7 +277,7 @@ export const CheckboxListInput = (
 
 		valid,
 		error,
-		translateError,
+		translateError = true,
 
 		options,
 		value,

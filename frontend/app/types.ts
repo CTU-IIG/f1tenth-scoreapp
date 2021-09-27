@@ -60,6 +60,21 @@ export type Race = TimeTrialRace | HeadToHeadRace;
 
 export type FullRace = Race & { crossings: Crossing[] };
 
+export interface CreateTimeTrialRaceData {
+	type: typeof RACE_TYPE_TIME_TRIAL;
+	round: number;
+	teamAId: number;
+}
+
+export interface CreateHeadToHeadRaceData {
+	type: typeof RACE_TYPE_HEAD_TO_HEAD;
+	round: number;
+	teamAId: number;
+	teamBId: number;
+}
+
+export type CreateRaceData = CreateTimeTrialRaceData | CreateHeadToHeadRaceData;
+
 export const CROSSING_TEAM_UNSET = 0;
 export const CROSSING_TEAM_A = 1;
 export const CROSSING_TEAM_B = 2;

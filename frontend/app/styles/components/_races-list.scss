@@ -1,0 +1,84 @@
+//
+// All races related styles
+// Will split into multiple files soon
+// --------------------------------------------------
+
+
+.races-list {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	margin: 0 0 1rem 0;
+	gap: 1rem;
+}
+
+.races-list-item {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 1rem 1rem;
+	border: 1px solid $gray-lighter;
+	align-items: center;
+	column-gap: 1.875rem;
+	row-gap: 0;
+
+	.race-id {
+		opacity: 0.5;
+	}
+
+	.race-team {
+
+		.team-a, .team-b {
+			font-size: 1.2rem;
+		}
+
+		.team-a, .team-b, .divider {
+			display: inline-block;
+		}
+
+		.divider {
+			opacity: 0.8;
+			margin: 0 0.5rem;
+		}
+
+	}
+
+	.race-state {
+		padding: .2rem .4rem;
+		font-size: .8rem;
+		margin: 0 0 0 auto;
+		text-transform: uppercase;
+	}
+
+	.btn-detail {
+
+	}
+
+	&.race--before-start {
+		.race-state {
+
+		}
+	}
+
+	&.race--running {
+		.race-state {
+			color: $white;
+			background-color: $brand-warning;
+		}
+	}
+
+	&.race--unfinished {
+		.race-state {
+			color: $white;
+			background-color: $brand-danger;
+		}
+	}
+
+	&.race--finished {
+		.race-state {
+			color: $white;
+			background-color: $brand-success;
+		}
+	}
+
+}

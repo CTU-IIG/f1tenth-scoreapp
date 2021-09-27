@@ -4,9 +4,9 @@ import React from 'react';
 
 import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { LoadingError, LoadingScreen } from '../components/layout';
-import { RaceCard } from '../components/content';
+import { RacesListItem } from '../components/content';
 import { useQuery } from '../helpers/data';
-import { R_RACES, R_TEAMS } from '../routes';
+import { R_RACE_NEW, R_TEAMS } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { findAllRaces } from '../helpers/queries';
 import { Link } from '../router/compoments';
@@ -37,18 +37,18 @@ const RacesPage = () => {
 		<>
 
 			<Breadcrumbs
-				name={R_RACES}
+				name={R_TEAMS}
 			/>
 
 			<h1>{t`titles.races`}</h1>
 
 			<p>
-				<Link className="btn btn-primary" name={R_TEAMS}>{t`racesPage.createRaceViaTeamsPage`}</Link>
+				<Link className="btn btn-primary" name={R_RACE_NEW}>{t`racesPage.createRace`}</Link>
 			</p>
 
-			<div className="card-grid">
+			<div className="races-list">
 				{op.data.map(race =>
-					<RaceCard
+					<RacesListItem
 						key={race.id}
 						race={race}
 					/>,

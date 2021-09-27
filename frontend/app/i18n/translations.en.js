@@ -14,7 +14,8 @@ export default {
 		settings: `Settings`,
 		teams: `Teams`,
 		races: `Races`,
-		presentation: `Presentation`,
+		newRace: `New race`,
+		presentation: `TV`,
 	},
 	header: {
 		appName: `ScoreApp`,
@@ -59,6 +60,7 @@ export default {
 		cancel: `Cancel`,
 		errors: {
 			fieldRequired: `Please fill this field.`,
+			invalidValue: `Invalid value.`,
 		},
 		prompt: `-- Please select --`,
 		send: `Submit`,
@@ -92,8 +94,7 @@ export default {
 		},
 	},
 	racesPage: {
-		createRace: `Create race with teamId=1 (then please refresh page)`,
-		createRaceViaTeamsPage: `Create a new race`,
+		createRace: `Create a new race`,
 	},
 	racePage: {
 		notFoundHeading: `Race not found`,
@@ -120,6 +121,15 @@ export default {
 		showAbsoluteTime: `Show absolute time`,
 		showDebugInfo: `Show debug info`,
 		autoScroll: `Auto scroll`,
+	},
+	newRaceForm: {
+		labels: {
+			type: `Type`,
+			team: `Team`,
+			teamA: `Team A`,
+			teamB: `Team B`,
+			round: `Round`,
+		},
 	},
 	teamsPage: {
 		createRace: `Create a new race`,

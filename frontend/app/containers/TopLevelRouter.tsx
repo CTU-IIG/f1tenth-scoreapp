@@ -5,7 +5,7 @@ import React from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { useRoute } from '../router/hooks';
 
-import { R_PRESENTATION, R_RACE, R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
+import { R_PRESENTATION, R_RACE, R_RACE_NEW, R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
 
 import { App } from '../components/layout';
 
@@ -15,6 +15,7 @@ import NotFoundPage from '../views/NotFoundPage';
 import HomePage from '../views/HomePage';
 import TeamsPage from '../views/TeamsPage';
 import RacesPage from '../views/RacesPage';
+import NewRacePage from '../views/NewRacePage';
 import RacePage from '../views/RacePage';
 import PresentationPage from '../views/PresentationPage';
 import SettingsPage from '../views/SettingsPage';
@@ -24,6 +25,7 @@ const routeToViewMap = new Map([
 	[R_ROOT, () => <HomePage />],
 	[R_TEAMS, () => <TeamsPage />],
 	[R_RACES, () => <RacesPage />],
+	[R_RACE_NEW, () => <NewRacePage />],
 	[R_RACE, () => <RacePage />],
 	[R_PRESENTATION, () => <PresentationPage />],
 	[R_SETTINGS, () => <SettingsPage />],

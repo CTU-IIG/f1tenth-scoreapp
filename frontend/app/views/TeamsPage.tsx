@@ -7,11 +7,10 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { useQuery } from '../helpers/data';
 import { R_RACES, R_TEAMS } from '../routes';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { createRace, findAllTeams } from '../helpers/queries';
+import { findAllTeams } from '../helpers/queries';
 import { Table, TableColumn } from '../components/table';
 import { Team } from '../types';
 import { useRouter } from '../router/hooks';
-import { QueryButton } from '../components/data';
 
 
 const getRowKey = (team: Team) => team.id;
@@ -40,19 +39,7 @@ const TeamsPage = () => {
 			type: 'string',
 			formatter: team => team.name,
 		},
-		{
-			name: 'teamsPage.columns.actions',
-			type: 'string',
-			formatter: team => (
-				<QueryButton
-					query={createRace(team.id)}
-					onSuccess={handleRaceCreated}
-					label="teamsPage.createRace"
-					style="success"
-				/>
-			),
-		},
-	]), [handleRaceCreated]);
+	]), []);
 
 	const { op } = useQuery(findAllTeams);
 

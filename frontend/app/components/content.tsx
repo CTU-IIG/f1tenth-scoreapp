@@ -4,40 +4,66 @@ import React from 'react';
 import { Link } from '../router/compoments';
 import { R_RACE } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
-import { Race } from '../types';
+import { Race, RACE_TYPE_HEAD_TO_HEAD } from '../types';
 import { copyOnClick } from '../helpers/copy';
+import classNames from 'classnames';
 
 
-export interface RaceCardProps {
+export interface RacesListItemProps {
 	race: Race;
 }
 
-export const RaceCard = (
+export const RacesListItem = (
 	{
 		race,
-	}: RaceCardProps,
+	}: RacesListItemProps,
 ) => {
 
 	const t = useFormatMessageId();
 
 	return (
-		<section className="card package">
+		<div
+			data-id={race.id}
+			className={classNames([
+				'races-list-item',
+				`race--${race.type.replace('_', '-')}`,
+				`race--${race.state.replace('_', '-')}`,
+			])}
+		>
 
-			<header className="card-heading">
-				<h3 className="heading">#{race.id} {race.teamA.name}</h3>
-			</header>
+			<div className="race-id">#{race.id}</div>
 
-			<div className="card-content">
-				{t(`race.round`)}: {race.round}
-				<br />{t(`race.type`)}: {t(`race.types.${race.type}`)}
-				<br />{t(`race.state`)}: {t(`race.states.${race.state}`)}
+			<div className="race-type">
+				{t(`race.types.${race.type}`)}
 			</div>
 
-			<div className="card-actions">
-				<Link name={R_RACE} payload={{ raceId: race.id }}>{t('race.actions.detail')}</Link>
+			<div className="race-team">
+				<span className="team-a">{race.teamA.name}</span>
+				{race.type === RACE_TYPE_HEAD_TO_HEAD && (
+					<>
+						<span className="divider">vs.</span>
+						<span className="team-b">{race.teamB.name}</span>
+					</>
+				)}
 			</div>
 
-		</section>
+			<div className="race-round">
+				{t(`race.round`)} {race.round}
+			</div>
+
+			<div className="race-state">
+				{t(`race.states.${race.state}`)}
+			</div>
+
+			<Link
+				className="btn btn-detail btn-sm btn-default"
+				name={R_RACE}
+				payload={{ raceId: race.id }}
+			>
+				{t('race.actions.detail')}
+			</Link>
+
+		</div>
 	);
 
 };

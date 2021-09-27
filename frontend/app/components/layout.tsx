@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link, NavLink } from '../router/compoments';
 import { useFormatMessageIdAsTagFn } from '../helpers/hooks';
-import { R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
+import { R_PRESENTATION, R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
 import { WebSocketInfo } from './ws';
 import classNames from 'classnames';
 import { isDefined } from '../helpers/common';
@@ -38,9 +38,9 @@ export const AppHeader = React.memo((props) => {
 						<li>
 							<NavLink name={R_RACES}>{t`titles.races`}</NavLink>
 						</li>
-						{/*<li>*/}
-						{/*	<NavLink name={R_PRESENTATION}>{t`titles.presentation`}</NavLink>*/}
-						{/*</li>*/}
+						<li>
+							<NavLink name={R_PRESENTATION}>{t`titles.presentation`}</NavLink>
+						</li>
 					</ul>
 					<ul className="right">
 						<li>

@@ -16,10 +16,10 @@ export const R_PRESENTATION = 'R_PRESENTATION';
 
 // note: ORDER MATTERS, the routes are matched from top to bottom
 export const routesMap = new Map([
-	[R_TEAM_NEW, '/team/new'],
-	[R_TEAM, '/teams/:teamId'],
+	// [R_TEAM_NEW, '/team/new'],
+	// [R_TEAM, '/teams/:teamId'],
 	[R_TEAMS, '/teams'],
-	[R_RACE_NEW, '/race/new'],
+	[R_RACE_NEW, '/races/new'],
 	[R_RACE, '/races/:raceId'],
 	[R_RACES, '/races'],
 	[R_PRESENTATION, '/presentation'],
