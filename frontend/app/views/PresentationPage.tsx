@@ -7,6 +7,8 @@ import { useCurrentRace } from '../ws/hooks';
 import { isDefined } from '../helpers/common';
 import { RaceView } from './race';
 
+import f1tenthLogo from '../images/f1tenth/f1tenth-logo-white-bg-and-url.png';
+
 
 const PresentationPage = () => {
 
@@ -17,11 +19,22 @@ const PresentationPage = () => {
 	const { currentRace } = useCurrentRace();
 
 	if (!isDefined(currentRace)) {
+		// TODO: Show LeaderBoard instead (once implemented).
 		return (
-			<>
-				Current race id is null.
-				<br />In this case, we show a leaderboard (TODO: Implement leaderboard).
-			</>
+			<div className="presentation-empty-screen">
+				<img
+					className="logo"
+					alt="F1Tenth Official Logo"
+					src={f1tenthLogo}
+					width={750}
+					height={750}
+				/>
+				<h1>9th F1TENTH Autonomous Grand Prix</h1>
+				<h2>IROS 2021 Prague</h2>
+				<div className="message">
+					No race is in progress.
+				</div>
+			</div>
 		);
 	}
 
