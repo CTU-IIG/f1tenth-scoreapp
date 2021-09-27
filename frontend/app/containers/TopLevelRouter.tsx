@@ -16,7 +16,7 @@ import HomePage from '../views/HomePage';
 import TeamsPage from '../views/TeamsPage';
 import RacesPage from '../views/RacesPage';
 import NewRacePage from '../views/NewRacePage';
-import RacePage from '../views/RacePage';
+import { RacePage } from '../views/race';
 import PresentationPage from '../views/PresentationPage';
 import SettingsPage from '../views/SettingsPage';
 

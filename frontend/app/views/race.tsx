@@ -9,13 +9,14 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { R_RACES } from '../routes';
 import { Link } from '../router/compoments';
 import { RaceTimers } from '../components/timers';
-import { RACE_STATE_BEFORE_START, RACE_STATE_RUNNING } from '../types';
+import { RACE_STATE_BEFORE_START, RACE_STATE_RUNNING, RACE_TYPE_HEAD_TO_HEAD } from '../types';
 import { useRaceDataExperimental } from '../helpers/races-experimental';
 import { CrossingsView } from '../components/crossings';
 
 import IconArrowLeft from '-!svg-react-loader?name=IconEye!../images/icons/arrow-left-solid.svg';
 import { WebSocketInfo } from '../components/ws';
 import { Button } from '../components/common';
+import classNames from 'classnames';
 
 const RaceNotFound = ({ id }) => {
 
@@ -33,14 +34,46 @@ const RaceNotFound = ({ id }) => {
 };
 
 
-const RacePage = () => {
-
-	const t = useFormatMessageId();
+export const RacePage = () => {
 
 	const { route } = useRoute();
-	const idStr = route?.payload?.raceId as string;
+
+	// TODO: Move payload validation and parsing to the router impl.
+
+	const idStr = route?.payload?.raceId;
+
+	if (typeof idStr !== 'string') {
+		return (
+			<RaceNotFound id={idStr} />
+		);
+	}
+
 	const id = parseInt(idStr);
-	console.log('id = ', id);
+
+	if (!Number.isInteger(id)) {
+		return (
+			<RaceNotFound id={idStr} />
+		);
+	}
+
+	return (
+		<RaceView
+			id={id}
+			interactive={true}
+		/>
+	);
+
+};
+
+
+export interface RaceViewProps {
+	id: number;
+	interactive: boolean;
+}
+
+export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
+
+	const t = useFormatMessageId();
 
 	const { op, startRace, stopRace, cancelRace, updateCrossing } = useRaceDataExperimental(id);
 
@@ -79,6 +112,7 @@ const RacePage = () => {
 		enhancedCrossings,
 	} = op.data.stats;
 
+	// TODO: Maybe remove this log in production to prevent memory leaks.
 	console.log('race', race);
 
 	const isActive = race.state === RACE_STATE_RUNNING;
@@ -89,13 +123,46 @@ const RacePage = () => {
 			<header className="race-header">
 				<div className="container">
 
-					<Link className="btn btn-back" name={R_RACES}>
-						<IconArrowLeft />
-						<span className="sr-only">Back to all races</span>
-					</Link>
+					{interactive && (
+						<Link className="btn btn-back" name={R_RACES}>
+							<IconArrowLeft />
+							<span className="sr-only">Back to all races</span>
+						</Link>
+					)}
 
-					<div className="race-details">
-						{t(`race.types.${race.type}`)} #{race.id}, {race.teamA.name}, round {race.round}
+					<div
+						data-id={race.id}
+						className={classNames([
+							'race-details-line',
+							`race--${race.type.replace('_', '-')}`,
+							`race--${race.state.replace('_', '-')}`,
+						])}
+					>
+
+						<div className="race-id">#{race.id}</div>
+
+						<div className="race-type">
+							{t(`race.types.${race.type}`)}
+						</div>
+
+						<div className="race-team">
+							<span className="team-a">{race.teamA.name}</span>
+							{race.type === RACE_TYPE_HEAD_TO_HEAD && (
+								<>
+									<span className="divider">vs.</span>
+									<span className="team-b">{race.teamB.name}</span>
+								</>
+							)}
+						</div>
+
+						<div className="race-round">
+							{t(`race.round`)} {race.round}
+						</div>
+
+						<div className="race-state">
+							{t(`race.states.${race.state}`)}
+						</div>
+
 					</div>
 
 					<WebSocketInfo />
@@ -107,35 +174,35 @@ const RacePage = () => {
 
 				<div className="container">
 
-					<div className="btn-group">
+					{interactive && (
+						<div className="btn-group">
 
-						<h2>{t(`race.states.${race.state}`)}</h2>
+							{race.state === RACE_STATE_BEFORE_START && (
+								<Button
+									style="default"
+									label="racePage.startRace"
+									onClick={startRace}
+								/>
+							)}
 
-						{race.state === RACE_STATE_BEFORE_START && (
-							<Button
-								style="default"
-								label="racePage.startRace"
-								onClick={startRace}
-							/>
-						)}
+							{race.state === RACE_STATE_RUNNING && (
+								<Button
+									style="default"
+									label="racePage.stopRace"
+									onClick={stopRace}
+								/>
+							)}
 
-						{race.state === RACE_STATE_RUNNING && (
-							<Button
-								style="default"
-								label="racePage.stopRace"
-								onClick={stopRace}
-							/>
-						)}
+							{race.state === RACE_STATE_RUNNING && (
+								<Button
+									style="default"
+									label="racePage.cancelRace"
+									onClick={cancelRace}
+								/>
+							)}
 
-						{race.state === RACE_STATE_RUNNING && (
-							<Button
-								style="default"
-								label="racePage.cancelRace"
-								onClick={cancelRace}
-							/>
-						)}
-
-					</div>
+						</div>
+					)}
 
 					<div className="race-layout">
 
@@ -152,6 +219,7 @@ const RacePage = () => {
 							bestLapCrossingId={bestLapCrossingId}
 							crossings={enhancedCrossings}
 							updateCrossing={updateCrossing}
+							interactive={interactive}
 						/>
 
 					</div>
@@ -168,10 +236,7 @@ const RacePage = () => {
 
 			</main>
 
-
 		</div>
 	);
 
 };
-
-export default RacePage;

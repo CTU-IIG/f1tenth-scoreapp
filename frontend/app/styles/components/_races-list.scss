@@ -12,12 +12,9 @@
 	gap: 1rem;
 }
 
-.races-list-item {
+.races-list-item, .race-details-line {
 	display: flex;
 	flex-wrap: wrap;
-	margin: 0;
-	padding: 1rem 1rem;
-	border: 1px solid $gray-lighter;
 	align-items: center;
 	column-gap: 1.875rem;
 	row-gap: 0;
@@ -50,10 +47,6 @@
 		text-transform: uppercase;
 	}
 
-	.btn-detail {
-
-	}
-
 	&.race--before-start {
 		.race-state {
 
@@ -80,5 +73,10 @@
 			background-color: $brand-success;
 		}
 	}
+}
 
+.races-list-item {
+	margin: 0;
+	padding: 1rem 1rem;
+	border: 1px solid $gray-lighter;
 }

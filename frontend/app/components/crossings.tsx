@@ -91,7 +91,7 @@ export const CrossingRow = (
 					</div>
 				</>
 			)}
-			{(showAbsoluteTime || ignored) && (
+			{(showAbsoluteTime || ignored || start) && (
 				<div className="crossing-time">
 					<span className="sr-only">{t('racePage.absoluteTime')}</span>
 					<LocalizedDate
@@ -138,6 +138,7 @@ export interface CrossingsListProps {
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
 
+	visibleScrollbar?: boolean;
 	autoScroll?: boolean;
 	setAutoScroll?: (autoScroll: boolean) => void;
 
@@ -156,6 +157,7 @@ export const CrossingsList = (
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
 
+		visibleScrollbar = true,
 		autoScroll = true,
 		setAutoScroll,
 
@@ -214,7 +216,10 @@ export const CrossingsList = (
 	return (
 		<div
 			data-auto-scroll={autoScroll}
-			className="crossings-list crossings-list--scrollable"
+			className={classNames([
+				'crossings-list',
+				visibleScrollbar ? 'crossings-list--scrollable' : 'crossings-list--scrollable-no-scrollbar',
+			])}
 			ref={ref}
 		>
 			{cs.map(c =>
@@ -238,6 +243,7 @@ export interface CrossingsViewProps {
 	bestLapCrossingId: number;
 	crossings: EnhancedCrossing[],
 	updateCrossing?: (id: number, ignored: boolean, team: CrossingTeam) => void;
+	interactive?: boolean;
 }
 
 export const CrossingsView = (
@@ -245,15 +251,16 @@ export const CrossingsView = (
 		bestLapCrossingId,
 		crossings,
 		updateCrossing,
+		interactive = true,
 	}: CrossingsViewProps,
 ) => {
 
 	const t = useFormatMessageId();
 
 	const [state, setState] = useState(() => ({
-		showIgnored: true,
+		showIgnored: interactive,
 		showAbsoluteTime: false,
-		showDebugInfo: true,
+		showDebugInfo: interactive,
 		autoScroll: true,
 	}));
 
@@ -335,40 +342,42 @@ export const CrossingsView = (
 
 	return (
 		<div className="crossings-view">
-			<ul className="crossings-view-options">
-				<CheckboxOptionBox
-					name="showIgnored"
-					id="crossings-options--showIgnored"
-					label={t('racePage.showIgnored')}
-					value="showIgnored"
-					selected={state.showIgnored}
-					onChange={handleOptionChange}
-				/>
-				<CheckboxOptionBox
-					name="showAbsoluteTime"
-					id="crossings-options--showAbsoluteTime"
-					label={t('racePage.showAbsoluteTime')}
-					value="showAbsoluteTime"
-					selected={state.showAbsoluteTime}
-					onChange={handleOptionChange}
-				/>
-				<CheckboxOptionBox
-					name="showDebugInfo"
-					id="crossings-options--showDebugInfo"
-					label={t('racePage.showDebugInfo')}
-					value="showDebugInfo"
-					selected={state.showDebugInfo}
-					onChange={handleOptionChange}
-				/>
-				<CheckboxOptionBox
-					name="autoScroll"
-					id="crossings-options--autoScroll"
-					label={t('racePage.autoScroll')}
-					value="autoScroll"
-					selected={state.autoScroll}
-					onChange={handleOptionChange}
-				/>
-			</ul>
+			{interactive && (
+				<ul className="crossings-view-options">
+					<CheckboxOptionBox
+						name="showIgnored"
+						id="crossings-options--showIgnored"
+						label={t('racePage.showIgnored')}
+						value="showIgnored"
+						selected={state.showIgnored}
+						onChange={handleOptionChange}
+					/>
+					<CheckboxOptionBox
+						name="showAbsoluteTime"
+						id="crossings-options--showAbsoluteTime"
+						label={t('racePage.showAbsoluteTime')}
+						value="showAbsoluteTime"
+						selected={state.showAbsoluteTime}
+						onChange={handleOptionChange}
+					/>
+					<CheckboxOptionBox
+						name="showDebugInfo"
+						id="crossings-options--showDebugInfo"
+						label={t('racePage.showDebugInfo')}
+						value="showDebugInfo"
+						selected={state.showDebugInfo}
+						onChange={handleOptionChange}
+					/>
+					<CheckboxOptionBox
+						name="autoScroll"
+						id="crossings-options--autoScroll"
+						label={t('racePage.autoScroll')}
+						value="autoScroll"
+						selected={state.autoScroll}
+						onChange={handleOptionChange}
+					/>
+				</ul>
+			)}
 			<CrossingsList
 
 				bestLapCrossingId={bestLapCrossingId}
@@ -379,10 +388,11 @@ export const CrossingsView = (
 				showDebugInfo={state.showDebugInfo}
 
 				// onUpdateCrossingTeam={isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
-				onUpdateCrossingIgnored={isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
+				onUpdateCrossingIgnored={interactive && isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
 
-				autoScroll={state.autoScroll}
-				setAutoScroll={setAutoScroll}
+				visibleScrollbar={interactive}
+				autoScroll={interactive ? state.autoScroll : true}
+				setAutoScroll={interactive ? setAutoScroll : undefined}
 
 			/>
 		</div>
