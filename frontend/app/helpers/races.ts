@@ -65,6 +65,7 @@ export const computeStats = (race: FullRace): RaceStats => {
 		if (startTime === -1) {
 			c.start = true;
 			startTime = c.time;
+			currentLapStartTime = startTime;
 		}
 
 		if (last !== -1) {
