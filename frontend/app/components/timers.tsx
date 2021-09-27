@@ -13,6 +13,14 @@ export interface TimeDisplayValueProps {
 
 export const TimerDisplayValue = ({ time }: TimeDisplayValueProps) => {
 
+	// TODO: This is a temp fix because we don't need/want to handle negative durations.
+	//   If there is a small deviation in timestamps, Timer component passes negative
+	//   differences to TimerDisplay which then renders minus sign that causes visual layout shift.
+	if (time < -1) {
+		// so for now do not allow negative values (-1 is a special value indicating "not set")
+		time = -1;
+	}
+
 	if (time === -1) {
 		return (
 			<div className="display-value display-value--disabled">
