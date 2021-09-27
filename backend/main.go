@@ -123,7 +123,10 @@ func setRaceState(c echo.Context, state RaceState) error {
 		switch state {
 		case Running:
 			if currentRace.race != nil {
-				return fmt.Errorf("race %d already running", currentRace.race.ID)
+				return echo.NewHTTPError(
+					http.StatusBadRequest,
+					fmt.Sprintf("another race with id %d is already running", currentRace.race.ID),
+				)
 			}
 			expectedState = BeforeStart
 		case Finished:
@@ -131,11 +134,19 @@ func setRaceState(c echo.Context, state RaceState) error {
 		case Unfinished:
 			expectedState = Running
 		default:
-			return fmt.Errorf("unsupported state '%s'", string(state))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Sprintf("unsupported state '%s'", string(state)),
+			)
 		}
 		if race.State != expectedState {
-			return fmt.Errorf("state should be '%s', not '%s'",
-				string(expectedState), string(race.State))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Sprintf(
+					"state should be '%s', not '%s'",
+					string(expectedState), string(race.State),
+				),
+			)
 		}
 		if err := tx.Model(&race).Updates(&Race{State: state}).Error; err != nil {
 			return err
