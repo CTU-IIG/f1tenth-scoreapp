@@ -4,7 +4,10 @@
 
 package main
 
-import "log"
+import (
+	"encoding/json"
+	"log"
+)
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -45,11 +48,43 @@ func newHub() *Hub {
 	}
 }
 
+func (h *Hub) sendBroadcast(message []byte) {
+	for client := range h.clients {
+		select {
+		case client.send <- message:
+		default:
+			close(client.send)
+			delete(h.clients, client)
+		}
+	}
+}
+
+func (h *Hub) getBarrierStatusMsg() ([]byte, error) {
+	type BarrierStatus struct {
+		Barriers []uint `json:"barriers"`
+	}
+	bs := BarrierStatus{Barriers: make([]uint, 0)}
+	for _, barrier := range h.barriers {
+		bs.Barriers = append(bs.Barriers, barrier.Id)
+	}
+	b, err := json.Marshal(bs)
+	if err != nil {
+		log.Printf("barrier status marshal error: %v", err)
+	}
+	return b, err
+}
+
 func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.registerClient:
 			h.clients[client] = true
+
+			// Send the client barrier status
+			if b, err := h.getBarrierStatusMsg(); err == nil {
+				client.send <- b
+			}
+
 		case client := <-h.unregisterClient:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -58,23 +93,23 @@ func (h *Hub) run() {
 		case barrier := <-h.registerBarrier:
 			if _, ok := h.barriers[barrier.Id]; ok {
 				barrier.RegistrationOk <- false
+				break
 			} else {
 				h.barriers[barrier.Id] = barrier
 				barrier.RegistrationOk <- true
 				log.Printf("registering barrier %d\n", barrier.Id)
 			}
+			if b, err := h.getBarrierStatusMsg(); err == nil {
+				h.sendBroadcast(b)
+			}
 		case barrier := <-h.unregisterBarrier:
 			log.Printf("unregistering barrier %d\n", barrier.Id)
 			delete(h.barriers, barrier.Id)
-		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
+			if b, err := h.getBarrierStatusMsg(); err == nil {
+				h.sendBroadcast(b)
 			}
+		case message := <-h.broadcast:
+			h.sendBroadcast(message)
 		}
 	}
 }
