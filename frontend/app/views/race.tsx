@@ -14,7 +14,7 @@ import { useRaceDataExperimental } from '../helpers/races-experimental';
 import { CrossingsView } from '../components/crossings';
 
 import IconArrowLeft from '-!svg-react-loader?name=IconEye!../images/icons/arrow-left-solid.svg';
-import { WebSocketInfo } from '../components/ws';
+import { OnlineBarriersInfo, WebSocketInfo } from '../components/ws';
 import { Button } from '../components/common';
 import classNames from 'classnames';
 
@@ -164,6 +164,8 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 						</div>
 
 					</div>
+
+					<OnlineBarriersInfo/>
 
 					<WebSocketInfo />
 

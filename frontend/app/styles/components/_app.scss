@@ -91,8 +91,12 @@ $app-footer-size: remy(100px);
 
 	}
 
-	.ws-info:first-of-type {
-		margin-left: auto;
+	.ws-info {
+		margin: 0 0 0 auto;
+	}
+
+	.ws-info + .ws-info {
+		margin: 0;
 	}
 
 	#app-navigation-toggle {

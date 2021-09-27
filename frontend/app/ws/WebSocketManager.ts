@@ -331,6 +331,8 @@ class WebSocketManager {
 
 	private processMessage(data: string) {
 
+		// console.log('data = ', data);
+
 		let msg: any;
 
 		try {
@@ -349,8 +351,9 @@ class WebSocketManager {
 			this.notifyRaceDataListeners(msg.race);
 		}
 
-		if (isDefined(msg.barriers)) {
+		if (Array.isArray(msg.barriers)) {
 			this.barriers = msg.barriers;
+			this.barriers.sort();
 			this.notifyBarriersChangeListeners();
 		}
 

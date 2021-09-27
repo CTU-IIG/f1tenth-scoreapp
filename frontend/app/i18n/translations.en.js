@@ -176,4 +176,8 @@ export default {
 		disconnect: `Disconnect`,
 		changeUrlInSettings: `Change URL is Settings`,
 	},
+	barriersInfo: {
+		onlineBarriers: `Connected barriers`,
+		none: 'none',
+	},
 };

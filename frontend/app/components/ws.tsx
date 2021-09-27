@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { useCallback } from 'react';
-import { useWebSocketManagerState } from '../ws/hooks';
+import { useOnlineBarriers, useWebSocketManagerState } from '../ws/hooks';
 import { useFormatMessageId } from '../helpers/hooks';
 import {
 	MANAGER_STATE_CONNECTED,
@@ -81,6 +81,30 @@ export const WebSocketInfo = (props: WebSocketInfoProps) => {
 						/>
 					)}
 				</div>
+			</div>
+		</div>
+	);
+
+};
+
+export interface OnlineBarriersInfoProps {
+
+}
+
+export const OnlineBarriersInfo = (props: OnlineBarriersInfoProps) => {
+
+	const t = useFormatMessageId();
+
+	const { onlineBarriers } = useOnlineBarriers();
+
+	const style = onlineBarriers.length >= 2 ? 'success' : onlineBarriers.length == 1 ? 'warning' : 'danger';
+
+	return (
+		<div className={`barriers-info ws-info ws-info--${style}`} tabIndex={0}>
+			<div className="barriers-info-number">{onlineBarriers.length}</div>
+			<div className="ws-info-details">
+				{t('barriersInfo.onlineBarriers')}{': '}
+				<code>{onlineBarriers.length > 0 ? onlineBarriers.join(', ') : t('barriersInfo.none')}</code>
 			</div>
 		</div>
 	);
