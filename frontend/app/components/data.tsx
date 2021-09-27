@@ -48,7 +48,7 @@ export const QueryButton = <Result extends any>({ query, onSuccess, ...otherProp
 				setState(prevState => ({ loading: false }));
 			});
 
-	}, [query, setState, store]);
+	}, [query, onSuccess, setState, store]);
 
 	return (
 		<Button
