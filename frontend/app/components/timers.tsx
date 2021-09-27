@@ -157,7 +157,8 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 	}, [refreshActive, stop, setCurrentTime]);
 
 	const diff = start !== -1
-		? (isDefined(stop) && stop !== -1 ? stop : currentTime) - start
+		// note: to prevent stale currentTime after refreshActive/stop changes, use Date.now()
+		? (isDefined(stop) && stop !== -1 ? stop : Date.now()) - start
 		: -1;
 
 	return (
