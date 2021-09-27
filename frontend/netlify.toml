@@ -27,3 +27,6 @@
 
 		[build.processing.images]
 			compress = false
+
+[context.legacy]
+	environment = { BROWSERSLIST_ENV = "legacy" }
