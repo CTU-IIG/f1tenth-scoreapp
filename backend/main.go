@@ -404,6 +404,7 @@ func broadcastRace(race *Race) error {
 
 func barrierSimulator(hub *Hub, db *gorm.DB) {
 	time.Sleep(1 * time.Second)
+	var barrierId uint = 1
 	for {
 		var race Race
 		if err := db.Last(&race, "state = ?", Running).Error; err != nil {
@@ -417,10 +418,15 @@ func barrierSimulator(hub *Hub, db *gorm.DB) {
 			db.Model(&race).Association("Crossings").Append(&Crossing{
 				Time:      Time(time.Now()),
 				Ignored:   false,
-				BarrierId: 1,
+				BarrierId: barrierId,
 			})
 			broadcastRace(&race)
 			// reset the race id so that next time gorm will rerun the query
+		}
+		if barrierId == 1 {
+			barrierId = 2
+		} else {
+			barrierId = 1
 		}
 		time.Sleep(time.Duration(5_000+rand.Intn(3_000)) * time.Millisecond)
 	}
