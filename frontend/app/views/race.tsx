@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { useDocumentTitle, useFormatMessageId } from '../helpers/hooks';
 import { useRoute } from '../router/hooks';
@@ -27,6 +27,7 @@ import classNames from 'classnames';
 import { RaceTimers } from '../components/timers';
 import { CrossingsList, CrossingsView } from '../components/crossings';
 import { RaceStats } from '../helpers/races';
+import { useOnKeyDownEvent } from '../helpers/keyboard';
 
 
 const RaceNotFound = ({ id }) => {
@@ -296,34 +297,19 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 		setForceNonInteractive(prevValue => !prevValue);
 	}, [setForceNonInteractive]);
 
-	useEffect(() => {
+	const handleKeyDownEvent = useCallback((event: KeyboardEvent) => {
 
-		let didUnsubscribe = false;
+		if (event.repeat) {
+			return;
+		}
 
-		const handler = (event: KeyboardEvent) => {
-
-			if (didUnsubscribe) {
-				return;
-			}
-
-			if (event.repeat) {
-				return;
-			}
-
-			if (event.key === 'i' || event.key === 'I') {
-				toggleForceNonInteractive();
-			}
-
-		};
-
-		window.addEventListener('keydown', handler);
-
-		return () => {
-			didUnsubscribe = true;
-			window.removeEventListener('keydown', handler);
-		};
+		if (event.key === 'i' || event.key === 'I') {
+			toggleForceNonInteractive();
+		}
 
 	}, [toggleForceNonInteractive]);
+
+	useOnKeyDownEvent(handleKeyDownEvent);
 
 	const { op, startRace, stopRace, cancelRace, updateCrossing } = useRaceDataExperimental(id);
 
