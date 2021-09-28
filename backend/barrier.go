@@ -83,16 +83,16 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
 					// First crossing in a race
 					if crossing.BarrierId == 1 {
-						crossing.Team = race.TeamAID
-					} else if crossing.BarrierId == 2 && race.TeamBID != nil {
-						crossing.Team = uint(*race.TeamBID)
+						crossing.Team = TeamA
+					} else if crossing.BarrierId == 2 {
+						crossing.Team = TeamB
 					}
 				} else {
 					// Later crossings in the race
-					if lastCrossing.Team == race.TeamAID && race.TeamBID != nil {
-						crossing.Team = uint(*race.TeamBID)
-					} else if race.TeamBID != nil && lastCrossing.Team == uint(*race.TeamBID) {
-						crossing.Team = race.TeamAID
+					if lastCrossing.Team == TeamA {
+						crossing.Team = TeamB
+					} else if lastCrossing.Team == TeamB {
+						crossing.Team = TeamA
 					}
 				}
 				log.Printf(name+": associating crossing with team %d", crossing.Team)

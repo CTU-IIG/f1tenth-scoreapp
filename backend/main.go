@@ -47,20 +47,20 @@ type Race struct {
 }
 
 type Crossing struct {
-	ID        uint `gorm:"primaryKey" json:"id" param:"id" query:"id"`
-	UpdatedAt Time `json:"updatedAt"`
-	Time      Time `json:"time"`
-	Ignored   bool `json:"ignored"`
-	BarrierId uint `json:"barrierId"`
-	Team      uint `json:"team"` // 0 = not set, 1 = team A, 2 = team B
+	ID        uint         `gorm:"primaryKey" json:"id" param:"id" query:"id"`
+	UpdatedAt Time         `json:"updatedAt"`
+	Time      Time         `json:"time"`
+	Ignored   bool         `json:"ignored"`
+	BarrierId uint         `json:"barrierId"`
+	Team      CrossingTeam `json:"team"`
 	// If 0, the crossing is not associated to any race
 	RaceID uint `json:"-"`
 }
 
 type CrossingUpdate struct {
-	ID      uint `param:"id"`
-	Ignored bool `json:"ignored"`
-	Team    uint `json:"team"` // 0 = not set, 1 = team A, 2 = team B
+	ID      uint         `param:"id"`
+	Ignored bool         `json:"ignored"`
+	Team    CrossingTeam `json:"team"`
 }
 
 type CurrentRace struct {
