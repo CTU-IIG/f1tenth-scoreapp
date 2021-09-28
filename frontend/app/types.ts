@@ -88,6 +88,10 @@ export type CrossingTeam =
 	| typeof CROSSING_TEAM_A
 	| typeof CROSSING_TEAM_B;
 
+export type CrossingTeamAOrB =
+	| typeof CROSSING_TEAM_A
+	| typeof CROSSING_TEAM_B;
+
 export interface Crossing extends Entity {
 	time: number; // Unix timestamp in UTC milliseconds
 	ignored: boolean;

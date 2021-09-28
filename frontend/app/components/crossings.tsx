@@ -1,6 +1,13 @@
 "use strict";
 
-import { Crossing, CROSSING_TEAM_A, CROSSING_TEAM_B, CROSSING_TEAM_UNSET, CrossingTeam } from '../types';
+import {
+	Crossing,
+	CROSSING_TEAM_A,
+	CROSSING_TEAM_B,
+	CROSSING_TEAM_UNSET,
+	CrossingTeam,
+	CrossingTeamAOrB,
+} from '../types';
 import { Button, ButtonProps } from './common';
 import { useFormatMessageId } from '../helpers/hooks';
 import classNames from 'classnames';
@@ -17,6 +24,11 @@ import { CheckboxOptionBox, RadioOptionBox } from './inputs';
 
 export const crossingTeamToClass = (team: CrossingTeam) =>
 	team === CROSSING_TEAM_A ? 'a' : team === CROSSING_TEAM_B ? 'b' : 'unset';
+
+export const otherTeam = (current: CrossingTeam, fallback: CrossingTeamAOrB) =>
+	current === CROSSING_TEAM_UNSET
+		? fallback
+		: current === CROSSING_TEAM_A ? CROSSING_TEAM_B : CROSSING_TEAM_A;
 
 export interface CrossingRowProps {
 	crossing: Crossing,
@@ -404,25 +416,25 @@ export const CrossingsView = (
 
 		const id = parseInt(crossing.dataset.id);
 		const ignored = crossing.dataset.ignored === 'true';
-		const team = parseInt(crossing.dataset.team);
+		const team = parseInt(crossing.dataset.team) as CrossingTeam;
 
 		if (btn.name === 'setTeamA') {
-			updateCrossing(id, ignored, team !== CROSSING_TEAM_A ? CROSSING_TEAM_A : CROSSING_TEAM_UNSET);
+			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_A));
 			return;
 		}
 
 		if (btn.name === 'setTeamB') {
-			updateCrossing(id, ignored, team !== CROSSING_TEAM_B ? CROSSING_TEAM_B : CROSSING_TEAM_UNSET);
+			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_B));
 			return;
 		}
 
 		if (btn.name === 'ignore') {
-			updateCrossing(id, true, team as CrossingTeam);
+			updateCrossing(id, true, team);
 			return;
 		}
 
 		if (btn.name === 'unignore') {
-			updateCrossing(id, false, team as CrossingTeam);
+			updateCrossing(id, false, team);
 			return;
 		}
 
