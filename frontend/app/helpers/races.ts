@@ -179,7 +179,7 @@ export const computeTeamStatsAndMutateCrossings = (
 			//       of computeTeamStatsAndMutateCrossings on the same race, resp. crossings array
 			//       iff each for each team value, unique lapBarrierId value is provided.
 			c.checkpoint = {
-				lapNumber: numLaps,
+				lapNumber: numLaps + 1,
 				number: checkpointNumber,
 				time: diff,
 			};
