@@ -1,6 +1,6 @@
 "use strict";
 
-import { CROSSING_TEAM_A, CROSSING_TEAM_B, CROSSING_TEAM_UNSET, CrossingTeam, EnhancedCrossing } from '../types';
+import { Crossing, CROSSING_TEAM_A, CROSSING_TEAM_B, CROSSING_TEAM_UNSET, CrossingTeam } from '../types';
 import { Button, ButtonProps } from './common';
 import { useFormatMessageId } from '../helpers/hooks';
 import classNames from 'classnames';
@@ -19,7 +19,7 @@ export const crossingTeamToClass = (team: CrossingTeam) =>
 	team === CROSSING_TEAM_A ? 'a' : team === CROSSING_TEAM_B ? 'b' : 'unset';
 
 export interface CrossingRowProps {
-	crossing: EnhancedCrossing,
+	crossing: Crossing,
 	isBestLap: boolean;
 	showAbsoluteTime?: boolean;
 	showDebugInfo?: boolean;
@@ -40,7 +40,7 @@ export const CrossingRow = (
 
 	const t = useFormatMessageId();
 
-	const { id, time, ignored, barrierId, team, start, lap } = crossing;
+	const { id, time, ignored, barrierId, team, start, checkpoint, lap } = crossing;
 
 	return (
 		<div
@@ -79,6 +79,18 @@ export const CrossingRow = (
 			{start && (
 				<div className="start">{t('racePage.start')}</div>
 			)}
+			{isDefined(checkpoint) && (
+				<>
+					<div className="checkpoint-number">
+						<div className="prefix">{t('racePage.checkpoint', { number: checkpoint.number })}</div>
+						<div className="value">{checkpoint.lapNumber}</div>
+					</div>
+					<div className="checkpoint-time">
+						<div className="prefix">{t('racePage.time')}</div>
+						<TimerDisplay time={checkpoint.time} />
+					</div>
+				</>
+			)}
 			{isDefined(lap) && (
 				<>
 					<div className="lap-number">
@@ -91,7 +103,7 @@ export const CrossingRow = (
 					</div>
 				</>
 			)}
-			{(showAbsoluteTime || ignored || start) && (
+			{(showAbsoluteTime || ignored || start || (!isDefined(checkpoint) && !isDefined(lap))) && (
 				<div className="crossing-time">
 					<span className="sr-only">{t('racePage.absoluteTime')}</span>
 					<LocalizedDate
@@ -129,10 +141,13 @@ export const CrossingRow = (
 export interface CrossingsListProps {
 
 	bestLapCrossingId: number;
-	crossings: EnhancedCrossing[],
+	crossings: Crossing[],
 
 	showIgnored: boolean;
 	barrierId?: number;
+	showCheckpoints: boolean;
+	team?: CrossingTeam;
+
 	showAbsoluteTime?: boolean;
 	showDebugInfo?: boolean;
 
@@ -153,6 +168,9 @@ export const CrossingsList = (
 
 		showIgnored,
 		barrierId,
+		showCheckpoints,
+		team,
+
 		showAbsoluteTime,
 		showDebugInfo,
 
@@ -168,7 +186,7 @@ export const CrossingsList = (
 
 	const filter = useMemo(() => {
 
-		const f: Parameters<Array<EnhancedCrossing>['filter']>[0][] = [];
+		const f: Parameters<Array<Crossing>['filter']>[0][] = [];
 
 		if (!showIgnored) {
 			f.push(c => !c.ignored);
@@ -178,9 +196,17 @@ export const CrossingsList = (
 			f.push(c => c.barrierId == barrierId);
 		}
 
+		if (!showCheckpoints) {
+			f.push(c => !isDefined(c.checkpoint));
+		}
+
+		if (isDefined(team)) {
+			f.push(c => c.team == team);
+		}
+
 		return f;
 
-	}, [showIgnored, barrierId]);
+	}, [showIgnored, barrierId, showCheckpoints, team]);
 
 	const cs = isDefined(filter) && filter.length > 0
 		? crossings.filter(
@@ -262,7 +288,7 @@ export const CrossingsList = (
 
 export interface CrossingsViewProps {
 	bestLapCrossingId: number;
-	crossings: EnhancedCrossing[],
+	crossings: Crossing[],
 	updateCrossing?: (id: number, ignored: boolean, team: CrossingTeam) => void;
 	interactive?: boolean;
 	barriersFilter?: boolean;
@@ -270,11 +296,16 @@ export interface CrossingsViewProps {
 }
 
 interface CrossingsViewState {
+
 	showIgnored: boolean;
+	barrierId: number | undefined;
+	showCheckpoints: boolean;
+
 	showAbsoluteTime: boolean;
 	showDebugInfo: boolean;
+
 	autoScroll: boolean;
-	barrierId: number | undefined;
+
 }
 
 export const CrossingsView = (
@@ -291,11 +322,16 @@ export const CrossingsView = (
 	const t = useFormatMessageId();
 
 	const [state, setState] = useState<CrossingsViewState>(() => ({
+
 		showIgnored: interactive,
+		barrierId: undefined,
+		showCheckpoints: interactive,
+
 		showAbsoluteTime: false,
 		showDebugInfo: interactive,
+
 		autoScroll: true,
-		barrierId: undefined,
+
 	}));
 
 	const handleOptionChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((event) => {
@@ -319,6 +355,7 @@ export const CrossingsView = (
 
 		if (
 			input.name === 'showIgnored'
+			|| input.name === 'showCheckpoints'
 			|| input.name === 'showAbsoluteTime'
 			|| input.name === 'showDebugInfo'
 			|| input.name === 'autoScroll'
@@ -432,6 +469,14 @@ export const CrossingsView = (
 						onChange={handleOptionChange}
 					/>
 					<CheckboxOptionBox
+						name="showCheckpoints"
+						id="crossings-options--showCheckpoints"
+						label={t('racePage.showCheckpoints')}
+						value="showCheckpoints"
+						selected={state.showCheckpoints}
+						onChange={handleOptionChange}
+					/>
+					<CheckboxOptionBox
 						name="showAbsoluteTime"
 						id="crossings-options--showAbsoluteTime"
 						label={t('racePage.showAbsoluteTime')}
@@ -464,6 +509,8 @@ export const CrossingsView = (
 
 				showIgnored={state.showIgnored}
 				barrierId={state.barrierId}
+				showCheckpoints={state.showCheckpoints}
+
 				showAbsoluteTime={state.showAbsoluteTime}
 				showDebugInfo={state.showDebugInfo}
 

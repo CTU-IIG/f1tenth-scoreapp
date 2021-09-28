@@ -6,7 +6,7 @@ import { useWebSocketManager } from '../ws/hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { cancelRace, findOneRaceById, startRace, stopRace, updateCrossing } from './queries';
 import { IS_DEVELOPMENT, isDefined, staleDeps } from './common';
-import { computeRaceStats, RaceStats } from './races';
+import { computeRaceStatsAndMutateCrossings, RaceStats } from './races';
 import { useStore } from '../store/hooks';
 
 
@@ -124,7 +124,7 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 							hasError: false,
 							data: {
 								race: op.data,
-								stats: computeRaceStats(op.data),
+								stats: computeRaceStatsAndMutateCrossings(op.data),
 							},
 						},
 					};
@@ -156,7 +156,7 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 							hasError: false,
 							data: {
 								race,
-								stats: computeRaceStats(race),
+								stats: computeRaceStatsAndMutateCrossings(race),
 							},
 						},
 					};

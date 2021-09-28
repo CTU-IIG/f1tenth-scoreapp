@@ -259,12 +259,12 @@ $team-b-color: $blue;
 			margin: 0 1rem 0 0;
 		}
 
-		.lap-number, .lap-time {
+		.lap-number, .lap-time, .checkpoint-number, .checkpoint-time {
 			display: flex;
 			align-items: center;
 		}
 
-		.lap-number {
+		.lap-number, .checkpoint-number {
 			.prefix {
 				margin: 0 5px 0 0;
 			}

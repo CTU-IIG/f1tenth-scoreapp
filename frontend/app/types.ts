@@ -58,6 +58,10 @@ export interface HeadToHeadRace extends AbstractRace {
 
 export type Race = TimeTrialRace | HeadToHeadRace;
 
+export type FullTimeTrialRace = TimeTrialRace & { crossings: Crossing[] };
+
+export type FullHeadToHeadRace = HeadToHeadRace & { crossings: Crossing[] };
+
 export type FullRace = Race & { crossings: Crossing[] };
 
 export interface CreateTimeTrialRaceData {
@@ -89,14 +93,19 @@ export interface Crossing extends Entity {
 	ignored: boolean;
 	barrierId: number;
 	team: CrossingTeam;
+	// computed fields that may be added by computeRaceStatsAndMutateCrossings
+	start?: boolean | undefined;
+	checkpoint?: ComputedLapCheckpoint | undefined;
+	lap?: ComputedLap | undefined;
+}
+
+export interface ComputedLapCheckpoint {
+	lapNumber: number;
+	number: number;
+	time: number;
 }
 
 export interface ComputedLap {
 	number: number;
 	time: number;
-}
-
-export interface EnhancedCrossing extends Crossing {
-	start?: boolean | undefined;
-	lap?: ComputedLap | undefined;
 }

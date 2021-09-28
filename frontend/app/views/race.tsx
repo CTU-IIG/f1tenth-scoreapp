@@ -9,12 +9,14 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { R_RACES } from '../routes';
 import { Link } from '../router/compoments';
 import {
+	CROSSING_TEAM_A,
+	CROSSING_TEAM_B,
+	FullHeadToHeadRace,
 	FullRace,
-	HeadToHeadRace,
+	FullTimeTrialRace,
 	RACE_STATE_BEFORE_START,
 	RACE_STATE_RUNNING,
 	RACE_TYPE_HEAD_TO_HEAD,
-	TimeTrialRace,
 } from '../types';
 import { CrossingUpdater, useRaceDataExperimental } from '../helpers/races-experimental';
 
@@ -25,6 +27,7 @@ import classNames from 'classnames';
 import { RaceTimers } from '../components/timers';
 import { CrossingsList, CrossingsView } from '../components/crossings';
 import { RaceStats } from '../helpers/races';
+
 
 const RaceNotFound = ({ id }) => {
 
@@ -140,7 +143,7 @@ const RaceHeader = ({ race, interactive }: RaceHeaderProps) => {
 };
 
 interface RaceHeadToHeadContentProps {
-	race: HeadToHeadRace;
+	race: FullHeadToHeadRace;
 	stats: RaceStats;
 	interactive: boolean;
 	updateCrossing: CrossingUpdater;
@@ -148,15 +151,10 @@ interface RaceHeadToHeadContentProps {
 
 const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: RaceHeadToHeadContentProps) => {
 
-	const {
-		startTime,
-		stopTime,
-		numLaps,
-		bestLapTime,
-		bestLapCrossingId,
-		currentLapStartTime,
-		enhancedCrossings,
-	} = stats;
+	if (race.type !== stats.type) {
+		// that should never happen
+		throw new Error(`race.type (${race.type}) !== stats.type (${stats.type})`);
+	}
 
 	const timersActive = race.state === RACE_STATE_RUNNING;
 
@@ -178,41 +176,44 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 			<div className="race-layout">
 
 				<RaceTimers
-					startTime={startTime}
-					stopTime={stopTime}
-					numLaps={numLaps}
-					bestLapTime={bestLapTime}
-					currentLapStartTime={currentLapStartTime}
+					startTime={stats.teamA.startTime}
+					stopTime={stats.teamA.stopTime}
+					numLaps={stats.teamA.numLaps}
+					bestLapTime={stats.teamA.bestLapTime}
+					currentLapStartTime={stats.teamA.currentLapStartTime}
 					active={timersActive}
 				/>
 
 				{interactive
 					? (
 						<CrossingsView
-							bestLapCrossingId={bestLapCrossingId}
-							crossings={enhancedCrossings}
+							bestLapCrossingId={/* TODO */-1}
+							crossings={race.crossings}
 							updateCrossing={updateCrossing}
 							interactive={interactive}
-							barriersFilter={race.type === RACE_TYPE_HEAD_TO_HEAD}
-							showTeamSetter={race.type === RACE_TYPE_HEAD_TO_HEAD}
+							barriersFilter={true}
+							showTeamSetter={true}
 						/>
 					)
 					: (
 						<>
 							<CrossingsList
-								bestLapCrossingId={bestLapCrossingId}
-								crossings={enhancedCrossings}
+								bestLapCrossingId={/* TODO */-1}
+								crossings={race.crossings}
 								showIgnored={false}
+								showCheckpoints={false}
+								team={CROSSING_TEAM_A}
 								showAbsoluteTime={false}
 								showDebugInfo={false}
 								visibleScrollbar={false}
 								autoScroll={true}
 							/>
-
 							<CrossingsList
-								bestLapCrossingId={bestLapCrossingId}
-								crossings={enhancedCrossings}
+								bestLapCrossingId={/* TODO */-1}
+								crossings={race.crossings}
 								showIgnored={false}
+								showCheckpoints={false}
+								team={CROSSING_TEAM_B}
 								showAbsoluteTime={false}
 								showDebugInfo={false}
 								visibleScrollbar={false}
@@ -223,11 +224,11 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 				}
 
 				<RaceTimers
-					startTime={startTime}
-					stopTime={stopTime}
-					numLaps={numLaps}
-					bestLapTime={bestLapTime}
-					currentLapStartTime={currentLapStartTime}
+					startTime={stats.teamB.startTime}
+					stopTime={stats.teamB.stopTime}
+					numLaps={stats.teamB.numLaps}
+					bestLapTime={stats.teamB.bestLapTime}
+					currentLapStartTime={stats.teamB.currentLapStartTime}
 					active={timersActive}
 				/>
 
@@ -238,7 +239,7 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 };
 
 interface RaceTimeTrialContentProps {
-	race: TimeTrialRace;
+	race: FullTimeTrialRace;
 	stats: RaceStats;
 	interactive: boolean;
 	updateCrossing: CrossingUpdater;
@@ -246,15 +247,10 @@ interface RaceTimeTrialContentProps {
 
 const RaceTimeTrialContent = ({ race, stats, interactive, updateCrossing }: RaceTimeTrialContentProps) => {
 
-	const {
-		startTime,
-		stopTime,
-		numLaps,
-		bestLapTime,
-		bestLapCrossingId,
-		currentLapStartTime,
-		enhancedCrossings,
-	} = stats;
+	if (race.type !== stats.type) {
+		// that should never happen
+		throw new Error(`race.type (${race.type}) !== stats.type (${stats.type})`);
+	}
 
 	const timersActive = race.state === RACE_STATE_RUNNING;
 
@@ -262,17 +258,17 @@ const RaceTimeTrialContent = ({ race, stats, interactive, updateCrossing }: Race
 		<div className="race-layout">
 
 			<RaceTimers
-				startTime={startTime}
-				stopTime={stopTime}
-				numLaps={numLaps}
-				bestLapTime={bestLapTime}
-				currentLapStartTime={currentLapStartTime}
+				startTime={stats.startTime}
+				stopTime={stats.stopTime}
+				numLaps={stats.numLaps}
+				bestLapTime={stats.bestLapTime}
+				currentLapStartTime={stats.currentLapStartTime}
 				active={timersActive}
 			/>
 
 			<CrossingsView
-				bestLapCrossingId={bestLapCrossingId}
-				crossings={enhancedCrossings}
+				bestLapCrossingId={stats.bestLapCrossingId}
+				crossings={race.crossings}
 				updateCrossing={updateCrossing}
 				interactive={interactive}
 				barriersFilter={false}

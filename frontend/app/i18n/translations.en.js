@@ -118,6 +118,7 @@ export default {
 		barrierId: `BID`,
 		id: `ID`,
 		showIgnored: `Show ignored`,
+		showCheckpoints: `Show checkpoints`,
 		showAbsoluteTime: `Show absolute time`,
 		showDebugInfo: `Show debug info`,
 		autoScroll: `Auto scroll`,
@@ -126,6 +127,7 @@ export default {
 		onlyBarrier2: `Only barrier 2`,
 		enableInteractiveMode: `Enable interactive mode`,
 		disableInteractiveMode: `Disable interactive mode`,
+		checkpoint: `{number, select, 1 {Mid} other {Ch{number}}}`,
 	},
 	newRaceForm: {
 		labels: {
