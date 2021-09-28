@@ -419,6 +419,7 @@ $team-b-color: $blue;
 
 .race-toolbar {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: flex-start;
 	gap: 1rem;
 	margin: 0 0 1rem 0;
@@ -436,7 +437,7 @@ $team-b-color: $blue;
 
 	.race-timers {
 		flex-grow: 0;
-		flex-shrink: 1;
+		flex-shrink: 0;
 	}
 
 	.crossings-view {
