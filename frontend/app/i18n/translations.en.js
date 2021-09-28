@@ -16,6 +16,7 @@ export default {
 		races: `Races`,
 		newRace: `New race`,
 		presentation: `TV`,
+		stream: `Stream`,
 	},
 	header: {
 		appName: `ScoreApp`,

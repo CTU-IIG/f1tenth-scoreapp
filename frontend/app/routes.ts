@@ -13,6 +13,7 @@ export const R_RACE_NEW = 'R_RACE_NEW';
 export const R_RACE = 'R_RACE';
 
 export const R_PRESENTATION = 'R_PRESENTATION';
+export const R_STREAM = 'R_STREAM';
 
 // note: ORDER MATTERS, the routes are matched from top to bottom
 export const routesMap = new Map([
@@ -23,6 +24,7 @@ export const routesMap = new Map([
 	[R_RACE, '/races/:raceId'],
 	[R_RACES, '/races'],
 	[R_PRESENTATION, '/presentation'],
+	[R_STREAM, '/stream'],
 	[R_SETTINGS, '/settings'],
 	[R_ROOT, '/'],
 	// [R_SOMETHING, '/some/route/:param/deep'],

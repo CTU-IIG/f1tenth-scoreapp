@@ -5,7 +5,7 @@ import React from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { useRoute } from '../router/hooks';
 
-import { R_PRESENTATION, R_RACE, R_RACE_NEW, R_RACES, R_ROOT, R_SETTINGS, R_TEAMS } from '../routes';
+import { R_PRESENTATION, R_RACE, R_RACE_NEW, R_RACES, R_ROOT, R_SETTINGS, R_STREAM, R_TEAMS } from '../routes';
 
 import { App } from '../components/layout';
 
@@ -19,6 +19,7 @@ import NewRacePage from '../views/NewRacePage';
 import { RacePage } from '../views/race';
 import PresentationPage from '../views/PresentationPage';
 import SettingsPage from '../views/SettingsPage';
+import StreamPage from '../views/StreamPage';
 
 
 const routeToViewMap = new Map([
@@ -28,6 +29,7 @@ const routeToViewMap = new Map([
 	[R_RACE_NEW, () => <NewRacePage />],
 	[R_RACE, () => <RacePage />],
 	[R_PRESENTATION, () => <PresentationPage />],
+	[R_STREAM, () => <StreamPage />],
 	[R_SETTINGS, () => <SettingsPage />],
 ]);
 
@@ -66,7 +68,7 @@ const TopLevelRouter = () => {
 	}
 
 	// special layout (no app at all)
-	if (name === R_PRESENTATION || name === R_RACE) {
+	if (name === R_PRESENTATION || name === R_STREAM || name === R_RACE) {
 		return getViewComponent();
 	}
 
