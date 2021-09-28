@@ -29,7 +29,7 @@ export default {
 		id: `ID`,
 		type: `Type`,
 		state: `State`,
-		round: `Round`,
+		round: `Heat`,
 		team: `Team`,
 		teamA: `Team A`,
 		teamB: `Team B`,
