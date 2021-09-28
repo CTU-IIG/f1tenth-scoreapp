@@ -81,3 +81,35 @@ header`with correct key. This can tested with:
 Barriers use separate authorization keys. Example:
 
     echo "{\"timestamp\":$(date +%s%6N)}"|websocat ws://localhost:4110/barrier/1 -H "Authorization: secretkey"
+
+## TLS proxy
+
+In production, the communication between the backend, clients and
+barriers should be encrypted, because it contains secret authorization
+keys. The easiest way to achieve encryption is to create a TLS reverse
+proxy. For example, with the Apache web server, the following
+configuration snippet can be used:
+
+```apache
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+    ServerName f1tenth-scoreapp.iid.ciirc.cvut.cz
+
+    ProxyPass /ws ws://localhost:4110/ws
+    ProxyPass /barrier/1 ws://localhost:4110/barrier/1
+    ProxyPass /barrier/2 ws://localhost:4110/barrier/2
+    ProxyPass / http://localhost:4110/
+
+    SSLCertificateFile /etc/letsencrypt/live/f1tenth-scoreapp.iid.ciirc.cvut.cz/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/f1tenth-scoreapp.iid.ciirc.cvut.cz/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+</VirtualHost>
+</IfModule>
+```
+
+TLS certificates were obtained via Let's Encrypt and the backend
+should be run as `./scoreapp -loopback` to listen for connections
+solely on the local loopback interface.
+
+The frontend should be configured ("Settings" tab) to connect to the
+proxy, rather than to the backend directly.
