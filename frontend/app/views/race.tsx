@@ -9,6 +9,7 @@ import { LoadingError, LoadingScreen } from '../components/layout';
 import { R_RACES } from '../routes';
 import { Link } from '../router/compoments';
 import {
+	Crossing,
 	CROSSING_TEAM_A,
 	CROSSING_TEAM_B,
 	FullHeadToHeadRace,
@@ -143,6 +144,41 @@ const RaceHeader = ({ race, interactive }: RaceHeaderProps) => {
 
 };
 
+interface RaceHeadToHeadNonInteractiveCrossingsViewProps {
+	crossings: Crossing[];
+}
+
+const RaceHeadToHeadNonInteractiveCrossingsView = ({ crossings }: RaceHeadToHeadNonInteractiveCrossingsViewProps) => {
+
+	return (
+		<>
+			<CrossingsList
+				bestLapCrossingId={/* TODO */-1}
+				crossings={crossings}
+				showIgnored={false}
+				showCheckpoints={false}
+				team={CROSSING_TEAM_A}
+				showAbsoluteTime={false}
+				showDebugInfo={false}
+				visibleScrollbar={false}
+				autoScroll={true}
+			/>
+			<CrossingsList
+				bestLapCrossingId={/* TODO */-1}
+				crossings={crossings}
+				showIgnored={false}
+				showCheckpoints={false}
+				team={CROSSING_TEAM_B}
+				showAbsoluteTime={false}
+				showDebugInfo={false}
+				visibleScrollbar={false}
+				autoScroll={true}
+			/>
+		</>
+	);
+
+};
+
 interface RaceHeadToHeadContentProps {
 	race: FullHeadToHeadRace;
 	stats: RaceStats;
@@ -197,30 +233,9 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 						/>
 					)
 					: (
-						<>
-							<CrossingsList
-								bestLapCrossingId={/* TODO */-1}
-								crossings={race.crossings}
-								showIgnored={false}
-								showCheckpoints={false}
-								team={CROSSING_TEAM_A}
-								showAbsoluteTime={false}
-								showDebugInfo={false}
-								visibleScrollbar={false}
-								autoScroll={true}
-							/>
-							<CrossingsList
-								bestLapCrossingId={/* TODO */-1}
-								crossings={race.crossings}
-								showIgnored={false}
-								showCheckpoints={false}
-								team={CROSSING_TEAM_B}
-								showAbsoluteTime={false}
-								showDebugInfo={false}
-								visibleScrollbar={false}
-								autoScroll={true}
-							/>
-						</>
+						<RaceHeadToHeadNonInteractiveCrossingsView
+							crossings={race.crossings}
+						/>
 					)
 				}
 
