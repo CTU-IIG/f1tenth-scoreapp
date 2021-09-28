@@ -365,9 +365,7 @@ func initDb() *gorm.DB {
 
 	db.FirstOrCreate(new(Team), Team{Name: "Formula Trinity Autonomous"})
 	db.FirstOrCreate(new(Team), Team{Name: "HiPeRT Modena"})
-	db.FirstOrCreate(new(Team), Team{Name: "Rasoul Najakhani"})
-	db.FirstOrCreate(new(Team), Team{Name: "Super TU Kart"})
-	db.FirstOrCreate(new(Team), Team{Name: "TU Wien"})
+	db.FirstOrCreate(new(Team), Team{Name: "Scuderia Segfault"})
 	db.FirstOrCreate(new(Team), Team{Name: "Ředkvičky"})
 
 	// Find running races
