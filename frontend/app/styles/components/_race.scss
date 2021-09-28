@@ -365,6 +365,69 @@ $team-b-color: $blue;
 	}
 }
 
+.race-teams {
+	display: flex;
+	justify-content: space-between;
+	margin: 0 0 1rem 0;
+	align-items: center;
+	gap: 1rem;
+
+	.team-name-box {
+		flex-shrink: 0;
+		width: 40px;
+		height: 40px;
+		background-color: $gray-lighter;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+	}
+
+	.team-a, .team-b {
+		flex: 1;
+		display: flex;
+		font-size: 1.4rem;
+		font-weight: 500;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.team-a {
+		.team-name-box {
+			color: $white;
+			background-color: darken($team-a-color, 10%);
+		}
+	}
+
+	.team-b {
+		justify-content: flex-end;
+
+		.team-name-box {
+			order: 1;
+			color: $white;
+			background-color: darken($team-b-color, 10%);
+		}
+	}
+}
+
+.race-columns {
+	flex: 1;
+	display: flex;
+	gap: 1rem;
+	overflow: hidden;
+}
+
+.race-toolbar {
+	display: flex;
+	justify-content: flex-start;
+	gap: 1rem;
+	margin: 0 0 1rem 0;
+
+	.btn {
+		margin: 0;
+	}
+}
+
 .race-layout {
 	flex: 1;
 	display: flex;
@@ -392,7 +455,7 @@ $team-b-color: $blue;
 
 }
 
-@media (min-width: 490px) and (min-height: 610px){
+@media (min-width: 490px) and (min-height: 610px) {
 
 	.race {
 		overflow: hidden;

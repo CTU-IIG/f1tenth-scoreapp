@@ -4,7 +4,14 @@ import { useMemo } from 'react';
 import { useQuery } from './data';
 import { findOneRaceById } from './queries';
 import { useLiveRaceData } from '../ws/hooks';
-import { EnhancedCrossing, FullRace, RACE_STATE_FINISHED, RACE_STATE_UNFINISHED, RACE_TYPE_TIME_TRIAL } from '../types';
+import {
+	CrossingTeam,
+	EnhancedCrossing,
+	FullRace,
+	RACE_STATE_FINISHED,
+	RACE_STATE_UNFINISHED,
+	RACE_TYPE_TIME_TRIAL,
+} from '../types';
 import { isDefined } from './common';
 
 
@@ -39,7 +46,20 @@ export interface RaceStats {
 	enhancedCrossings: EnhancedCrossing[];
 }
 
-export const computeStats = (race: FullRace): RaceStats => {
+export interface TeamStats {
+	numLaps: number;
+	bestLapTime: number;
+	bestLapCrossingId: number;
+	currentLapStartTime: number;
+}
+
+export const computeRaceStats  = (race: FullRace): RaceStats => {
+
+	return computeTeamStats(race);
+
+};
+
+export const computeTeamStats = (race: FullRace): RaceStats => {
 
 	// TODO: RACE_TYPE_HEAD_TO_HEAD
 
@@ -51,11 +71,11 @@ export const computeStats = (race: FullRace): RaceStats => {
 	let last = -1;
 	let bestLapCrossingId = -1;
 
-	// for performance reasons, we do not copy crossings, and instead we directly mutate it
 	const enhancedCrossings: EnhancedCrossing[] = race.type === RACE_TYPE_TIME_TRIAL
 		? race.crossings.filter(c => c.barrierId === 1) // time trial use only the barrier with id 1
 		: race.crossings; // RACE_TYPE_HEAD_TO_HEAD uses both barriers
 
+	// for performance reasons, we do not copy crossings, and instead we directly mutate it
 	enhancedCrossings.forEach(c => {
 
 		if (c.ignored) {

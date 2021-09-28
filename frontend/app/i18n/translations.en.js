@@ -121,6 +121,11 @@ export default {
 		showAbsoluteTime: `Show absolute time`,
 		showDebugInfo: `Show debug info`,
 		autoScroll: `Auto scroll`,
+		allBarriers: `All barriers`,
+		onlyBarrier1: `Only barrier 1`,
+		onlyBarrier2: `Only barrier 2`,
+		enableInteractiveMode: `Enable interactive mode`,
+		disableInteractiveMode: `Disable interactive mode`,
 	},
 	newRaceForm: {
 		labels: {
