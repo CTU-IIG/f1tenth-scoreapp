@@ -342,3 +342,50 @@ export const CheckboxListInput = (
 	);
 
 };
+
+export interface RadioOptionBoxProps {
+	name: string;
+	id: string;
+	label: string;
+	value: string;
+	selected: boolean;
+	onChange: React.ChangeEventHandler<HTMLInputElement>;
+}
+
+export const RadioOptionBox = (
+	{
+		name,
+		id,
+		label,
+		value,
+		selected,
+		onChange,
+	}: RadioOptionBoxProps,
+) => {
+
+	return (
+		<li
+			className={classNames('option', {
+				'option--selected': selected,
+			})}
+			data-value={value}
+		>
+			<label
+				className="option-label"
+				htmlFor={id}
+			>
+				<input
+					className="option-radio"
+					id={id}
+					name={name}
+					type="radio"
+					value={value}
+					checked={selected}
+					onChange={onChange}
+				/>
+				{label}
+			</label>
+		</li>
+	);
+
+};

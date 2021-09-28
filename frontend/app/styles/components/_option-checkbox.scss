@@ -2,7 +2,7 @@
 // Option checkbox
 // --------------------------------------------------
 
-.option-checkbox {
+.option-checkbox, .option-radio {
 	align-self: center;
 	flex-shrink: 0;
 	display: block;
@@ -18,23 +18,42 @@
 
 	@include form-control-focus;
 
-	&:before, &:after {
-		position: absolute;
-		content: "";
-		display: block;
-		height: 0.125rem;
-		background-color: transparent;
-		transition: all ease-in-out .1s;
+	&.option-radio {
+		border-radius: 50%;
+
+		&:before {
+			position: absolute;
+			content: "";
+			display: block;
+			width: 0.625rem;
+			height: 0.625rem;
+			margin: 0.1875rem;
+			border-radius: 50%;
+			background-color: transparent;
+			transition: all ease-in-out .1s;
+		}
 	}
 
-	&:before {
-		width: 0.875rem;
-		transform: translate(0.1875rem, 0.4375rem) rotate(-45deg);
-	}
+	&.option-checkbox {
 
-	&:after {
-		width: 0.4375rem;
-		transform: translate(0rem, 0.625rem) rotate(45deg);
+		&:before, &:after {
+			position: absolute;
+			content: "";
+			display: block;
+			height: 0.125rem;
+			background-color: transparent;
+			transition: all ease-in-out .1s;
+		}
+
+		&:before {
+			width: 0.875rem;
+			transform: translate(0.1875rem, 0.4375rem) rotate(-45deg);
+		}
+
+		&:after {
+			width: 0.4375rem;
+			transform: translate(0rem, 0.625rem) rotate(45deg);
+		}
 	}
 
 	&:checked {
