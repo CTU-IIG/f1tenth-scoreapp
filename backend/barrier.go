@@ -75,6 +75,28 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 			BarrierId: b.Id,
 		}
 		if race.ID != 0 {
+			if race.Type == HeadToHead {
+				// Switch crossing teams in round robin fashion. If needed, barrier operators
+				// can correct the team associated with the crossing via the frontend.
+				var lastCrossing Crossing
+				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
+				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
+					// First crossing in a race
+					if crossing.BarrierId == 1 {
+						crossing.Team = race.TeamAID
+					} else if crossing.BarrierId == 2 && race.TeamBID != nil {
+						crossing.Team = uint(*race.TeamBID)
+					}
+				} else {
+					// Later crossings in the race
+					if lastCrossing.Team == race.TeamAID && race.TeamBID != nil {
+						crossing.Team = uint(*race.TeamBID)
+					} else if race.TeamBID != nil && lastCrossing.Team == uint(*race.TeamBID) {
+						crossing.Team = race.TeamAID
+					}
+				}
+				log.Printf(name+": associating crossing with team %d", crossing.Team)
+			}
 			// this also updates Race's UpdatedAt which is what we want
 			// so the frontend can find out what is the latest version
 			if err := db.Model(&race).Association("Crossings").Append(&crossing); err != nil {
