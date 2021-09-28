@@ -12,7 +12,7 @@ import IconEye from '-!svg-react-loader?name=IconEye!../images/icons/eye-solid.s
 import IconEyeSlash from '-!svg-react-loader?name=IconEyeSlash!../images/icons/eye-slash-solid.svg';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckboxOptionBox } from './inputs';
+import { CheckboxOptionBox, RadioOptionBox } from './inputs';
 
 
 export const crossingTeamToClass = (team: CrossingTeam) =>
@@ -63,14 +63,14 @@ export const CrossingRow = (
 					<Button
 						name="setTeamA"
 						label="racePage.teamBtn.a"
-						style="team"
+						style="team-a"
 						className={team === CROSSING_TEAM_A ? 'btn-active' : undefined}
 						onClick={onUpdateCrossingTeam}
 					/>
 					<Button
 						name="setTeamB"
 						label="racePage.teamBtn.b"
-						style="team"
+						style="team-b"
 						className={team === CROSSING_TEAM_B ? 'btn-active' : undefined}
 						onClick={onUpdateCrossingTeam}
 					/>
@@ -132,6 +132,7 @@ export interface CrossingsListProps {
 	crossings: EnhancedCrossing[],
 
 	showIgnored: boolean;
+	barrierId?: number;
 	showAbsoluteTime?: boolean;
 	showDebugInfo?: boolean;
 
@@ -151,6 +152,7 @@ export const CrossingsList = (
 		crossings,
 
 		showIgnored,
+		barrierId,
 		showAbsoluteTime,
 		showDebugInfo,
 
@@ -164,9 +166,28 @@ export const CrossingsList = (
 	}: CrossingsListProps,
 ) => {
 
-	const cs = showIgnored
-		? crossings
-		: crossings.filter(c => !c.ignored);
+	const filter = useMemo(() => {
+
+		const f: Parameters<Array<EnhancedCrossing>['filter']>[0][] = [];
+
+		if (!showIgnored) {
+			f.push(c => !c.ignored);
+		}
+
+		if (isDefined(barrierId)) {
+			f.push(c => c.barrierId == barrierId);
+		}
+
+		return f;
+
+	}, [showIgnored, barrierId]);
+
+	const cs = isDefined(filter) && filter.length > 0
+		? crossings.filter(
+			(value, index, array) =>
+				filter.every(fn => fn(value, index, array)),
+		)
+		: crossings; // no filtering needed
 
 	const count = cs.length;
 
@@ -244,6 +265,16 @@ export interface CrossingsViewProps {
 	crossings: EnhancedCrossing[],
 	updateCrossing?: (id: number, ignored: boolean, team: CrossingTeam) => void;
 	interactive?: boolean;
+	barriersFilter?: boolean;
+	showTeamSetter?: boolean;
+}
+
+interface CrossingsViewState {
+	showIgnored: boolean;
+	showAbsoluteTime: boolean;
+	showDebugInfo: boolean;
+	autoScroll: boolean;
+	barrierId: number | undefined;
 }
 
 export const CrossingsView = (
@@ -252,29 +283,49 @@ export const CrossingsView = (
 		crossings,
 		updateCrossing,
 		interactive = true,
+		barriersFilter = false,
+		showTeamSetter = false,
 	}: CrossingsViewProps,
 ) => {
 
 	const t = useFormatMessageId();
 
-	const [state, setState] = useState(() => ({
+	const [state, setState] = useState<CrossingsViewState>(() => ({
 		showIgnored: interactive,
 		showAbsoluteTime: false,
 		showDebugInfo: interactive,
 		autoScroll: true,
+		barrierId: undefined,
 	}));
 
 	const handleOptionChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((event) => {
 
+		const input = event.currentTarget;
+
+		if (input.name === 'barrierId') {
+
+			const barrierId = parseInt(input.value);
+
+			if (!Number.isInteger(barrierId)) {
+				return;
+			}
+
+			return setState(prevState => ({
+				...prevState,
+				barrierId: barrierId === 0 ? undefined : barrierId,
+			}));
+
+		}
+
 		if (
-			event.target.name === 'showIgnored'
-			|| event.target.name === 'showAbsoluteTime'
-			|| event.target.name === 'showDebugInfo'
-			|| event.target.name === 'autoScroll'
+			input.name === 'showIgnored'
+			|| input.name === 'showAbsoluteTime'
+			|| input.name === 'showDebugInfo'
+			|| input.name === 'autoScroll'
 		) {
 			return setState(prevState => ({
 				...prevState,
-				[event.target.name]: event.target.checked,
+				[input.name]: input.checked,
 			}));
 		}
 
@@ -344,6 +395,34 @@ export const CrossingsView = (
 		<div className="crossings-view">
 			{interactive && (
 				<ul className="crossings-view-options">
+					{barriersFilter === true && (
+						<>
+							<RadioOptionBox
+								name="barrierId"
+								id="crossings-options--barrierId0"
+								label={t('racePage.allBarriers')}
+								value="0"
+								selected={state.barrierId === undefined}
+								onChange={handleOptionChange}
+							/>
+							<RadioOptionBox
+								name="barrierId"
+								id="crossings-options--barrierId1"
+								label={t('racePage.onlyBarrier1')}
+								value="1"
+								selected={state.barrierId === 1}
+								onChange={handleOptionChange}
+							/>
+							<RadioOptionBox
+								name="barrierId"
+								id="crossings-options--barrierId2"
+								label={t('racePage.onlyBarrier2')}
+								value="2"
+								selected={state.barrierId === 2}
+								onChange={handleOptionChange}
+							/>
+						</>
+					)}
 					<CheckboxOptionBox
 						name="showIgnored"
 						id="crossings-options--showIgnored"
@@ -384,11 +463,18 @@ export const CrossingsView = (
 				crossings={crossings}
 
 				showIgnored={state.showIgnored}
+				barrierId={state.barrierId}
 				showAbsoluteTime={state.showAbsoluteTime}
 				showDebugInfo={state.showDebugInfo}
 
-				// onUpdateCrossingTeam={isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
-				onUpdateCrossingIgnored={interactive && isDefined(updateCrossing) ? handleUpdateCrossing : undefined}
+				onUpdateCrossingTeam={
+					interactive && showTeamSetter && isDefined(updateCrossing)
+						? handleUpdateCrossing : undefined
+				}
+				onUpdateCrossingIgnored={
+					interactive && isDefined(updateCrossing)
+						? handleUpdateCrossing : undefined
+				}
 
 				visibleScrollbar={interactive}
 				autoScroll={interactive ? state.autoScroll : true}

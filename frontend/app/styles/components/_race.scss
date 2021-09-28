@@ -3,6 +3,8 @@
 // Will split into multiple files soon
 // --------------------------------------------------
 
+$team-a-color: $red;
+$team-b-color: $blue;
 
 .race {
 	position: relative;
@@ -209,7 +211,47 @@
 			.btn {
 				display: block;
 				margin: 0;
+				opacity: .5;
+
+				&.btn-team-a {
+					&, &:hover, &:focus {
+						color: darken($team-a-color, 10%)
+					}
+				}
+
+				&.btn-team-b {
+					&, &:hover, &:focus {
+						color: darken($team-b-color, 10%)
+					}
+				}
+
+				&.btn-active {
+					opacity: 1;
+
+					&.btn-team-a {
+						background-color: $team-a-color;
+						color: $white;
+
+						&:hover, &:focus {
+							background-color: darken($team-a-color, 10%);
+							color: $white;
+						}
+					}
+
+					&.btn-team-b {
+						background-color: $team-b-color;
+						color: $white;
+
+						&:hover, &:focus {
+							background-color: darken($team-b-color, 10%);
+							color: $white;
+						}
+					}
+				}
+
 			}
+
+
 		}
 
 		.prefix, .start {
@@ -284,11 +326,13 @@
 		}
 
 		&.crossing--team-a {
-
+			border-color: $team-a-color;
+			// background-color: transparentize($team-a-color, .9);
 		}
 
 		&.crossing--team-b {
-
+			border-color: $team-b-color;
+			// background-color: transparentize($team-b-color, .9);
 		}
 
 	}
