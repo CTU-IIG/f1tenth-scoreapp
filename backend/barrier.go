@@ -79,7 +79,9 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 				// Switch crossing teams in round robin fashion. If needed, barrier operators
 				// can correct the team associated with the crossing via the frontend.
 				var lastCrossing Crossing
+				var crossingCnt int64
 				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
+				db.Model(&Crossing{}).Where(&filter).Where("ignored = ?", false).Count(&crossingCnt)
 				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
 					// First crossing in a race
 					if crossing.BarrierId == 1 {
@@ -88,6 +90,9 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 						crossing.Team = TeamB
 					}
 				} else {
+					if crossingCnt == 1 && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < 1000) {
+						crossing.Ignored = true
+					}
 					// Later crossings in the race
 					if lastCrossing.Team == TeamA {
 						crossing.Team = TeamB
