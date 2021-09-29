@@ -128,6 +128,17 @@ export const computeTeamStatsAndMutateCrossings = (
 			c.start = true;
 			startTime = c.time;
 			currentLapStartTime = startTime;
+			// if we know the race duration, we can calculate the stopTime
+			if (race.type === RACE_TYPE_TIME_TRIAL && race.timeDuration > 0) {
+				stopTime = startTime + race.timeDuration;
+			}
+		}
+
+		// ignore crossings that happened after the race stopTime
+		// if this is a fixed-time race (e.g. RACE_TYPE_TIME_TRIAL with non-zero timeDuration)
+		if (stopTime !== -1 && c.time > stopTime) {
+			c.excluded = true;
+			return;
 		}
 
 		// two (non-skipped) consecutive lap-barrier crossings forms a lap
@@ -196,8 +207,9 @@ export const computeTeamStatsAndMutateCrossings = (
 
 	});
 
-	// TODO: maybe different stopTime logic?
-	if (last !== -1 && (race.state === RACE_STATE_FINISHED || race.state === RACE_STATE_UNFINISHED)) {
+	// If the race stopTime is not known and the race has already been stopped (finished or cancelled),
+	// we use the time of the last non-ignored lap-barrier crossing (if there is any), as the stopTime.
+	if (stopTime === -1 && last !== -1 && (race.state === RACE_STATE_FINISHED || race.state === RACE_STATE_UNFINISHED)) {
 		stopTime = last;
 	}
 
