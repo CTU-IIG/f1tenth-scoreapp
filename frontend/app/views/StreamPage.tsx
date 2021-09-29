@@ -3,7 +3,7 @@
 import React from 'react';
 
 import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
-import { useCurrentRace } from '../ws/hooks';
+import { useEffectiveRace } from '../ws/hooks';
 import { isDefined } from '../helpers/common';
 import { RaceStreamViewProps } from './race';
 
@@ -16,7 +16,7 @@ const StreamPage = () => {
 
 	useDocumentTitle(t`titles.stream`);
 
-	const { race: { prevRace, currentRace } } = useCurrentRace();
+	const currentRace = useEffectiveRace();
 
 	if (!isDefined(currentRace)) {
 		// TODO: Show LeaderBoard instead (once implemented).
