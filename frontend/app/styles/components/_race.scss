@@ -258,6 +258,13 @@ $team-b-color: $blue;
 		}
 
 		.crossing-diff {
+			display: flex;
+			align-items: center;
+			font-size: remy(18px);
+			line-height: 1;
+			font-weight: 500;
+			gap: .5rem;
+
 			.display-value {
 				font-size: remy(18px);
 				line-height: 1;

@@ -132,6 +132,7 @@ export const CrossingRow = (
 			{(showDiff && isDefined(diff)) && (
 				<div className="crossing-diff">
 					<span className="sr-only">{t('racePage.diff')}</span>
+					{'+ '}
 					<TimerDisplay time={diff} />
 				</div>
 			)}
