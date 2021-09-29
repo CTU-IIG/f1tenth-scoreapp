@@ -24,7 +24,7 @@ import { CrossingUpdater, useRaceDataExperimental } from '../helpers/races-exper
 
 import IconArrowLeft from '-!svg-react-loader?name=IconEye!../images/icons/arrow-left-solid.svg';
 import { OnlineBarriersInfo, WebSocketInfo } from '../components/ws';
-import { Button } from '../components/common';
+import { Button, ConfirmButton } from '../components/common';
 import classNames from 'classnames';
 import { RaceTimers } from '../components/timers';
 import { CrossingsList, CrossingsView } from '../components/crossings';
@@ -390,7 +390,7 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 							)}
 
 							{!forceNonInteractive && race.state === RACE_STATE_RUNNING && (
-								<Button
+								<ConfirmButton
 									style="default"
 									label="racePage.stopRace"
 									onClick={stopRace}
@@ -398,7 +398,7 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 							)}
 
 							{!forceNonInteractive && race.state === RACE_STATE_RUNNING && (
-								<Button
+								<ConfirmButton
 									style="default"
 									label="racePage.cancelRace"
 									onClick={cancelRace}

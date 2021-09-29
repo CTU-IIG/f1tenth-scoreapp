@@ -54,6 +54,8 @@ export default {
 		},
 		loading: `Loading ...`,
 		loadingError: `An error occurred while loading data.`,
+		confirmByNumClicks: `Confirm by {num} clicks`,
+		cancel: `Cancel`,
 	},
 	forms: {
 		selectAll: `Select all`,
