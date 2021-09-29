@@ -32,8 +32,10 @@ export const otherTeam = (current: CrossingTeam, fallback: CrossingTeamAOrB) =>
 
 export interface CrossingRowProps {
 	crossing: Crossing,
+	diff?: number;
 	isBestLap: boolean;
 	showAbsoluteTime?: boolean;
+	showDiff?: boolean;
 	showDebugInfo?: boolean;
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
@@ -42,8 +44,10 @@ export interface CrossingRowProps {
 export const CrossingRow = (
 	{
 		crossing,
+		diff,
 		isBestLap,
 		showAbsoluteTime = false,
+		showDiff = false,
 		showDebugInfo = false,
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
@@ -125,6 +129,12 @@ export const CrossingRow = (
 					/>
 				</div>
 			)}
+			{(showDiff && isDefined(diff)) && (
+				<div className="crossing-diff">
+					<span className="sr-only">{t('racePage.diff')}</span>
+					<TimerDisplay time={diff} />
+				</div>
+			)}
 			{showDebugInfo && (
 				<div className="crossing-debug">
 					<span className="barrier-id">B{barrierId}</span>
@@ -149,6 +159,30 @@ export const CrossingRow = (
 
 };
 
+// TODO: Refactor once we have time
+const calculateFilteredCrossingsDiffs = (cs: Crossing[]): (number | undefined)[] => {
+
+	const diffs: (number | undefined)[] = [];
+
+	let prev: number = 0;
+
+	cs.forEach((c, index) => {
+
+		if (index === 0) {
+			diffs.push(undefined);
+			prev = c.time;
+			return;
+		}
+
+		diffs.push(c.time - prev);
+
+		prev = c.time;
+
+	});
+
+	return diffs;
+
+};
 
 export interface CrossingsListProps {
 
@@ -161,6 +195,7 @@ export interface CrossingsListProps {
 	team?: CrossingTeam;
 
 	showAbsoluteTime?: boolean;
+	showDiff?: boolean;
 	showDebugInfo?: boolean;
 
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
@@ -184,6 +219,7 @@ export const CrossingsList = (
 		team,
 
 		showAbsoluteTime,
+		showDiff,
 		showDebugInfo,
 
 		onUpdateCrossingTeam,
@@ -228,6 +264,8 @@ export const CrossingsList = (
 		: crossings; // no filtering needed
 
 	const count = cs.length;
+
+	const diffs = showDiff ? calculateFilteredCrossingsDiffs(cs) : undefined;
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -281,12 +319,14 @@ export const CrossingsList = (
 			])}
 			ref={ref}
 		>
-			{cs.map(c =>
+			{cs.map((c, index) =>
 				<CrossingRow
 					key={c.id}
 					crossing={c}
+					diff={isDefined(diffs) ? diffs[index] : undefined}
 					isBestLap={c.id === bestLapCrossingId}
 					showAbsoluteTime={showAbsoluteTime}
+					showDiff={showDiff}
 					showDebugInfo={showDebugInfo}
 					onUpdateCrossingTeam={onUpdateCrossingTeam}
 					onUpdateCrossingIgnored={onUpdateCrossingIgnored}
@@ -314,6 +354,7 @@ interface CrossingsViewState {
 	showCheckpoints: boolean;
 
 	showAbsoluteTime: boolean;
+	showDiffs: boolean;
 	showDebugInfo: boolean;
 
 	autoScroll: boolean;
@@ -340,6 +381,7 @@ export const CrossingsView = (
 		showCheckpoints: interactive,
 
 		showAbsoluteTime: false,
+		showDiffs: false,
 		showDebugInfo: interactive,
 
 		autoScroll: true,
@@ -369,6 +411,7 @@ export const CrossingsView = (
 			input.name === 'showIgnored'
 			|| input.name === 'showCheckpoints'
 			|| input.name === 'showAbsoluteTime'
+			|| input.name === 'showDiffs'
 			|| input.name === 'showDebugInfo'
 			|| input.name === 'autoScroll'
 		) {
@@ -497,6 +540,14 @@ export const CrossingsView = (
 						onChange={handleOptionChange}
 					/>
 					<CheckboxOptionBox
+						name="showDiffs"
+						id="crossings-options--showDiffs"
+						label={t('racePage.showDiffs')}
+						value="showDiffs"
+						selected={state.showDiffs}
+						onChange={handleOptionChange}
+					/>
+					<CheckboxOptionBox
 						name="showDebugInfo"
 						id="crossings-options--showDebugInfo"
 						label={t('racePage.showDebugInfo')}
@@ -524,6 +575,7 @@ export const CrossingsView = (
 				showCheckpoints={state.showCheckpoints}
 
 				showAbsoluteTime={state.showAbsoluteTime}
+				showDiff={state.showDiffs}
 				showDebugInfo={state.showDebugInfo}
 
 				onUpdateCrossingTeam={

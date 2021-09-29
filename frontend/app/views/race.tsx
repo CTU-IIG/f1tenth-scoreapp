@@ -319,7 +319,7 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 			return;
 		}
 
-		if (event.key === 'i' || event.key === 'I') {
+		if (event.key === 'q' || event.key === 'Q') {
 			toggleForceNonInteractive();
 		}
 
@@ -374,7 +374,7 @@ export const RaceView = ({ id, interactive = true }: RaceViewProps) => {
 								style="flex"
 								onClick={toggleForceNonInteractive}
 							>
-								<kbd className="dark left">I</kbd>{' '}
+								<kbd className="dark left">Q</kbd>{' '}
 								{t(`racePage.${forceNonInteractive
 									? 'enableInteractiveMode'
 									: 'disableInteractiveMode'

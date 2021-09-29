@@ -213,40 +213,8 @@ $team-b-color: $blue;
 				margin: 0;
 				opacity: .5;
 
-				&.btn-team-a {
-					&, &:hover, &:focus {
-						color: darken($team-a-color, 10%)
-					}
-				}
-
-				&.btn-team-b {
-					&, &:hover, &:focus {
-						color: darken($team-b-color, 10%)
-					}
-				}
-
 				&.btn-active {
-					opacity: 1;
-
-					&.btn-team-a {
-						background-color: $team-a-color;
-						color: $white;
-
-						&:hover, &:focus {
-							background-color: darken($team-a-color, 10%);
-							color: $white;
-						}
-					}
-
-					&.btn-team-b {
-						background-color: $team-b-color;
-						color: $white;
-
-						&:hover, &:focus {
-							background-color: darken($team-b-color, 10%);
-							color: $white;
-						}
-					}
+					background-color: darken($gray-lighter, 50%);
 				}
 
 			}
@@ -279,6 +247,22 @@ $team-b-color: $blue;
 
 		.crossing-time {
 
+		}
+
+		.checkpoint-time {
+			opacity: .5;
+
+			.display-value {
+				font-size: 1rem;
+			}
+		}
+
+		.crossing-diff {
+			.display-value {
+				font-size: remy(18px);
+				line-height: 1;
+				font-weight: 500;
+			}
 		}
 
 		.crossing-debug {
@@ -325,14 +309,57 @@ $team-b-color: $blue;
 			// color: $state-warning-text;
 		}
 
-		&.crossing--team-a {
-			border-color: $team-a-color;
-			// background-color: transparentize($team-a-color, .9);
-		}
+		&[data-ignored="false"] {
 
-		&.crossing--team-b {
-			border-color: $team-b-color;
-			// background-color: transparentize($team-b-color, .9);
+			.team-setter {
+				.btn {
+					&.btn-team-a {
+						&, &:hover, &:focus {
+							color: darken($team-a-color, 10%)
+						}
+					}
+
+					&.btn-team-b {
+						&, &:hover, &:focus {
+							color: darken($team-b-color, 10%)
+						}
+					}
+
+					&.btn-active {
+						opacity: 1;
+
+						&.btn-team-a {
+							background-color: $team-a-color;
+							color: $white;
+
+							&:hover, &:focus {
+								background-color: darken($team-a-color, 10%);
+								color: $white;
+							}
+						}
+
+						&.btn-team-b {
+							background-color: $team-b-color;
+							color: $white;
+
+							&:hover, &:focus {
+								background-color: darken($team-b-color, 10%);
+								color: $white;
+							}
+						}
+					}
+				}
+			}
+
+			&.crossing--team-a {
+				border-color: $team-a-color;
+				// background-color: transparentize($team-a-color, .9);
+			}
+
+			&.crossing--team-b {
+				border-color: $team-b-color;
+				// background-color: transparentize($team-b-color, .9);
+			}
 		}
 
 	}
@@ -505,6 +532,7 @@ $team-b-color: $blue;
 
 	.race-teams {
 		margin: 0;
+
 		.team-a, .team-b {
 
 		}
@@ -554,7 +582,6 @@ $team-b-color: $blue;
 		justify-content: space-between;
 
 
-
 		.timer-display, .value-display {
 			// display: flex;
 			// align-items: center;
@@ -570,6 +597,7 @@ $team-b-color: $blue;
 		.race-details-line {
 			padding: 1rem;
 			font-size: 2rem;
+
 			.team-a, .team-b {
 				font-size: remy(38px);
 				font-weight: 500;
