@@ -1,6 +1,7 @@
 "use strict";
 
 import { useEffect } from 'react';
+import { IS_DEVELOPMENT } from './common';
 
 
 export const useOnKeyDownEvent = (onKeyDown: (event: KeyboardEvent) => void) => {
@@ -19,10 +20,13 @@ export const useOnKeyDownEvent = (onKeyDown: (event: KeyboardEvent) => void) => 
 
 		};
 
+		IS_DEVELOPMENT && console.log(`[useOnKeyDownEvent] setup`);
+
 		window.addEventListener('keydown', handler);
 
 		return () => {
 			didUnsubscribe = true;
+			IS_DEVELOPMENT && console.log(`[useOnKeyDownEvent] cleanup`);
 			window.removeEventListener('keydown', handler);
 		};
 

@@ -11,7 +11,7 @@ import {
 import { Button, ButtonProps } from './common';
 import { useFormatMessageId } from '../helpers/hooks';
 import classNames from 'classnames';
-import { isDefined } from '../helpers/common';
+import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { TimerDisplay } from './timers';
 import LocalizedDate from './LocalizedDate';
 
@@ -20,6 +20,8 @@ import IconEyeSlash from '-!svg-react-loader?name=IconEyeSlash!../images/icons/e
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckboxOptionBox, RadioOptionBox } from './inputs';
+import { useOnKeyDownEvent } from '../helpers/keyboard';
+import { CrossingUpdater } from '../helpers/races-experimental';
 
 
 export const crossingTeamToClass = (team: CrossingTeam) =>
@@ -199,6 +201,7 @@ export interface CrossingsListProps {
 	showDiff?: boolean;
 	showDebugInfo?: boolean;
 
+	updateCrossing?: CrossingUpdater;
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
 
@@ -207,6 +210,56 @@ export interface CrossingsListProps {
 	setAutoScroll?: (autoScroll: boolean) => void;
 
 }
+
+const useCrossingsKeyboardShortcuts = (
+	cs: Crossing[],
+	toggleIgnore: boolean,
+	setTeam: boolean,
+	updateCrossing?: CrossingUpdater,
+) => {
+
+	const handleKeyDownEvent = useCallback((event: KeyboardEvent) => {
+
+		const key = event.key.toLowerCase();
+
+		if (key !== 'i' && key !== 'a' && key !== 'b' && key !== 's') {
+			return;
+		}
+
+		const noShortcutEnabled = !toggleIgnore && !setTeam;
+
+		if (cs.length === 0 || noShortcutEnabled || !isDefined(updateCrossing)) {
+			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] no crossings or none shortcut registered`);
+			return;
+		}
+
+		if (event.repeat) {
+			return;
+		}
+
+		if (toggleIgnore && key === 'i') {
+			const lc = cs[cs.length - 1];
+			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] toggleIgnore lastVisibleCrossing.id = ${lc.id}`);
+			updateCrossing(lc.id, !lc.ignored, lc.team);
+		}
+
+		if (setTeam && key === 'a') {
+			const lc = cs[cs.length - 1];
+			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] setTeamA lastVisibleCrossing.id = ${lc.id}`);
+			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_A);
+		}
+
+		if (setTeam && (key === 'b' || key === 's')) {
+			const lc = cs[cs.length - 1];
+			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] setTeamB lastVisibleCrossing.id = ${lc.id}`);
+			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_B);
+		}
+
+	}, [cs, toggleIgnore, setTeam, updateCrossing]);
+
+	useOnKeyDownEvent(handleKeyDownEvent);
+
+};
 
 export const CrossingsList = (
 	{
@@ -223,6 +276,7 @@ export const CrossingsList = (
 		showDiff,
 		showDebugInfo,
 
+		updateCrossing,
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
 
@@ -267,6 +321,13 @@ export const CrossingsList = (
 	const count = cs.length;
 
 	const diffs = showDiff ? calculateFilteredCrossingsDiffs(cs) : undefined;
+
+	useCrossingsKeyboardShortcuts(
+		cs,
+		isDefined(onUpdateCrossingIgnored),
+		isDefined(onUpdateCrossingTeam),
+		updateCrossing,
+	);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -342,7 +403,7 @@ export const CrossingsList = (
 export interface CrossingsViewProps {
 	bestLapCrossingId: number;
 	crossings: Crossing[],
-	updateCrossing?: (id: number, ignored: boolean, team: CrossingTeam) => void;
+	updateCrossing?: CrossingUpdater;
 	interactive?: boolean;
 	barriersFilter?: boolean;
 	showTeamSetter?: boolean;
@@ -579,6 +640,7 @@ export const CrossingsView = (
 				showDiff={state.showDiffs}
 				showDebugInfo={state.showDebugInfo}
 
+				updateCrossing={updateCrossing}
 				onUpdateCrossingTeam={
 					interactive && showTeamSetter && isDefined(updateCrossing)
 						? handleUpdateCrossing : undefined
