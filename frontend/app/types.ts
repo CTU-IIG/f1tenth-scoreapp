@@ -68,6 +68,7 @@ export interface CreateTimeTrialRaceData {
 	type: typeof RACE_TYPE_TIME_TRIAL;
 	round: number;
 	teamAId: number;
+	timeDuration: number;
 }
 
 export interface CreateHeadToHeadRaceData {
@@ -75,6 +76,7 @@ export interface CreateHeadToHeadRaceData {
 	round: number;
 	teamAId: number;
 	teamBId: number;
+	lapsDuration: number;
 }
 
 export type CreateRaceData = CreateTimeTrialRaceData | CreateHeadToHeadRaceData;

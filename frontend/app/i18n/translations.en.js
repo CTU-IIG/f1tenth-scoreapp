@@ -140,8 +140,11 @@ export default {
 			team: `Team`,
 			teamA: `Team A`,
 			teamB: `Team B`,
-			round: `Round`,
+			round: `Heat`,
+			timeDuration: `Time duration`,
+			lapsDuration: `Laps duration`,
 		},
+		timeDurationNote: `Enter duration in number of milliseconds (e.g. 300000 means 5 minutes).`
 	},
 	teamsPage: {
 		createRace: `Create a new race`,
