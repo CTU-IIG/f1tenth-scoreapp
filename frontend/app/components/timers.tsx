@@ -110,7 +110,7 @@ export interface TimerProps {
 	className?: any;
 }
 
-const isStopped = (currentTime: number, stopTime: number | undefined) =>
+const isStopped = (currentTime: number, stopTime: number | undefined): stopTime is number =>
 	isDefined(stopTime) && stopTime !== -1 && currentTime >= stopTime;
 
 export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
@@ -166,7 +166,7 @@ export const Timer = ({ name, start, stop, active, className }: TimerProps) => {
 
 	const diff = start !== -1
 		// note: to prevent stale currentTime after refreshActive/stop changes, use Date.now()
-		? (isDefined(stop) && stop !== -1 ? stop : Date.now()) - start
+		? isStopped(Date.now(), stop) ? stop - start : Date.now() - start
 		: -1;
 
 	return (
