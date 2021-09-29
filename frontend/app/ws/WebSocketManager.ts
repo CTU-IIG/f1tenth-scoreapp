@@ -44,7 +44,7 @@ export type ManagerStateChangeListener = (state: ManagerState) => void;
 
 export type BarriersChangeListener = (barriers: number[]) => void;
 
-export type CurrentRaceChangeListener = (currentRaceId: number | null) => void;
+export type CurrentRaceChangeListener = (race: { currentRace: number | null, prevRace: number | null }) => void;
 
 export type RaceDataListener = (race: FullRace) => void;
 
@@ -63,11 +63,17 @@ class WebSocketManager {
 	public readonly barriersGetter: () => number[];
 	public readonly registerBarriersChangeListener: (onChange: BarriersChangeListener) => () => void;
 
-	public readonly currentRaceGetter: () => number | null;
+	public readonly currentRaceGetter: () => {
+		prevRace: number | null;
+		currentRace: number | null;
+	};
 	public readonly registerCurrentRaceChangeListener: (onChange: CurrentRaceChangeListener) => () => void;
 
 	private barriers: number[];
-	private currentRace: number | null;
+	private race: {
+		prevRace: number | null;
+		currentRace: number | null;
+	};
 
 	private readonly stateChangeListeners: Set<ManagerStateChangeListener>;
 	private readonly barriersChangeListeners: Set<BarriersChangeListener>;
@@ -86,7 +92,10 @@ class WebSocketManager {
 	constructor(options?: Partial<ManagerOptions>, url?: string | undefined) {
 
 		this.barriers = [];
-		this.currentRace = null;
+		this.race = {
+			prevRace: null,
+			currentRace: null,
+		};
 
 		this.stateChangeListeners = new Set();
 		this.barriersChangeListeners = new Set();
@@ -99,7 +108,7 @@ class WebSocketManager {
 		this.barriersGetter = () => this.barriers;
 		this.registerBarriersChangeListener = onChange => this.listenForBarriersChange(onChange);
 
-		this.currentRaceGetter = () => this.currentRace;
+		this.currentRaceGetter = () => this.race;
 		this.registerCurrentRaceChangeListener = onChange => this.listenForCurrentRaceChange(onChange);
 
 		this.options = {
@@ -112,6 +121,24 @@ class WebSocketManager {
 		};
 
 		this.connect(url);
+
+	}
+
+	private updateCurrentRace(currentRace: number | null) {
+
+		// skip updates
+		if (currentRace === this.race.currentRace) {
+			return;
+		}
+
+		const prevRace = this.race.currentRace;
+
+		this.race = {
+			prevRace,
+			currentRace,
+		};
+
+		this.notifyCurrentRaceChangeListeners();
 
 	}
 
@@ -363,12 +390,10 @@ class WebSocketManager {
 		// 2. { "currentRace": { "id": x } } where is x is number
 		if (msg.currentRace === null) {
 			console.log(`[currentRace] setting to null`);
-			this.currentRace = null;
-			this.notifyCurrentRaceChangeListeners();
+			this.updateCurrentRace(null);
 		} else if (Number.isInteger(msg.currentRace?.id)) {
 			console.log(`[currentRace] setting to number ${msg.currentRace.id}`);
-			this.currentRace = msg.currentRace.id;
-			this.notifyCurrentRaceChangeListeners();
+			this.updateCurrentRace(msg.currentRace.id);
 		}
 
 	}
@@ -378,7 +403,7 @@ class WebSocketManager {
 	}
 
 	private notifyCurrentRaceChangeListeners() {
-		this.currentRaceChangeListeners.forEach(fn => fn(this.currentRace));
+		this.currentRaceChangeListeners.forEach(fn => fn(this.race));
 	}
 
 	private notifyStateChangeListeners() {

@@ -36,16 +36,16 @@ export const useOnlineBarriers = (): { manager: WebSocketManager, onlineBarriers
 
 };
 
-export const useCurrentRace = (): { manager: WebSocketManager, currentRace: number | null } => {
+export const useCurrentRace = (): { manager: WebSocketManager, race: { prevRace: number | null, currentRace: number | null } } => {
 
 	const manager = useWebSocketManager();
 
-	const currentRace = useSubscription({
+	const race = useSubscription({
 		getCurrentValue: manager.currentRaceGetter,
 		subscribe: manager.registerCurrentRaceChangeListener,
 	});
 
-	return { manager, currentRace };
+	return { manager, race };
 
 };
 

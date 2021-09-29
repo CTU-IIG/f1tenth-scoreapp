@@ -5,7 +5,7 @@ import React from 'react';
 import { useDocumentTitle, useFormatMessageIdAsTagFn } from '../helpers/hooks';
 import { useCurrentRace } from '../ws/hooks';
 import { isDefined } from '../helpers/common';
-import { RaceStreamViewProps, RaceView } from './race';
+import { RaceStreamViewProps } from './race';
 
 import f1tenthLogo from '../images/f1tenth/f1tenth-logo-white-bg-and-url.png';
 
@@ -16,7 +16,7 @@ const StreamPage = () => {
 
 	useDocumentTitle(t`titles.stream`);
 
-	const { currentRace } = useCurrentRace();
+	const { race: { prevRace, currentRace } } = useCurrentRace();
 
 	if (!isDefined(currentRace)) {
 		// TODO: Show LeaderBoard instead (once implemented).

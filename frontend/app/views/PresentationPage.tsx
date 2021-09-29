@@ -16,7 +16,7 @@ const PresentationPage = () => {
 
 	useDocumentTitle(t`titles.presentation`);
 
-	const { currentRace } = useCurrentRace();
+	const { race: { prevRace, currentRace } } = useCurrentRace();
 
 	if (!isDefined(currentRace)) {
 		// TODO: Show LeaderBoard instead (once implemented).
