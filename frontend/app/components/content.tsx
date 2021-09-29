@@ -4,7 +4,7 @@ import React from 'react';
 import { Link } from '../router/compoments';
 import { R_RACE } from '../routes';
 import { useFormatMessageId } from '../helpers/hooks';
-import { Race, RACE_TYPE_HEAD_TO_HEAD } from '../types';
+import { Race, RACE_TYPE_HEAD_TO_HEAD, RACE_TYPE_TIME_TRIAL } from '../types';
 import { copyOnClick } from '../helpers/copy';
 import classNames from 'classnames';
 
@@ -47,9 +47,11 @@ export const RacesListItem = (
 				)}
 			</div>
 
-			<div className="race-round">
-				{t(`race.round`)} {race.round}
-			</div>
+			{race.type === RACE_TYPE_TIME_TRIAL && (
+				<div className="race-round">
+					{t(`race.round`)} {race.round}
+				</div>
+			)}
 
 			<div className="race-state">
 				{t(`race.states.${race.state}`)}

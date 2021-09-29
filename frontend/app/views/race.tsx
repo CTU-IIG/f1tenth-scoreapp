@@ -125,9 +125,11 @@ const RaceHeader = ({ race, interactive }: RaceHeaderProps) => {
 						)}
 					</div>
 
-					<div className="race-round">
-						{t(`race.round`)} {race.round}
-					</div>
+					{race.type === RACE_TYPE_TIME_TRIAL && (
+						<div className="race-round">
+							{t(`race.round`)} {race.round}
+						</div>
+					)}
 
 					<div className="race-state">
 						{t(`race.states.${race.state}`)}
@@ -540,9 +542,11 @@ const RaceTimeTrialStreamBox = ({ race, stats }: RaceTimeTrialStreamBoxProps) =>
 					<span className="team-a">{race.teamA.name}</span>
 				</div>
 
-				<div className="race-round">
-					{t(`race.round`)} {race.round}
-				</div>
+				{race.type === RACE_TYPE_TIME_TRIAL && (
+					<div className="race-round">
+						{t(`race.round`)} {race.round}
+					</div>
+				)}
 
 			</div>
 
