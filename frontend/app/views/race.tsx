@@ -489,11 +489,11 @@ const RaceHeadToHeadStreamBox = ({ race, stats }: RaceHeadToHeadStreamBoxProps) 
 				/>
 
 				<RaceTimers
-					startTime={stats.teamA.startTime}
-					stopTime={stats.teamA.stopTime}
-					numLaps={stats.teamA.numLaps}
-					bestLapTime={stats.teamA.bestLapTime}
-					currentLapStartTime={stats.teamA.currentLapStartTime}
+					startTime={stats.teamB.startTime}
+					stopTime={stats.teamB.stopTime}
+					numLaps={stats.teamB.numLaps}
+					bestLapTime={stats.teamB.bestLapTime}
+					currentLapStartTime={stats.teamB.currentLapStartTime}
 					active={timersActive}
 				/>
 
