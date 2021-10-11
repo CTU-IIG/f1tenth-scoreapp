@@ -1,0 +1,39 @@
+#
+# GitHub Action Workflow
+#   reference: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+#
+#   useful example: https://github.com/mikeal/bundle-size-action/blob/master/.github/workflows/mikeals-workflow.yml
+#
+
+name: Backend build
+
+on:
+  # see also https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662
+  push:
+#     branches:
+#       - main
+    path:
+      - 'backend/**'
+  pull_request:
+    branches:
+      - main
+    path:
+      - 'backend/**'
+jobs:
+  build:
+    name: Build
+
+    runs-on: ubuntu-18.04
+
+    steps:
+
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x # The Go version to download (if necessary) and use.
+      - run: cd backend && go build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: backend
+          path: backend/scoreapp
