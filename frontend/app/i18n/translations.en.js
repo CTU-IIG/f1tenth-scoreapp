@@ -144,7 +144,7 @@ export default {
 			timeDuration: `Time duration`,
 			lapsDuration: `Laps duration`,
 		},
-		timeDurationNote: `Enter duration in number of milliseconds (e.g. 300000 means 5 minutes).`
+		timeDurationNote: `Enter duration in number of milliseconds (e.g. 300000 means 5 minutes). Enter 0 (zero) for an unlimited duration.`
 	},
 	teamsPage: {
 		createRace: `Create a new race`,
