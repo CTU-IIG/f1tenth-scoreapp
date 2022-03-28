@@ -1,6 +1,6 @@
 # Node.js Development Setup
 
-We'll install latest [Node.js](https://nodejs.org/en/) version using [nvm](https://github.com/nvm-sh/nvm).
+We'll install the latest [Node.js](https://nodejs.org/en/) version using [nvm](https://github.com/nvm-sh/nvm).
 We'll also install [Yarn 1.x](https://classic.yarnpkg.com/en/) package manager alongside the
 standard [npm CLI](https://docs.npmjs.com/about-npm).
 
@@ -10,7 +10,7 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    cd ~/
    git clone https://github.com/nvm-sh/nvm.git .nvm
    cd ~/.nvm
-   git checkout v0.38.0
+   git checkout v0.39.1
    ```
 
 2. Add the following at the end of your `~/.bashrc`:
@@ -32,17 +32,17 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    export PATH="$HOME/.yarn/bin:$PATH"
    ```
 
-3. Restart your terminal. Verify nvm works (should print `0.38.0`):
+3. Restart your terminal. Verify nvm works (should print `0.39.1`):
    ```bash
    nvm -v
    ```
 
-4. Install latest Node.js 16:
+4. Install latest Node.js 17:
    ```bash
-   nvm install 16.*
+   nvm install 17.*
    ```
 
-5. Verify Node.js is installed and active (should print `v16.9.1`):
+5. Verify Node.js is installed and active (should print `v17.8.0`):
    ```bash
    node -v
    ```
@@ -68,7 +68,7 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    yarn global add node-gyp nodemon sort-package-json doctoc
    ```
 
-10. Verify that Yarn global packages binaries are on your PATH (should print `2.0.12`):
+10. Verify that Yarn global packages binaries are on your PATH (should print `2.0.15`):
 	```bash
 	nodemon -v
 	```
