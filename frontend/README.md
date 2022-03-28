@@ -31,11 +31,9 @@ and **[React.js](https://reactjs.org/)**. See more in the [Architecture](#archit
 
 ## Description
 
-TODO
-
-The UI of the app is fully translated and localized into Czech and English. By default, the app automatically
-detects the locale to be used from the browser preferences. In addition, the locale can be changed manually in
-the app settings.
+The UI of the app is prepared for localization. By default, the app automatically detects the locale to be
+used from the browser preferences. In addition, the locale can be changed manually in the app settings.
+Currently, only [English translation](app/i18n/translations.en.js) is available.
 
 
 ## Architecture
@@ -137,7 +135,7 @@ following diagram briefly describes the main directories and files:
 
 ### Requirements
 
-- [Node.js](https://nodejs.org/) 16.x
+- [Node.js](https://nodejs.org/) 17.x
 - [Yarn](https://yarnpkg.com/) 1.x
 - You can follow [this Node.js Development Setup guide](../NODEJS-SETUP.md).
 
