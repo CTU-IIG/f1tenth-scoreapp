@@ -195,20 +195,20 @@ int64_t usec_between(const struct timeval *start, const struct timeval *stop)
 
 void shutdown_handler(bool btn_pressed)
 {
-    static struct timeval start;
+    static struct timeval start1;
     struct timeval now;
 
     if (!btn_pressed) {
-        start = (struct timeval){0, 0};
+        start1 = (struct timeval){0, 0};
         return;
     }
 
-    if (start.tv_sec == 0)
-        gettimeofday(&start, NULL);
+    if (start1.tv_sec == 0)
+        gettimeofday(&start1, NULL);
 
     gettimeofday(&now, NULL);
 
-    if (usec_between(&start, &now) > 5*1000000) {
+    if (usec_between(&start1, &now) > 5*1000000) {
         update_display(EMPTY);
         System_Exit();
         system("sudo shutdown -h now");
