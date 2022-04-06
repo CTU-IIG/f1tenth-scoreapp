@@ -216,6 +216,28 @@ void shutdown_handler(bool btn_pressed)
     }
 }
 
+void exit_handler(bool btn_pressed)
+{
+    static struct timeval start2;
+    struct timeval now;
+
+    if (!btn_pressed) {
+        start2 = (struct timeval){0, 0};
+        return;
+    }
+
+    if (start2.tv_sec == 0)
+        gettimeofday(&start2, NULL);
+
+    gettimeofday(&now, NULL);
+
+    if (usec_between(&start2, &now) > 5*1000000) {
+        update_display(EMPTY);
+        System_Exit();
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     // 1.System Initialization
