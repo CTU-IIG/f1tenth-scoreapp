@@ -280,9 +280,13 @@ int main(int argc, char *argv[])
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
             update_display(SHUTDOWN);
             shutdown_handler(true);
+        } else if (digitalRead(UNIVERSAL_BUTTON2) == 1) {
+            update_display(EXIT);
+            exit_handler(true);
         } else {
             update_display(TIME);
             shutdown_handler(false);
+            exit_handler(false);
         }
 
         if (after_start) {
