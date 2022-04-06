@@ -141,7 +141,7 @@ struct state {
     int64_t best_time_us;
 } state;
 
-enum screen { EMPTY, TIME, SHUTDOWN };
+enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
 
 void update_display(enum screen screen)
 {
@@ -176,6 +176,11 @@ void update_display(enum screen screen)
         cuserid(name_user);
         sprintf(user_info, "User:%s Pass:user", name_user);
         GUI_DisString_EN(0, 2*Font12.Height - 4, user_info, &Font12, FONT_BACKGROUND, WHITE);
+
+        break;
+    }
+    case EXIT: {
+        GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
 
         break;
     }
