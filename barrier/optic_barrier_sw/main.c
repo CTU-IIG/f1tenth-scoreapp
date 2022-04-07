@@ -40,6 +40,8 @@
 #include "OLED_GUI.h"
 #include "Show_Lib.h"
 
+#include "git.h"
+
 #define BARRIER_SIGNAL 0     // 30
 #define UNIVERSAL_BUTTON1 19 // 24
 #define UNIVERSAL_BUTTON2 26 // 25
@@ -182,6 +184,19 @@ void update_display(enum screen screen)
     case EXIT: {
         GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
 
+        char version[100];
+
+        if (GIT_AVAILABLE) {
+            if (GIT_IS_DIRTY) {
+                sprintf(version, "%s-dirty", GIT_DESCRIBE);
+            } else {
+                sprintf(version, "%s", GIT_DESCRIBE);
+            }
+        } else {
+            sprintf(version, "Unknown version");
+        }
+
+        GUI_DisString_EN(0, 3 * Font8.Height, version, &Font8, FONT_BACKGROUND, WHITE);
         break;
     }
     }
