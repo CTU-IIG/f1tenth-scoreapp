@@ -141,7 +141,7 @@ struct state {
     int64_t best_time_us;
 } state;
 
-enum screen { EMPTY, TIME, SHUTDOWN };
+enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
 
 void update_display(enum screen screen)
 {
@@ -179,6 +179,11 @@ void update_display(enum screen screen)
 
         break;
     }
+    case EXIT: {
+        GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
+
+        break;
+    }
     }
     GUI_Display();
 }
@@ -190,23 +195,45 @@ int64_t usec_between(const struct timeval *start, const struct timeval *stop)
 
 void shutdown_handler(bool btn_pressed)
 {
-    static struct timeval start;
+    static struct timeval start1;
     struct timeval now;
 
     if (!btn_pressed) {
-        start = (struct timeval){0, 0};
+        start1 = (struct timeval){0, 0};
         return;
     }
 
-    if (start.tv_sec == 0)
-        gettimeofday(&start, NULL);
+    if (start1.tv_sec == 0)
+        gettimeofday(&start1, NULL);
 
     gettimeofday(&now, NULL);
 
-    if (usec_between(&start, &now) > 5*1000000) {
+    if (usec_between(&start1, &now) > 5*1000000) {
         update_display(EMPTY);
         System_Exit();
         system("sudo shutdown -h now");
+        exit(0);
+    }
+}
+
+void exit_handler(bool btn_pressed)
+{
+    static struct timeval start2;
+    struct timeval now;
+
+    if (!btn_pressed) {
+        start2 = (struct timeval){0, 0};
+        return;
+    }
+
+    if (start2.tv_sec == 0)
+        gettimeofday(&start2, NULL);
+
+    gettimeofday(&now, NULL);
+
+    if (usec_between(&start2, &now) > 5*1000000) {
+        update_display(EMPTY);
+        System_Exit();
         exit(0);
     }
 }
@@ -253,9 +280,13 @@ int main(int argc, char *argv[])
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
             update_display(SHUTDOWN);
             shutdown_handler(true);
+        } else if (digitalRead(UNIVERSAL_BUTTON2) == 1) {
+            update_display(EXIT);
+            exit_handler(true);
         } else {
             update_display(TIME);
             shutdown_handler(false);
+            exit_handler(false);
         }
 
         if (after_start) {
