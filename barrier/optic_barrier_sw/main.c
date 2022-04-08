@@ -249,6 +249,7 @@ void exit_handler(bool btn_pressed)
     if (usec_between(&start2, &now) > 5*1000000) {
         update_display(EMPTY);
         System_Exit();
+        system("pkill websocat"); // FIXME: This is currently only way how I can force quit on websocat.
         exit(0);
     }
 }
