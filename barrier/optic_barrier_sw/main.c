@@ -148,6 +148,11 @@ enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
 static struct timeval start1;
 static struct timeval start2;
 
+int64_t usec_between(const struct timeval *start, const struct timeval *stop)
+{
+    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
+}
+
 void update_display(enum screen screen)
 {
     GUI_Clear();
@@ -204,11 +209,6 @@ void update_display(enum screen screen)
     }
     }
     GUI_Display();
-}
-
-int64_t usec_between(const struct timeval *start, const struct timeval *stop)
-{
-    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
 }
 
 void shutdown_handler(bool btn_pressed)
