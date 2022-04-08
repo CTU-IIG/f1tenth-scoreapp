@@ -145,6 +145,9 @@ struct state {
 
 enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
 
+static struct timeval start1;
+static struct timeval start2;
+
 void update_display(enum screen screen)
 {
     GUI_Clear();
@@ -210,7 +213,6 @@ int64_t usec_between(const struct timeval *start, const struct timeval *stop)
 
 void shutdown_handler(bool btn_pressed)
 {
-    static struct timeval start1;
     struct timeval now;
 
     if (!btn_pressed) {
@@ -233,7 +235,6 @@ void shutdown_handler(bool btn_pressed)
 
 void exit_handler(bool btn_pressed)
 {
-    static struct timeval start2;
     struct timeval now;
 
     if (!btn_pressed) {
