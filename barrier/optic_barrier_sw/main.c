@@ -174,7 +174,14 @@ void update_display(enum screen screen)
         break;
     }
     case SHUTDOWN: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         GUI_DisString_EN(0, 0, "Hold 5s to pwroff", &Font12, FONT_BACKGROUND, WHITE);
+        //GUI_DisString_EN(usec_between(&start1, &now) / 41322, (Font12.Height / 2) - 1, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start1, &now) / 41322, 2*Font12.Height - 4, "_", &Font12, FONT_BACKGROUND, WHITE);
+
+
         char host[NI_MAXHOST];
         get_ip_address(host);
         char str[100];
@@ -190,7 +197,14 @@ void update_display(enum screen screen)
         break;
     }
     case EXIT: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
+        // MAX_TIME / (DISPLAY_WIDTH - FONT_WIDTH)
+        // 5000000 / (128 - 7)
+        //GUI_DisString_EN(usec_between(&start2, &now) / 41322, Font12.Height - 2, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start2, &now) / 41322, 0, "_", &Font12, FONT_BACKGROUND, WHITE);
 
         char version[100];
 
