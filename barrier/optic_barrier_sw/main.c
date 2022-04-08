@@ -145,6 +145,14 @@ struct state {
 
 enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
 
+static struct timeval start1;
+static struct timeval start2;
+
+int64_t usec_between(const struct timeval *start, const struct timeval *stop)
+{
+    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
+}
+
 void update_display(enum screen screen)
 {
     GUI_Clear();
@@ -166,7 +174,14 @@ void update_display(enum screen screen)
         break;
     }
     case SHUTDOWN: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         GUI_DisString_EN(0, 0, "Hold 5s to pwroff", &Font12, FONT_BACKGROUND, WHITE);
+        //GUI_DisString_EN(usec_between(&start1, &now) / 41322, (Font12.Height / 2) - 1, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start1, &now) / 41322, 2*Font12.Height - 4, "_", &Font12, FONT_BACKGROUND, WHITE);
+
+
         char host[NI_MAXHOST];
         get_ip_address(host);
         char str[100];
@@ -182,7 +197,14 @@ void update_display(enum screen screen)
         break;
     }
     case EXIT: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
+        // MAX_TIME / (DISPLAY_WIDTH - FONT_WIDTH)
+        // 5000000 / (128 - 7)
+        //GUI_DisString_EN(usec_between(&start2, &now) / 41322, Font12.Height - 2, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start2, &now) / 41322, 0, "_", &Font12, FONT_BACKGROUND, WHITE);
 
         char version[100];
 
@@ -203,14 +225,8 @@ void update_display(enum screen screen)
     GUI_Display();
 }
 
-int64_t usec_between(const struct timeval *start, const struct timeval *stop)
-{
-    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
-}
-
 void shutdown_handler(bool btn_pressed)
 {
-    static struct timeval start1;
     struct timeval now;
 
     if (!btn_pressed) {
@@ -233,7 +249,6 @@ void shutdown_handler(bool btn_pressed)
 
 void exit_handler(bool btn_pressed)
 {
-    static struct timeval start2;
     struct timeval now;
 
     if (!btn_pressed) {
@@ -294,11 +309,11 @@ int main(int argc, char *argv[])
         }
 
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
-            update_display(SHUTDOWN);
             shutdown_handler(true);
+            update_display(SHUTDOWN);
         } else if (digitalRead(UNIVERSAL_BUTTON2) == 1) {
-            update_display(EXIT);
             exit_handler(true);
+            update_display(EXIT);
         } else {
             update_display(TIME);
             shutdown_handler(false);
