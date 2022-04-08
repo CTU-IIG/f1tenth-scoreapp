@@ -294,11 +294,11 @@ int main(int argc, char *argv[])
         }
 
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
-            update_display(SHUTDOWN);
             shutdown_handler(true);
+            update_display(SHUTDOWN);
         } else if (digitalRead(UNIVERSAL_BUTTON2) == 1) {
-            update_display(EXIT);
             exit_handler(true);
+            update_display(EXIT);
         } else {
             update_display(TIME);
             shutdown_handler(false);
