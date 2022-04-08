@@ -39,7 +39,8 @@ if(GIT_AVAILABLE)
     # Dirty
     execute_process(
         COMMAND git status --porcelain -uno
-        RESULT_VARIABLE GIT_DIRTY
+        OUTPUT_VARIABLE GIT_DIRTY
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     if ("${GIT_DIRTY}" STREQUAL "")
