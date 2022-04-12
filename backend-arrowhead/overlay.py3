@@ -43,6 +43,8 @@ import signal
 def exit_sequence(sig, frame):
     Client.unregister_service(Service)
 
+    exit(0)
+
 
 signal.signal(signal.SIGTERM, exit_sequence)
 
