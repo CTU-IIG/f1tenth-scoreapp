@@ -218,6 +218,7 @@ void update_display(enum screen screen)
             sprintf(version, "Unknown version");
         }
 
+        GUI_DisString_EN(0, 2 * Font8.Height, GIT_BRANCH_NAME, &Font8, FONT_BACKGROUND, WHITE);
         GUI_DisString_EN(0, 3 * Font8.Height, version, &Font8, FONT_BACKGROUND, WHITE);
         break;
     }

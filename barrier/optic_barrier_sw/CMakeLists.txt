@@ -48,6 +48,13 @@ if(GIT_AVAILABLE)
     else()
         set(GIT_IS_DIRTY true)
     endif()
+
+    # Branch name
+    execute_process(
+        COMMAND git rev-parse --abbrev-ref HEAD
+        OUTPUT_VARIABLE GIT_BRANCH_NAME
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 endif()
 
 get_filename_component(PRE_CONFIGURE_FILE "${PRE_CONFIGURE_FILE}" ABSOLUTE)
