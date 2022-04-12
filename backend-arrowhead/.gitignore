@@ -2,3 +2,4 @@
 *.pub
 *.ca
 ahconf.py
+scoreapp.db
