@@ -31,6 +31,8 @@ Service = ArrowheadService(
     name = "scoreapp",
     metadata = {
         "authorization": "secret",
+        "endpoint_1": "barrier/1",
+        "endpoint_2": "barrier/2",
     },
 )
 
