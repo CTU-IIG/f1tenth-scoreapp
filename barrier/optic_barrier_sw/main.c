@@ -192,6 +192,7 @@ void update_display(enum screen screen)
 
         char host[NI_MAXHOST];
         char wg_host[NI_MAXHOST];
+        sprintf(wg_host, "");
         get_ip_address(host, wg_host);
         char str[100];
         if (roll) {
