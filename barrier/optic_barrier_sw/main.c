@@ -66,7 +66,7 @@ void interrupt_optic_barrier()
     pthread_mutex_unlock(&detect_mutex);
 }
 
-int get_ip_address(char *host)
+int get_ip_address(char *host, char *wghost)
 {
     struct ifaddrs *ifa;
     int family, s; // n;
@@ -86,7 +86,11 @@ int get_ip_address(char *host)
         family = ifa->ifa_addr->sa_family;
 
         if (family == AF_INET) {
-            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (strcmp("wg0", ifa->ifa_name) == 0) {
+                s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), wghost, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            } else {
+                s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            }
             if (s != 0) {
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
                 return EXIT_FAILURE;
@@ -153,6 +157,8 @@ int64_t usec_between(const struct timeval *start, const struct timeval *stop)
     return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
 }
 
+bool roll = false;
+
 void update_display(enum screen screen)
 {
     GUI_Clear();
@@ -183,9 +189,14 @@ void update_display(enum screen screen)
 
 
         char host[NI_MAXHOST];
-        get_ip_address(host);
+        char wg_host[NI_MAXHOST];
+        get_ip_address(host, wg_host);
         char str[100];
-        sprintf(str, "IP: %s", host);
+        if (roll) {
+            sprintf(str, "WG: %s", wg_host);
+        } else {
+            sprintf(str, "IP: %s", host);
+        }
         GUI_DisString_EN(0, Font12.Height - 2, str, &Font12, FONT_BACKGROUND, WHITE);
 
         char name_user[32];
@@ -223,6 +234,9 @@ void update_display(enum screen screen)
         break;
     }
     }
+
+    roll = !roll;
+
     GUI_Display();
 }
 
