@@ -195,7 +195,7 @@ void update_display(enum screen screen)
         sprintf(wg_host, "");
         get_ip_address(host, wg_host);
         char str[100];
-        if (roll) {
+        if (roll && strcmp(wg_host, "") != 0) {
             sprintf(str, "WG: %s", wg_host);
         } else {
             sprintf(str, "IP: %s", host);
