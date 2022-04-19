@@ -157,6 +157,8 @@ int64_t usec_between(const struct timeval *start, const struct timeval *stop)
     return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
 }
 
+int roll_time = 5;
+int roll_current_time = 0;
 bool roll = false;
 
 void update_display(enum screen screen)
@@ -235,7 +237,12 @@ void update_display(enum screen screen)
     }
     }
 
-    roll = !roll;
+    roll_current_time++;
+
+    if (roll_current_time >= roll_time) {
+        roll = !roll;
+        roll_current_time = 0;
+    }
 
     GUI_Display();
 }
