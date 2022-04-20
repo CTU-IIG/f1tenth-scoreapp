@@ -1,6 +1,14 @@
 # f1tenth-scoreapp-backend-arrowhead
 _An Arrowhead compliant overlay for backend._
 
+This application serves as an Arrowhead overlay for the **F1Tenth Scoreapp** (backend). It registers itself as an Arrowhead Service `scoreapp` and launches the backend scoreapp itself. Provided Service is consumed by the optical barriers.
+
+The Service `scoreapp` provided by this overlay has following metadata:
+- `authorization` -- secret keyphrase for authorizing the barrier (it is used by the barrier to authorize itself with the scoreapp)
+- `endpoint_X` -- available endpoint for the barrier to connect to
+
+_Note: The amount of endpoints is not limited. Each parameter starting with `endpoint_` should be treated as an endpoint option._
+
 
 ## Requirements
 - `aclpy >= 0.2.0`
