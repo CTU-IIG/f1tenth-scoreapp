@@ -1,6 +1,29 @@
 #!/usr/bin/env python3
 # overlay.py3
 """Arrowhead Compliant overlay."""
+######################
+# Logo
+######################
+
+from PIL import Image
+# https://stackoverflow.com/questions/68957686/pillow-how-to-binarize-an-image-with-threshold
+arrowhead_logo = Image.open("arrowhead_logo.bmp") \
+                      .convert("L") \
+                      .point( lambda p: 255 if p > 20 else 0 ) \
+                      .convert("1") \
+                      .resize((16, 9))
+
+import sys
+
+def show_arrowhead_logo():
+    for y in range(arrowhead_logo.height):
+        for x in range(arrowhead_logo.width):
+            if arrowhead_logo.getpixel((x, y)):
+                sys.stdout.write("#")
+            else:
+                sys.stdout.write(" ")
+        print("")
+
 
 ######################
 # Arrowhead Configuration
@@ -54,6 +77,10 @@ signal.signal(signal.SIGTERM, exit_sequence)
 
 import time, os
 
+show_arrowhead_logo()
+print ("Arrowhead backend overlay starting up...\n")
+
+print ("Registering '%s' service to Arrowhead Core..." % Service.name)
 if not Client.register_service(Service):
     Client.unregister_service(Service)
 
@@ -61,8 +88,10 @@ if not Client.register_service(Service):
         print (Client.last_error)
         exit (1)
 
-print ("Registered to AHCore with:\n\tInterface ID: %d\n\tProvider ID: %d\n\tService ID: %d" % (Interface.id, Client.id, Service.id))
+print ("> Registration successful.")
+print ("> Interface ID: %d\n> Provider ID: %d\n> Service ID: %d\n" % (Interface.id, Client.id, Service.id))
 
+print ("Starting scoreapp...")
 os.system("../backend/scoreapp")
 
 exit_sequence(signal.SIGTERM, None)
