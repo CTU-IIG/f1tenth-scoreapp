@@ -89,7 +89,7 @@ export const App = ({ children, withFooter = true, routeName }: AppProps) => {
 
 			{withFooter && (
 				<footer className="app-footer">
-					<p>&copy; 2021 <a href="https://github.com/CTU-IIG">IIRC, CTU in Prague</a></p>
+					<p>&copy; 2022 <a href="https://github.com/CTU-IIG">IIRC, CTU in Prague</a></p>
 					<p>{t`footer.sourceCode`} <a href="https://github.com/CTU-IIG/f1tenth-scoreapp">GitHub</a></p>
 				</footer>
 			)}

@@ -10,6 +10,7 @@ import { templateParameters } from './tools/webpack-utils';
 
 const port = 3000;
 const publicPath = `http://localhost:${port}/`;
+// const publicPath = `http://195.0.0.41:${port}/`;
 
 export default merge(baseConfig, {
 

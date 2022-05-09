@@ -29,8 +29,8 @@ const PresentationPage = () => {
 					width={750}
 					height={750}
 				/>
-				<h1>9th F1TENTH Autonomous Grand Prix</h1>
-				<h2>IROS 2021 Prague</h2>
+				<h1>10th F1TENTH Autonomous Grand Prix</h1>
+				<h2>ICRA 2022 Prague</h2>
 				<div className="message">
 					No race is in progress.
 				</div>
