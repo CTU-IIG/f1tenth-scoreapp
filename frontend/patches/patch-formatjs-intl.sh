@@ -6,16 +6,18 @@ set -e
 #   fractionalSecondDigits is missing in dateTime.ts DATE_TIME_FORMAT_OPTIONS
 #   see https://github.com/formatjs/formatjs/blob/main/packages/intl/src/dateTime.ts#L7
 
-# This is temporary patch script working only for @formatjs/intl version 2.1.1
+# This is a temporary patch script working only for @formatjs/intl version <version>
 # This script must be run from the frontend root
 
-if ! grep '"version": "2.1.1"' "node_modules/@formatjs/intl/package.json" 1>/dev/null; then
-	echo "@formatjs/intl version 2.1.1 not found (node_modules/@formatjs/intl/package.json)"
+version="2.2.1"
+
+if ! grep "\"version\": \"$version\"" "node_modules/@formatjs/intl/package.json" 1>/dev/null; then
+	echo "@formatjs/intl version $version not found (node_modules/@formatjs/intl/package.json)"
 	exit 1
 fi
 
 if grep "fractionalSecondDigits" "node_modules/@formatjs/intl/lib/src/dateTime.js" 1>/dev/null && grep "fractionalSecondDigits" "node_modules/@formatjs/intl/src/dateTime.js" 1>/dev/null; then
-	echo "skipping @formatjs/intl version 2.1.1 patching (already patched)"
+	echo "skipping @formatjs/intl version $version patching (already patched)"
 	exit 0
 fi
 
