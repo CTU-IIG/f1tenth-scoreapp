@@ -40,6 +40,8 @@
 #include "OLED_GUI.h"
 #include "Show_Lib.h"
 
+#include "git.h"
+
 #define BARRIER_SIGNAL 0     // 30
 #define UNIVERSAL_BUTTON1 19 // 24
 #define UNIVERSAL_BUTTON2 26 // 25
@@ -64,7 +66,7 @@ void interrupt_optic_barrier()
     pthread_mutex_unlock(&detect_mutex);
 }
 
-int get_ip_address(char *host)
+int get_ip_address(char *host, char *wghost)
 {
     struct ifaddrs *ifa;
     int family, s; // n;
@@ -84,7 +86,11 @@ int get_ip_address(char *host)
         family = ifa->ifa_addr->sa_family;
 
         if (family == AF_INET) {
-            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (strcmp("wg0", ifa->ifa_name) == 0) {
+                s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), wghost, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            } else {
+                s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            }
             if (s != 0) {
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
                 return EXIT_FAILURE;
@@ -141,7 +147,19 @@ struct state {
     int64_t best_time_us;
 } state;
 
-enum screen { EMPTY, TIME, SHUTDOWN };
+enum screen { EMPTY, TIME, SHUTDOWN, EXIT };
+
+static struct timeval start1;
+static struct timeval start2;
+
+int64_t usec_between(const struct timeval *start, const struct timeval *stop)
+{
+    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
+}
+
+int roll_time = 5;
+int roll_current_time = 0;
+bool roll = false;
 
 void update_display(enum screen screen)
 {
@@ -164,11 +182,24 @@ void update_display(enum screen screen)
         break;
     }
     case SHUTDOWN: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         GUI_DisString_EN(0, 0, "Hold 5s to pwroff", &Font12, FONT_BACKGROUND, WHITE);
+        //GUI_DisString_EN(usec_between(&start1, &now) / 41322, (Font12.Height / 2) - 1, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start1, &now) / 41322, 2*Font12.Height - 4, "_", &Font12, FONT_BACKGROUND, WHITE);
+
+
         char host[NI_MAXHOST];
-        get_ip_address(host);
+        char wg_host[NI_MAXHOST];
+        sprintf(wg_host, "");
+        get_ip_address(host, wg_host);
         char str[100];
-        sprintf(str, "IP: %s", host);
+        if (roll && strcmp(wg_host, "") != 0) {
+            sprintf(str, "WG: %s", wg_host);
+        } else {
+            sprintf(str, "IP: %s", host);
+        }
         GUI_DisString_EN(0, Font12.Height - 2, str, &Font12, FONT_BACKGROUND, WHITE);
 
         char name_user[32];
@@ -179,34 +210,84 @@ void update_display(enum screen screen)
 
         break;
     }
-    }
-    GUI_Display();
-}
+    case EXIT: {
+        struct timeval now;
+        gettimeofday(&now, NULL);
 
-int64_t usec_between(const struct timeval *start, const struct timeval *stop)
-{
-    return (stop->tv_sec - start->tv_sec) * 1000000LL + stop->tv_usec - start->tv_usec;
+        GUI_DisString_EN(0, 0, "Hold 5s to exit", &Font12, FONT_BACKGROUND, WHITE);
+        // MAX_TIME / (DISPLAY_WIDTH - FONT_WIDTH)
+        // 5000000 / (128 - 7)
+        //GUI_DisString_EN(usec_between(&start2, &now) / 41322, Font12.Height - 2, "-", &Font12, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(usec_between(&start2, &now) / 41322, 0, "_", &Font12, FONT_BACKGROUND, WHITE);
+
+        char version[100];
+
+        if (GIT_AVAILABLE) {
+            if (GIT_IS_DIRTY) {
+                sprintf(version, "%s-dirty", GIT_DESCRIBE);
+            } else {
+                sprintf(version, "%s", GIT_DESCRIBE);
+            }
+        } else {
+            sprintf(version, "Unknown version");
+        }
+
+        GUI_DisString_EN(0, 2 * Font8.Height, GIT_BRANCH_NAME, &Font8, FONT_BACKGROUND, WHITE);
+        GUI_DisString_EN(0, 3 * Font8.Height, version, &Font8, FONT_BACKGROUND, WHITE);
+        break;
+    }
+    }
+
+    roll_current_time++;
+
+    if (roll_current_time >= roll_time) {
+        roll = !roll;
+        roll_current_time = 0;
+    }
+
+    GUI_Display();
 }
 
 void shutdown_handler(bool btn_pressed)
 {
-    static struct timeval start;
     struct timeval now;
 
     if (!btn_pressed) {
-        start = (struct timeval){0, 0};
+        start1 = (struct timeval){0, 0};
         return;
     }
 
-    if (start.tv_sec == 0)
-        gettimeofday(&start, NULL);
+    if (start1.tv_sec == 0)
+        gettimeofday(&start1, NULL);
 
     gettimeofday(&now, NULL);
 
-    if (usec_between(&start, &now) > 5*1000000) {
+    if (usec_between(&start1, &now) > 5*1000000) {
         update_display(EMPTY);
         System_Exit();
         system("sudo shutdown -h now");
+        exit(0);
+    }
+}
+
+void exit_handler(bool btn_pressed)
+{
+    struct timeval now;
+
+    if (!btn_pressed) {
+        start2 = (struct timeval){0, 0};
+        return;
+    }
+
+    if (start2.tv_sec == 0)
+        gettimeofday(&start2, NULL);
+
+    gettimeofday(&now, NULL);
+
+    if (usec_between(&start2, &now) > 5*1000000) {
+        update_display(EMPTY);
+        System_Exit();
+        system("pkill websocat"); // FIXME: This is currently only way how I can force quit on websocat.
         exit(0);
     }
 }
@@ -251,11 +332,15 @@ int main(int argc, char *argv[])
         }
 
         if (digitalRead(SHUTDOWN_BUTTON) == 1) {
-            update_display(SHUTDOWN);
             shutdown_handler(true);
+            update_display(SHUTDOWN);
+        } else if (digitalRead(UNIVERSAL_BUTTON2) == 1) {
+            exit_handler(true);
+            update_display(EXIT);
         } else {
             update_display(TIME);
             shutdown_handler(false);
+            exit_handler(false);
         }
 
         if (after_start) {
