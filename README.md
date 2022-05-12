@@ -14,7 +14,7 @@ This project consists of several parts:
 
 ## License
 
-F1tenth Scoreapp is released under the **TODO LICENSE**.
+F1tenth Scoreapp is released under the **GPLv3** license.
 
 
 ## About Arrowhead Tools
