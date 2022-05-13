@@ -30,7 +30,7 @@ const PresentationPage = () => {
 					height={750}
 				/>
 				<h1>10th F1TENTH Autonomous Grand Prix</h1>
-				<h2>ICRA 2022 Prague</h2>
+				<h2>ICRA 2022 Philadelphia</h2>
 				<div className="message">
 					No race is in progress.
 				</div>
