@@ -40,4 +40,6 @@ captures
 
 ### PROJECT
 
-
+/barrier/optic_barrier_hw/*.pro
+/barrier/optic_barrier_hw/*.sch-bak
+/barrier/optic_barrier_hw/*.lib
