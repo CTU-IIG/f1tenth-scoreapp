@@ -92,6 +92,6 @@ print ("> Registration successful.")
 print ("> Interface ID: %d\n> Provider ID: %d\n> Service ID: %d\n" % (Interface.id, Client.id, Service.id))
 
 print ("Starting scoreapp...")
-os.system("../backend/scoreapp")
+os.system("../../backend/scoreapp")
 
 exit_sequence(signal.SIGTERM, None)
