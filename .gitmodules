@@ -1,0 +1,4 @@
+[submodule "barrier-arrowhead"]
+	path = arrowhead/barrier
+	url = https://github.com/jara001/ah-raspi-overlay
+	branch = master
