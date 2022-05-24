@@ -20,7 +20,7 @@ export interface FullRaceAndStats {
 	stats: RaceStats;
 }
 
-export type CrossingUpdater = (id: number, ignored: boolean, team: CrossingTeam) => void;
+export type CrossingUpdater = (id: number, ignored: boolean, team: CrossingTeam, interrupted: boolean) => void;
 
 export interface UseRaceDataExperimentalHookReturnValue {
 	op: QueryOperation<FullRaceAndStats | undefined>,
@@ -179,14 +179,14 @@ export const useRaceDataExperimental = (raceId: number): UseRaceDataExperimental
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, deps);
 
-	const handleUpdateCrossing = useMemo<CrossingUpdater>(() => (id, ignored, team) => {
+	const handleUpdateCrossing = useMemo<CrossingUpdater>(() => (id, ignored, team, interrupted) => {
 
 		const restUrl = store.get('restUrl');
 		const token = store.get('authToken');
 
 		// TODO: set actions loading
 
-		updateCrossing(id, ignored, team)(restUrl, token)
+		updateCrossing(id, ignored, team, interrupted)(restUrl, token)
 			.then(result => {
 				// TODO: maybe set state
 				console.log(`[handleUpdateCrossing] got result`);

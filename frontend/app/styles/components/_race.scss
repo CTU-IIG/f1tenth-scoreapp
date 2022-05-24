@@ -277,8 +277,8 @@ $team-b-color: $blue;
 			opacity: .5;
 		}
 
-		.btn-ignore {
-			margin: 0 0 0 auto;
+		.btn-ignore, .btn-interrupted {
+			margin: 0;
 			display: flex;
 			align-items: center;
 			width: 40px;
@@ -294,12 +294,25 @@ $team-b-color: $blue;
 			}
 		}
 
+		.btn-interrupted {
+			margin: 0 0 0 auto;
+		}
+
 		.crossing-debug + .btn-ignore {
 			margin: 0;
 		}
 
 		&.crossing--ignored {
 			opacity: .5;
+		}
+
+		&.crossing--interrupted {
+			.btn-interrupted {
+				background-color: $purple;
+				svg {
+					fill: $white;
+				}
+			}
 		}
 
 		&.crossing--start {

@@ -52,20 +52,22 @@ type Race struct {
 }
 
 type Crossing struct {
-	ID        uint         `gorm:"primaryKey" json:"id" param:"id" query:"id"`
-	UpdatedAt Time         `json:"updatedAt"`
-	Time      Time         `json:"time"`
-	Ignored   bool         `json:"ignored"`
-	BarrierId uint         `json:"barrierId"`
-	Team      CrossingTeam `json:"team"`
+	ID          uint         `gorm:"primaryKey" json:"id" param:"id" query:"id"`
+	UpdatedAt   Time         `json:"updatedAt"`
+	Time        Time         `json:"time"`
+	Ignored     bool         `json:"ignored"`
+	BarrierId   uint         `json:"barrierId"`
+	Team        CrossingTeam `json:"team"`
+	Interrupted bool         `json:"interrupted"` // true if there was any crash during the corresponding lap
 	// If 0, the crossing is not associated to any race
 	RaceID uint `json:"-"`
 }
 
 type CrossingUpdate struct {
-	ID      uint         `param:"id"`
-	Ignored bool         `json:"ignored"`
-	Team    CrossingTeam `json:"team"`
+	ID          uint         `param:"id"`
+	Ignored     bool         `json:"ignored"`
+	Team        CrossingTeam `json:"team"`
+	Interrupted bool         `json:"interrupted"`
 }
 
 type CurrentRace struct {
@@ -330,7 +332,7 @@ func updateCrossing(c echo.Context) error {
 	err := db.Transaction(func(tx *gorm.DB) error {
 
 		// note: we have to explicitly select Team otherwise GoORM will ignore zero fields
-		if err := db.Model(&crossing).Select("Ignored", "Team").Updates(Crossing{Ignored: update.Ignored, Team: update.Team}).Error; err != nil {
+		if err := db.Model(&crossing).Select("Ignored", "Team", "Interrupted").Updates(Crossing{Ignored: update.Ignored, Team: update.Team, Interrupted: update.Interrupted}).Error; err != nil {
 			return err
 		}
 

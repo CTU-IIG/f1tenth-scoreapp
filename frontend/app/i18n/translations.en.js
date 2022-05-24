@@ -110,6 +110,8 @@ export default {
 		stopRace: `Stop race`,
 		ignore: `Ignore`,
 		unignore: `Unignore`,
+		setInterrupted: `Set interrupted flag`,
+		setUninterrupted: `Remove interrupted flag`,
 		teamBtn: {
 			a: `A`,
 			b: `B`,

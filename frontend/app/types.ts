@@ -107,6 +107,7 @@ export interface Crossing extends Entity {
 	ignored: boolean;
 	barrierId: number;
 	team: CrossingTeam;
+	interrupted: boolean;
 	// computed fields that may be added by computeRaceStatsAndMutateCrossings
 	start?: boolean | undefined;
 	excluded?: boolean | undefined; // if the crossing happened after the stopTime

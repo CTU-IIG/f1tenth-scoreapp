@@ -73,13 +73,13 @@ export const cancelRace = (id: number) =>
 			{ method: METHOD_POST, token },
 		);
 
-export const updateCrossing = (id: number, ignored: boolean, team: CrossingTeam) =>
+export const updateCrossing = (id: number, ignored: boolean, team: CrossingTeam, interrupted: boolean) =>
 	(restUrl: string, token: string | undefined) =>
 		doRequest<Crossing>(
 			`${restUrl}/crossings/${id}`,
 			{
 				method: METHOD_POST,
 				token,
-				body: { ignored, team },
+				body: { ignored, team, interrupted },
 			},
 		);

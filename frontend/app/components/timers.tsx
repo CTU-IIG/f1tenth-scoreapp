@@ -183,6 +183,7 @@ export interface RaceTimersProps {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
+	numUninterruptedLaps: number;
 	bestLapTime: number;
 	currentLapStartTime: number;
 	active: boolean;
@@ -193,6 +194,7 @@ export const RaceTimers = (
 		startTime,
 		stopTime,
 		numLaps,
+		numUninterruptedLaps,
 		bestLapTime,
 		currentLapStartTime,
 		active,
@@ -208,8 +210,8 @@ export const RaceTimers = (
 		/>
 		<ValueDisplay
 			className="timer--total-laps"
-			name="Total laps:"
-			value={numLaps}
+			name="Crash-free / Total laps:"
+			value={`${numUninterruptedLaps} / ${numLaps}`}
 		/>
 		<TimerDisplay
 			className="timer--best-lap-time"

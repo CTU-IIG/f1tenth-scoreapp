@@ -43,6 +43,7 @@ export interface TeamStats {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
+	numUninterruptedLaps: number;
 	bestLapTime: number;
 	bestLapCrossingId: number;
 	currentLapStartTime: number;
@@ -96,6 +97,7 @@ export const computeTeamStatsAndMutateCrossings = (
 	let startTime = -1;
 	let stopTime = -1;
 	let numLaps = 0;
+	let numUninterruptedLaps = 0;
 	let checkpointNumber = 0;
 	let bestLapTime = Number.MAX_SAFE_INTEGER;
 	let currentLapStartTime = -1;
@@ -147,6 +149,9 @@ export const computeTeamStatsAndMutateCrossings = (
 			}
 
 			numLaps++;
+			if (!c.interrupted) {
+				numUninterruptedLaps++;
+			}
 			checkpointNumber = 0;
 
 			// assign the lap stats to the crossing
@@ -216,6 +221,7 @@ export const computeTeamStatsAndMutateCrossings = (
 		startTime,
 		stopTime,
 		numLaps,
+		numUninterruptedLaps,
 		bestLapTime,
 		bestLapCrossingId,
 		currentLapStartTime,

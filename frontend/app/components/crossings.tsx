@@ -17,6 +17,7 @@ import LocalizedDate from './LocalizedDate';
 
 import IconEye from '-!svg-react-loader?name=IconEye!../images/icons/eye-solid.svg';
 import IconEyeSlash from '-!svg-react-loader?name=IconEyeSlash!../images/icons/eye-slash-solid.svg';
+import IconCarCrash from '-!svg-react-loader?name=IconCarCrash!../images/icons/car-crash-solid.svg';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckboxOptionBox, RadioOptionBox } from './inputs';
@@ -41,6 +42,7 @@ export interface CrossingRowProps {
 	showDebugInfo?: boolean;
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
+	onUpdateCrossingInterrupted?: ButtonProps['onClick'];
 }
 
 export const CrossingRow = (
@@ -53,23 +55,26 @@ export const CrossingRow = (
 		showDebugInfo = false,
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
+		onUpdateCrossingInterrupted,
 	}: CrossingRowProps,
 ) => {
 
 	const t = useFormatMessageId();
 
-	const { id, time, ignored, barrierId, team, start, checkpoint, lap } = crossing;
+	const { id, time, ignored, barrierId, team, interrupted, start, checkpoint, lap } = crossing;
 
 	return (
 		<div
 			data-id={id}
 			data-ignored={ignored}
 			data-team={team}
+			data-interrupted={interrupted}
 			className={classNames(
 				'crossing',
 				`crossing--team-${crossingTeamToClass(team)}`,
 				{
 					'crossing--ignored': ignored,
+					'crossing--interrupted': interrupted,
 					'crossing--start': start,
 					'crossing--lap': isDefined(lap),
 					'crossing--best-lap': isBestLap,
@@ -145,6 +150,18 @@ export const CrossingRow = (
 					<span className="crossing-id">#{id}</span>
 				</div>
 			)}
+			{isDefined(onUpdateCrossingInterrupted) && (
+				<Button
+					name={!interrupted ? 'setInterrupted' : 'setUninterrupted'}
+					className="btn-interrupted"
+					onClick={onUpdateCrossingInterrupted}
+				>
+					{!interrupted ? <IconCarCrash /> : <IconCarCrash />}
+					<span className="sr-only">
+						{t(`racePage.${!ignored ? 'setInterrupted' : 'setUninterrupted'}`)}
+					</span>
+				</Button>
+			)}
 			{isDefined(onUpdateCrossingIgnored) && (
 				<Button
 					name={!ignored ? 'ignore' : 'unignore'}
@@ -204,6 +221,7 @@ export interface CrossingsListProps {
 	updateCrossing?: CrossingUpdater;
 	onUpdateCrossingTeam?: ButtonProps['onClick'];
 	onUpdateCrossingIgnored?: ButtonProps['onClick'];
+	onUpdateCrossingInterrupted?: ButtonProps['onClick'];
 
 	visibleScrollbar?: boolean;
 	autoScroll?: boolean;
@@ -240,19 +258,19 @@ const useCrossingsKeyboardShortcuts = (
 		if (toggleIgnore && key === 'i') {
 			const lc = cs[cs.length - 1];
 			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] toggleIgnore lastVisibleCrossing.id = ${lc.id}`);
-			updateCrossing(lc.id, !lc.ignored, lc.team);
+			updateCrossing(lc.id, !lc.ignored, lc.team, lc.interrupted);
 		}
 
 		if (setTeam && key === 'a') {
 			const lc = cs[cs.length - 1];
 			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] setTeamA lastVisibleCrossing.id = ${lc.id}`);
-			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_A);
+			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_A, lc.interrupted);
 		}
 
 		if (setTeam && (key === 'b' || key === 's')) {
 			const lc = cs[cs.length - 1];
 			IS_DEVELOPMENT && console.log(`[useCrossingsKeyboardShortcuts] setTeamB lastVisibleCrossing.id = ${lc.id}`);
-			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_B);
+			updateCrossing(lc.id, lc.ignored, CROSSING_TEAM_B, lc.interrupted);
 		}
 
 	}, [cs, toggleIgnore, setTeam, updateCrossing]);
@@ -279,6 +297,7 @@ export const CrossingsList = (
 		updateCrossing,
 		onUpdateCrossingTeam,
 		onUpdateCrossingIgnored,
+		onUpdateCrossingInterrupted,
 
 		visibleScrollbar = true,
 		autoScroll = true,
@@ -392,6 +411,7 @@ export const CrossingsList = (
 					showDebugInfo={showDebugInfo}
 					onUpdateCrossingTeam={onUpdateCrossingTeam}
 					onUpdateCrossingIgnored={onUpdateCrossingIgnored}
+					onUpdateCrossingInterrupted={onUpdateCrossingInterrupted}
 				/>,
 			)}
 		</div>
@@ -519,6 +539,7 @@ export const CrossingsView = (
 			!isDefined(crossing.dataset.id)
 			|| !isDefined(crossing.dataset.ignored)
 			|| !isDefined(crossing.dataset.team)
+			|| !isDefined(crossing.dataset.interrupted)
 		) {
 			return;
 		}
@@ -526,24 +547,35 @@ export const CrossingsView = (
 		const id = parseInt(crossing.dataset.id);
 		const ignored = crossing.dataset.ignored === 'true';
 		const team = parseInt(crossing.dataset.team) as CrossingTeam;
+		const interrupted = crossing.dataset.interrupted === 'true';
 
 		if (btn.name === 'setTeamA') {
-			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_A));
+			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_A), interrupted);
 			return;
 		}
 
 		if (btn.name === 'setTeamB') {
-			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_B));
+			updateCrossing(id, ignored, otherTeam(team, CROSSING_TEAM_B), interrupted);
 			return;
 		}
 
 		if (btn.name === 'ignore') {
-			updateCrossing(id, true, team);
+			updateCrossing(id, true, team, interrupted);
 			return;
 		}
 
 		if (btn.name === 'unignore') {
-			updateCrossing(id, false, team);
+			updateCrossing(id, false, team, interrupted);
+			return;
+		}
+
+		if (btn.name === 'setInterrupted') {
+			updateCrossing(id, ignored, team, true);
+			return;
+		}
+
+		if (btn.name === 'setUninterrupted') {
+			updateCrossing(id, ignored, team, false);
 			return;
 		}
 
@@ -652,6 +684,10 @@ export const CrossingsView = (
 						? handleUpdateCrossing : undefined
 				}
 				onUpdateCrossingIgnored={
+					interactive && isDefined(updateCrossing)
+						? handleUpdateCrossing : undefined
+				}
+				onUpdateCrossingInterrupted={
 					interactive && isDefined(updateCrossing)
 						? handleUpdateCrossing : undefined
 				}
