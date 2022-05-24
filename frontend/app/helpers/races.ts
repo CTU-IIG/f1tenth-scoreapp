@@ -62,26 +62,20 @@ export type RaceStats = TimeTrialRaceStats | HeadToHeadRaceStats;
 
 export const computeRaceStatsAndMutateCrossings = (race: FullRace): RaceStats => {
 
-	// TODO: In the future, support configurable the "home" (lap) barrier per team.
-	// Currently:
-	//   TIME_TRIAL = barrierId 1
-	//   HEAD_TO_HEAD team A = barrierId 1 = value of CROSSING_TEAM_A
-	//   HEAD_TO_HEAD team B = barrierId 2 = value of CROSSING_TEAM_B
-
 	const type = race.type;
 
 	if (type === RACE_TYPE_TIME_TRIAL) {
 		return {
 			type,
-			...computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_UNSET, CROSSING_TEAM_A),
+			...computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_UNSET, race.teamABarrierId),
 		};
 	}
 
 	// HEAD_TO_HEAD
 	return {
 		type,
-		teamA: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_A, CROSSING_TEAM_A),
-		teamB: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_B, CROSSING_TEAM_B),
+		teamA: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_A, race.teamABarrierId),
+		teamB: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_B, race.teamBBarrierId),
 	};
 
 };

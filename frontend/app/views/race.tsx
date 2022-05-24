@@ -233,6 +233,8 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 							interactive={interactive}
 							barriersFilter={true}
 							showTeamSetter={true}
+							teamABarrierId={race.teamABarrierId}
+							teamBBarrierId={race.teamBBarrierId}
 						/>
 					)
 					: (
@@ -292,6 +294,7 @@ const RaceTimeTrialContent = ({ race, stats, interactive, updateCrossing }: Race
 				interactive={interactive}
 				barriersFilter={false}
 				showTeamSetter={false}
+				teamABarrierId={race.teamABarrierId}
 			/>
 
 		</div>

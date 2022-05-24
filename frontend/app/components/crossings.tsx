@@ -407,6 +407,8 @@ export interface CrossingsViewProps {
 	interactive?: boolean;
 	barriersFilter?: boolean;
 	showTeamSetter?: boolean;
+	teamABarrierId: number;
+	teamBBarrierId?: number;
 }
 
 interface CrossingsViewState {
@@ -431,6 +433,8 @@ export const CrossingsView = (
 		interactive = true,
 		barriersFilter = false,
 		showTeamSetter = false,
+		teamABarrierId,
+		teamBBarrierId,
 	}: CrossingsViewProps,
 ) => {
 
@@ -553,7 +557,7 @@ export const CrossingsView = (
 						<>
 							<RadioOptionBox
 								name="barrierId"
-								id="crossings-options--barrierId0"
+								id="crossings-options--allBarriers"
 								label={t('racePage.allBarriers')}
 								value="0"
 								selected={state.barrierId === undefined}
@@ -561,20 +565,22 @@ export const CrossingsView = (
 							/>
 							<RadioOptionBox
 								name="barrierId"
-								id="crossings-options--barrierId1"
-								label={t('racePage.onlyBarrier1')}
-								value="1"
-								selected={state.barrierId === 1}
+								id="crossings-options--onlyBarrierA"
+								label={t('racePage.onlyBarrierA')}
+								value={teamABarrierId.toString()}
+								selected={state.barrierId === teamABarrierId}
 								onChange={handleOptionChange}
 							/>
-							<RadioOptionBox
-								name="barrierId"
-								id="crossings-options--barrierId2"
-								label={t('racePage.onlyBarrier2')}
-								value="2"
-								selected={state.barrierId === 2}
-								onChange={handleOptionChange}
-							/>
+							{isDefined(teamBBarrierId) && (
+								<RadioOptionBox
+									name="barrierId"
+									id="crossings-options--onlyBarrierB"
+									label={t('racePage.onlyBarrierB')}
+									value={teamBBarrierId.toString()}
+									selected={state.barrierId === teamBBarrierId}
+									onChange={handleOptionChange}
+								/>
+							)}
 						</>
 					)}
 					<CheckboxOptionBox

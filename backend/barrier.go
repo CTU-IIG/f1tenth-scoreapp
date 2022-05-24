@@ -75,30 +75,56 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 			BarrierId: b.Id,
 		}
 		if race.ID != 0 {
+			if race.Type == TimeTrial {
+
+				// find the last crossing from the same race and the same barrier
+				var lastCrossing Crossing
+				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
+
+				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err == nil {
+
+					if race.MinLapTime != nil && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < time.Duration(*race.MinLapTime).Milliseconds()) {
+						crossing.Ignored = true
+					}
+
+				}
+
+			}
 			if race.Type == HeadToHead {
-				// Switch crossing teams in round robin fashion. If needed, barrier operators
+
+				// Switch crossing teams in round-robin fashion. If needed, barrier operators
 				// can correct the team associated with the crossing via the frontend.
 				var lastCrossing Crossing
 				var crossingCnt int64
+
+				// find the last crossing from the same race and the same barrier
 				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
 				db.Model(&Crossing{}).Where(&filter).Where("ignored = ?", false).Count(&crossingCnt)
+
 				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
-					// First crossing in a race
-					if crossing.BarrierId == 1 {
+
+					// this crossing will be the first crossing from this barrier in the race
+					// (there are no crossings from this barrier yet)
+					if crossing.BarrierId == race.TeamABarrierId {
 						crossing.Team = TeamA
-					} else if crossing.BarrierId == 2 {
+					} else if crossing.BarrierId == race.TeamBBarrierId {
 						crossing.Team = TeamB
 					}
+
 				} else {
+
+					// second crossing
 					if crossingCnt == 1 && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < 1000) {
 						crossing.Ignored = true
 					}
-					// Later crossings in the race
+
+					// later crossings in the race (expected round-robin fashion)
 					if lastCrossing.Team == TeamA {
 						crossing.Team = TeamB
 					} else if lastCrossing.Team == TeamB {
 						crossing.Team = TeamA
 					}
+
 				}
 				log.Printf(name+": associating crossing with team %d", crossing.Team)
 			}

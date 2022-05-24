@@ -36,16 +36,19 @@ type Team struct {
 
 type Race struct {
 	CommonModelFields
-	Type         RaceType   `json:"type" gorm:"index"`
-	State        RaceState  `json:"state" gorm:"index"`
-	Round        uint32     `json:"round"`
-	TeamAID      uint       `json:"teamAId" query:"team_a_id"`
-	TeamA        Team       `json:"teamA"`
-	TimeDuration *Duration  `json:"timeDuration,omitempty"`              // if Type != TimeTrial then TimeDuration == nil
-	LapsDuration *uint      `json:"lapsDuration,omitempty"`              // if Type != HeadToHead then LapsDuration == nil
-	TeamBID      *int       `json:"teamBId,omitempty" query:"team_b_id"` // if Type != HeadToHead then TeamBId == nil
-	TeamB        *Team      `json:"teamB,omitempty"`                     // if Type != HeadToHead then TeamB == nil
-	Crossings    []Crossing `json:"crossings"`
+	Type           RaceType   `json:"type" gorm:"index"`
+	State          RaceState  `json:"state" gorm:"index"`
+	Round          uint32     `json:"round"`
+	TeamAID        uint       `json:"teamAId" query:"team_a_id"`
+	TeamA          Team       `json:"teamA"`
+	TeamABarrierId uint       `json:"teamABarrierId" query:"team_a_barrier_id"`
+	MinLapTime     *Duration  `json:"minLapTime,omitempty"`                     // if Type != TimeTrial then MinLapTime == nil
+	TimeDuration   *Duration  `json:"timeDuration,omitempty"`                   // if Type != TimeTrial then TimeDuration == nil
+	LapsDuration   *uint      `json:"lapsDuration,omitempty"`                   // if Type != HeadToHead then LapsDuration == nil
+	TeamBID        *int       `json:"teamBId,omitempty" query:"team_b_id"`      // if Type != HeadToHead then TeamBId == nil
+	TeamB          *Team      `json:"teamB,omitempty"`                          // if Type != HeadToHead then TeamB == nil
+	TeamBBarrierId uint       `json:"teamBBarrierId" query:"team_b_barrier_id"` // if Type != HeadToHead then TeamBBarrierId == nil
+	Crossings      []Crossing `json:"crossings"`
 }
 
 type Crossing struct {

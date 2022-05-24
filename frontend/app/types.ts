@@ -44,6 +44,7 @@ export interface AbstractRace extends Entity {
 	round: number;
 	teamAId: number;
 	teamA: Team;
+	teamABarrierId: number;
 }
 
 export interface TimeTrialRace extends AbstractRace {
@@ -56,6 +57,7 @@ export interface HeadToHeadRace extends AbstractRace {
 	lapsDuration: number; // the first team to successfully complete this number of laps wins
 	teamBId: number;
 	teamB: Team;
+	teamBBarrierId: number;
 }
 
 export type Race = TimeTrialRace | HeadToHeadRace;
@@ -70,14 +72,18 @@ export interface CreateTimeTrialRaceData {
 	type: typeof RACE_TYPE_TIME_TRIAL;
 	round: number;
 	teamAId: number;
+	teamABarrierId: number;
 	timeDuration: number;
+	minLapTime: number;
 }
 
 export interface CreateHeadToHeadRaceData {
 	type: typeof RACE_TYPE_HEAD_TO_HEAD;
 	round: number;
 	teamAId: number;
+	teamABarrierId: number;
 	teamBId: number;
+	teamBBarrierId: number;
 	lapsDuration: number;
 }
 
