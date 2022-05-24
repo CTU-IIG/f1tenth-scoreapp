@@ -368,16 +368,30 @@ func initDb() *gorm.DB {
 
 	// db = db.Debug()
 
-	// create initial testing data
-
-	db.FirstOrCreate(new(Team), Team{Name: "Team 1"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 2"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 3"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 4"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 5"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 6"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 7"})
-	db.FirstOrCreate(new(Team), Team{Name: "Team 8"})
+	// create teams data
+	db.FirstOrCreate(new(Team), Team{Name: "Autoware"})
+	db.FirstOrCreate(new(Team), Team{Name: "Drexel Dragons"})
+	db.FirstOrCreate(new(Team), Team{Name: "Dzik"})
+	db.FirstOrCreate(new(Team), Team{Name: "Triton AI - Sid"})
+	db.FirstOrCreate(new(Team), Team{Name: "ForzaPBL"})
+	db.FirstOrCreate(new(Team), Team{Name: "KnightRider"})
+	db.FirstOrCreate(new(Team), Team{Name: "Stony Brook University"})
+	db.FirstOrCreate(new(Team), Team{Name: "HMCar"})
+	db.FirstOrCreate(new(Team), Team{Name: "Falcons"})
+	db.FirstOrCreate(new(Team), Team{Name: "UNIBO Racing"})
+	db.FirstOrCreate(new(Team), Team{Name: "Scuderia Segfault"})
+	db.FirstOrCreate(new(Team), Team{Name: "UT AUTOmata"})
+	db.FirstOrCreate(new(Team), Team{Name: "Carnegie Autonomous Racing"})
+	db.FirstOrCreate(new(Team), Team{Name: "PL400"})
+	db.FirstOrCreate(new(Team), Team{Name: "Herbie McQueen"})
+	db.FirstOrCreate(new(Team), Team{Name: "Lehigh"})
+	db.FirstOrCreate(new(Team), Team{Name: "HiPeRT Modena"})
+	db.FirstOrCreate(new(Team), Team{Name: "1tenth UBM"})
+	db.FirstOrCreate(new(Team), Team{Name: "QC Pass"})
+	db.FirstOrCreate(new(Team), Team{Name: "Team Rocket"})
+	db.FirstOrCreate(new(Team), Team{Name: "Audubon Racing"})
+	db.FirstOrCreate(new(Team), Team{Name: "ScatterBrained"})
+	db.FirstOrCreate(new(Team), Team{Name: "Triton AI - Dominic"})
 	db.FirstOrCreate(new(Team), Team{Name: "—"})
 
 	// Find running races
