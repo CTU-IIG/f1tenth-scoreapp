@@ -28,7 +28,9 @@ type CommonModelFields struct {
 
 type Team struct {
 	CommonModelFields
-	Name string `gorm:"uniqueIndex" json:"name"`
+	Name       string `gorm:"uniqueIndex" json:"name"`
+	University string `json:"university"`
+	Country    string `json:"country"`
 	// Races []Race `json:"-"` // can not be easily specified when using TeamA, TeamB instead of just Team
 }
 

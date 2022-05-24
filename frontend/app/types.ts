@@ -16,6 +16,8 @@ export interface Entity {
 
 export interface Team extends Entity {
 	name: string;
+	university: string;
+	country: string;
 }
 
 export const RACE_TYPE_TIME_TRIAL = 'time_trial';
