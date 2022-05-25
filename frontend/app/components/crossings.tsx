@@ -311,7 +311,7 @@ export const CrossingsList = (
 		const f: Parameters<Array<Crossing>['filter']>[0][] = [];
 
 		if (!showIgnored) {
-			f.push(c => !c.ignored);
+			f.push(c => !c.ignored && !c.excluded);
 		}
 
 		if (isDefined(barrierId)) {
