@@ -43,7 +43,8 @@ export interface TeamStats {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
-	numUninterruptedLaps: number;
+	totalUninterruptedLaps: number;
+	maxConsecutiveUninterruptedLaps: number;
 	bestLapTime: number;
 	bestLapCrossingId: number;
 	currentLapStartTime: number;
@@ -97,7 +98,10 @@ export const computeTeamStatsAndMutateCrossings = (
 	let startTime = -1;
 	let stopTime = -1;
 	let numLaps = 0;
-	let numUninterruptedLaps = 0;
+	let prevInterrupted = false;
+	let totalUninterruptedLaps = 0;
+	let maxConsecutiveUninterruptedLaps = 0;
+	let consecutiveUninterruptedLaps = 0;
 	let checkpointNumber = 0;
 	let bestLapTime = Number.MAX_SAFE_INTEGER;
 	let currentLapStartTime = -1;
@@ -149,9 +153,28 @@ export const computeTeamStatsAndMutateCrossings = (
 			}
 
 			numLaps++;
+
+			// (max) number of (consecutive) uninterrupted laps calculation
 			if (!c.interrupted) {
-				numUninterruptedLaps++;
+
+				totalUninterruptedLaps++;
+
+				if (!prevInterrupted) {
+					consecutiveUninterruptedLaps++;
+				}
+
+			} else {
+
+				// reset consecutiveUninterruptedLaps counter
+				// but before doing that check if it is a new maximum
+				if (consecutiveUninterruptedLaps > maxConsecutiveUninterruptedLaps) {
+					maxConsecutiveUninterruptedLaps = consecutiveUninterruptedLaps;
+				}
+				consecutiveUninterruptedLaps = 0;
+
 			}
+			prevInterrupted = c.interrupted;
+
 			checkpointNumber = 0;
 
 			// assign the lap stats to the crossing
@@ -217,11 +240,16 @@ export const computeTeamStatsAndMutateCrossings = (
 		bestLapTime = -1;
 	}
 
+	if (consecutiveUninterruptedLaps > maxConsecutiveUninterruptedLaps) {
+		maxConsecutiveUninterruptedLaps = consecutiveUninterruptedLaps;
+	}
+
 	return {
 		startTime,
 		stopTime,
 		numLaps,
-		numUninterruptedLaps,
+		totalUninterruptedLaps,
+		maxConsecutiveUninterruptedLaps,
 		bestLapTime,
 		bestLapCrossingId,
 		currentLapStartTime,

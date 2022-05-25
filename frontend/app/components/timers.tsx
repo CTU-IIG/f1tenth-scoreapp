@@ -183,7 +183,7 @@ export interface RaceTimersProps {
 	startTime: number;
 	stopTime: number;
 	numLaps: number;
-	numUninterruptedLaps: number;
+	maxConsecutiveUninterruptedLaps?: number;
 	bestLapTime: number;
 	currentLapStartTime: number;
 	active: boolean;
@@ -194,7 +194,7 @@ export const RaceTimers = (
 		startTime,
 		stopTime,
 		numLaps,
-		numUninterruptedLaps,
+		maxConsecutiveUninterruptedLaps,
 		bestLapTime,
 		currentLapStartTime,
 		active,
@@ -210,9 +210,16 @@ export const RaceTimers = (
 		/>
 		<ValueDisplay
 			className="timer--total-laps"
-			name="Crash-free / Total laps:"
-			value={`${numUninterruptedLaps} / ${numLaps}`}
+			name="Total laps:"
+			value={numLaps}
 		/>
+		{isDefined(maxConsecutiveUninterruptedLaps) && (
+			<ValueDisplay
+				className="timer--max-consecutive-uninterrupted-laps"
+				name="Max consecutive uninterrupted laps:"
+				value={maxConsecutiveUninterruptedLaps}
+			/>
+		)}
 		<TimerDisplay
 			className="timer--best-lap-time"
 			name="Best lap time:"
