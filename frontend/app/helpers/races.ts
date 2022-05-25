@@ -58,6 +58,7 @@ export interface HeadToHeadRaceStats {
 	type: typeof RACE_TYPE_HEAD_TO_HEAD;
 	teamA: TeamStats;
 	teamB: TeamStats;
+	winner: CrossingTeam;
 }
 
 export type RaceStats = TimeTrialRaceStats | HeadToHeadRaceStats;
@@ -73,11 +74,35 @@ export const computeRaceStatsAndMutateCrossings = (race: FullRace): RaceStats =>
 		};
 	}
 
+
+	let winner: CrossingTeam = CROSSING_TEAM_UNSET;
+
+	const teamA = computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_A, race.teamABarrierId);
+	const teamB = computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_B, race.teamBBarrierId);
+
+	let teamAStopTime = Number.MAX_SAFE_INTEGER;
+	let teamBStopTime = Number.MAX_SAFE_INTEGER;
+
+	if (teamA.numLaps >= race.lapsDuration && teamA.stopTime !== -1) {
+		teamAStopTime = teamA.stopTime;
+	}
+
+	if (teamB.numLaps >= race.lapsDuration && teamB.stopTime !== -1) {
+		teamBStopTime = teamB.stopTime;
+	}
+
+	if (teamAStopTime < teamBStopTime) {
+		winner = CROSSING_TEAM_A;
+	} else if (teamBStopTime < teamAStopTime) {
+		winner = CROSSING_TEAM_B;
+	}
+
 	// HEAD_TO_HEAD
 	return {
 		type,
-		teamA: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_A, race.teamABarrierId),
-		teamB: computeTeamStatsAndMutateCrossings(race, CROSSING_TEAM_B, race.teamBBarrierId),
+		teamA,
+		teamB,
+		winner,
 	};
 
 };
@@ -154,14 +179,17 @@ export const computeTeamStatsAndMutateCrossings = (
 
 			numLaps++;
 
+			// if we know the number of laps in the race, we can determine if this is the last crossing
+			// and calculate the stopTime accordingly
+			if (race.type === RACE_TYPE_HEAD_TO_HEAD && numLaps === race.lapsDuration) {
+				stopTime = c.time;
+			}
+
 			// (max) number of (consecutive) uninterrupted laps calculation
 			if (!c.interrupted) {
 
 				totalUninterruptedLaps++;
-
-				if (!prevInterrupted) {
-					consecutiveUninterruptedLaps++;
-				}
+				consecutiveUninterruptedLaps++;
 
 			} else {
 

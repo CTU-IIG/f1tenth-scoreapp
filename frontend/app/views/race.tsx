@@ -23,6 +23,7 @@ import {
 import { CrossingUpdater, useRaceDataExperimental } from '../helpers/races-experimental';
 
 import IconArrowLeft from '-!svg-react-loader?name=IconEye!../images/icons/arrow-left-solid.svg';
+import IconTrophyAlt from '-!svg-react-loader?name=IconTrophyAlt!../images/icons/trophy-alt-solid.svg';
 import { OnlineBarriersInfo, WebSocketInfo } from '../components/ws';
 import { Button, ConfirmButton } from '../components/common';
 import classNames from 'classnames';
@@ -182,6 +183,13 @@ const RaceHeadToHeadNonInteractiveCrossingsView = ({ crossings }: RaceHeadToHead
 
 };
 
+const WinnerBadge = () => (
+	<div className="winner-badge">
+		<IconTrophyAlt />
+		<span className="text">Winner</span>
+	</div>
+);
+
 interface RaceHeadToHeadContentProps {
 	race: FullHeadToHeadRace;
 	stats: RaceStats;
@@ -202,14 +210,16 @@ const RaceHeadToHeadContent = ({ race, stats, interactive, updateCrossing }: Rac
 		<>
 
 			<div className="race-teams">
-				<div className="team-a">
+				<div className={classNames('team-a', { 'team--winner': stats.winner === CROSSING_TEAM_A })}>
 					<span className="team-name-box">A</span>
-					{race.teamA.name}
+					<span className="team-name">{race.teamA.name}</span>
+					{stats.winner === CROSSING_TEAM_A && <WinnerBadge />}
 				</div>
 				<span className="divider">vs.</span>
-				<div className="team-b">
+				<div className={classNames('team-b', { 'team--winner': stats.winner === CROSSING_TEAM_B })}>
 					<span className="team-name-box">B</span>
-					{race.teamB.name}
+					<span className="team-name">{race.teamB.name}</span>
+					{stats.winner === CROSSING_TEAM_B && <WinnerBadge />}
 				</div>
 			</div>
 
@@ -295,6 +305,7 @@ const RaceTimeTrialContent = ({ race, stats, interactive, updateCrossing }: Race
 				interactive={interactive}
 				barriersFilter={false}
 				showTeamSetter={false}
+				showMarkInterruptionBtn={true}
 				teamABarrierId={race.teamABarrierId}
 			/>
 

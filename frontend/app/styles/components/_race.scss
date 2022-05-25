@@ -410,6 +410,12 @@ $team-b-color: $blue;
 		}
 
 	}
+
+	.timer--max-consecutive-uninterrupted-laps {
+		.display-name {
+			font-size: remy(14px);
+		}
+	}
 }
 
 .race-teams {
@@ -450,9 +456,36 @@ $team-b-color: $blue;
 		justify-content: flex-end;
 
 		.team-name-box {
-			order: 1;
+			order: 3;
 			color: $white;
 			background-color: darken($team-b-color, 10%);
+		}
+
+		.team-name {
+			order: 2;
+		}
+
+		.winner-badge {
+			order: 1;
+			flex-direction: row-reverse;
+		}
+
+	}
+
+	.winner-badge {
+		display: flex;
+		gap: remy(10px);
+		color: $yellow;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		font-size: remy(22px);
+		font-weight: 700;
+
+		.svg-inline--fa {
+			fill: $yellow;
+			display: block;
+			width: 30px;
+			color: inherit;
 		}
 	}
 }
@@ -485,6 +518,7 @@ $team-b-color: $blue;
 	.race-timers {
 		flex-grow: 0;
 		flex-shrink: 0;
+		overflow-y: auto;
 	}
 
 	.crossings-view {

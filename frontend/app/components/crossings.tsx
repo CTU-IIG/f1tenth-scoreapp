@@ -427,6 +427,7 @@ export interface CrossingsViewProps {
 	interactive?: boolean;
 	barriersFilter?: boolean;
 	showTeamSetter?: boolean;
+	showMarkInterruptionBtn?: boolean;
 	teamABarrierId: number;
 	teamBBarrierId?: number;
 }
