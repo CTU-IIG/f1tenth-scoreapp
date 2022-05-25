@@ -7,6 +7,7 @@ import { useFormatMessageId } from '../helpers/hooks';
 import { Race, RACE_TYPE_HEAD_TO_HEAD, RACE_TYPE_TIME_TRIAL } from '../types';
 import { copyOnClick } from '../helpers/copy';
 import classNames from 'classnames';
+import { isDefined } from '../helpers/common';
 
 
 export interface RacesListItemProps {
@@ -21,6 +22,8 @@ export const RacesListItem = (
 
 	const t = useFormatMessageId();
 
+	console.log(race);
+
 	return (
 		<div
 			data-id={race.id}
@@ -32,6 +35,8 @@ export const RacesListItem = (
 		>
 
 			<div className="race-id">#{race.id}</div>
+
+			{isDefined(race.number) && <div className="race-number">{race.number}</div>}
 
 			<div className="race-type">
 				{t(`race.types.${race.type}`)}
@@ -47,11 +52,9 @@ export const RacesListItem = (
 				)}
 			</div>
 
-			{race.type === RACE_TYPE_TIME_TRIAL && (
-				<div className="race-round">
-					{t(`race.round`)} {race.round}
-				</div>
-			)}
+			<div className="race-round">
+				{t(`race.${race.type === RACE_TYPE_TIME_TRIAL ? 'heat' : 'round'}`)} {race.round}
+			</div>
 
 			<div className="race-state">
 				{t(`race.states.${race.state}`)}

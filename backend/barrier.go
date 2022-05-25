@@ -75,58 +75,62 @@ func (b *Barrier) reader(conn *websocket.Conn) {
 			BarrierId: b.Id,
 		}
 		if race.ID != 0 {
-			if race.Type == TimeTrial {
+			// if race.Type == TimeTrial {
 
-				// find the last crossing from the same race and the same barrier
-				var lastCrossing Crossing
-				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
+			// find the last crossing from the same race and the same barrier
+			var lastCrossing Crossing
+			filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
 
-				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err == nil {
+			if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err == nil {
 
-					if race.MinLapTime != nil && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < time.Duration(*race.MinLapTime).Milliseconds()) {
-						crossing.Ignored = true
-					}
-
+				if race.MinLapTime != nil && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < time.Duration(*race.MinLapTime).Milliseconds()) {
+					crossing.Ignored = true
 				}
 
 			}
+
+			// }
 			if race.Type == HeadToHead {
-
-				// Switch crossing teams in round-robin fashion. If needed, barrier operators
-				// can correct the team associated with the crossing via the frontend.
-				var lastCrossing Crossing
-				var crossingCnt int64
-
-				// find the last crossing from the same race and the same barrier
-				filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
-				db.Model(&Crossing{}).Where(&filter).Where("ignored = ?", false).Count(&crossingCnt)
-
-				if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
-
-					// this crossing will be the first crossing from this barrier in the race
-					// (there are no crossings from this barrier yet)
-					if crossing.BarrierId == race.TeamABarrierId {
-						crossing.Team = TeamA
-					} else if crossing.BarrierId == race.TeamBBarrierId {
-						crossing.Team = TeamB
-					}
-
-				} else {
-
-					// second crossing
-					if crossingCnt == 1 && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < 1000) {
-						crossing.Ignored = true
-					}
-
-					// later crossings in the race (expected round-robin fashion)
-					if lastCrossing.Team == TeamA {
-						crossing.Team = TeamB
-					} else if lastCrossing.Team == TeamB {
-						crossing.Team = TeamA
-					}
-
+				if crossing.BarrierId == race.TeamABarrierId {
+					crossing.Team = TeamA
+				} else if crossing.BarrierId == race.TeamBBarrierId {
+					crossing.Team = TeamB
 				}
-				log.Printf(name+": associating crossing with team %d", crossing.Team)
+				// // Switch crossing teams in round-robin fashion. If needed, barrier operators
+				// // can correct the team associated with the crossing via the frontend.
+				// var lastCrossing Crossing
+				// var crossingCnt int64
+				//
+				// // find the last crossing from the same race and the same barrier
+				// filter := Crossing{RaceID: race.ID, BarrierId: b.Id, Ignored: false}
+				// db.Model(&Crossing{}).Where(&filter).Where("ignored = ?", false).Count(&crossingCnt)
+				//
+				// if err := db.Where(&filter).Where("ignored = ?", false).Last(&lastCrossing).Error; err != nil {
+				//
+				// 	// this crossing will be the first crossing from this barrier in the race
+				// 	// (there are no crossings from this barrier yet)
+				// 	if crossing.BarrierId == race.TeamABarrierId {
+				// 		crossing.Team = TeamA
+				// 	} else if crossing.BarrierId == race.TeamBBarrierId {
+				// 		crossing.Team = TeamB
+				// 	}
+				//
+				// } else {
+				//
+				// 	// second crossing
+				// 	if crossingCnt == 1 && (time.Time(crossing.Time).Sub(time.Time(lastCrossing.Time)).Milliseconds() < 1000) {
+				// 		crossing.Ignored = true
+				// 	}
+				//
+				// 	// later crossings in the race (expected round-robin fashion)
+				// 	if lastCrossing.Team == TeamA {
+				// 		crossing.Team = TeamB
+				// 	} else if lastCrossing.Team == TeamB {
+				// 		crossing.Team = TeamA
+				// 	}
+				//
+				// }
+				// log.Printf(name+": associating crossing with team %d", crossing.Team)
 			}
 			// this also updates Race's UpdatedAt which is what we want
 			// so the frontend can find out what is the latest version

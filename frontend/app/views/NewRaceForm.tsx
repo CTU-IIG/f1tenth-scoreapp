@@ -15,13 +15,14 @@ interface Field<T> {
 
 interface NewRaceFormState {
 	type: Field<RaceType>;
+	number: Field<number>;
 	round: Field<number>;
+	minLapTime: Field<number>;
 	teamAId: Field<number>;
 	teamABarrierId: Field<number>;
 	teamBId: Field<number>;
 	teamBBarrierId: Field<number>;
 	timeDuration: Field<number>;
-	minLapTime: Field<number>;
 	lapsDuration: Field<number>;
 }
 
@@ -36,18 +37,39 @@ const validateNewRaceForm = (state: NewRaceFormState): Map<string, string> => {
 
 	const {
 		type,
+		number,
 		round,
+		minLapTime,
 		teamAId,
 		teamABarrierId,
 		teamBId,
 		teamBBarrierId,
 		timeDuration,
-		minLapTime,
 		lapsDuration,
 	} = state;
 
 	if (!isDefined(type.value)) {
 		errors.set('type', 'forms.errors.fieldRequired');
+	}
+
+	if (isDefined(number.value) && (!Number.isInteger(number.value) || number.value <= 0)) {
+		errors.set('number', 'forms.errors.invalidValue');
+	}
+
+	if (!isDefined(round.value)) {
+		errors.set('round', 'forms.errors.fieldRequired');
+	}
+
+	if (isDefined(round.value) && (!Number.isInteger(round.value) || round.value <= 0)) {
+		errors.set('round', 'forms.errors.invalidValue');
+	}
+
+	if (!isDefined(minLapTime.value)) {
+		errors.set('minLapTime', 'forms.errors.fieldRequired');
+	}
+
+	if (isDefined(minLapTime.value) && (!Number.isInteger(minLapTime.value) || minLapTime.value < 0)) {
+		errors.set('minLapTime', 'forms.errors.invalidValue');
 	}
 
 	if (!isDefined(teamAId.value)) {
@@ -60,28 +82,12 @@ const validateNewRaceForm = (state: NewRaceFormState): Map<string, string> => {
 
 	if (type.value === RACE_TYPE_TIME_TRIAL) {
 
-		if (!isDefined(round.value)) {
-			errors.set('round', 'forms.errors.fieldRequired');
-		}
-
-		if (isDefined(round.value) && (!Number.isInteger(round.value) || round.value <= 0)) {
-			errors.set('round', 'forms.errors.invalidValue');
-		}
-
 		if (!isDefined(timeDuration.value)) {
 			errors.set('timeDuration', 'forms.errors.fieldRequired');
 		}
 
 		if (isDefined(timeDuration.value) && (!Number.isInteger(timeDuration.value) || timeDuration.value < 0)) {
 			errors.set('timeDuration', 'forms.errors.invalidValue');
-		}
-
-		if (!isDefined(minLapTime.value)) {
-			errors.set('minLapTime', 'forms.errors.fieldRequired');
-		}
-
-		if (isDefined(minLapTime.value) && (!Number.isInteger(minLapTime.value) || minLapTime.value < 0)) {
-			errors.set('minLapTime', 'forms.errors.invalidValue');
 		}
 
 	}
@@ -126,11 +132,19 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 
 	const [formState, setFormState] = useState<NewRaceFormState>(() => ({
 		type: {
-			value: RACE_TYPE_TIME_TRIAL,
+			value: RACE_TYPE_HEAD_TO_HEAD,
+			touched: false,
+		},
+		number: {
+			value: undefined,
 			touched: false,
 		},
 		round: {
 			value: 1,
+			touched: false,
+		},
+		minLapTime: {
+			value: 8000,
 			touched: false,
 		},
 		teamAId: {
@@ -147,10 +161,6 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 		},
 		teamBBarrierId: {
 			value: 2,
-			touched: false,
-		},
-		minLapTime: {
-			value: 5000,
 			touched: false,
 		},
 		timeDuration: {
@@ -188,6 +198,7 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 		if (formState.type.value === RACE_TYPE_TIME_TRIAL) {
 			onSubmit({
 				type: RACE_TYPE_TIME_TRIAL,
+				number: formState.number.value!,
 				round: formState.round.value!,
 				teamAId: formState.teamAId.value!,
 				teamABarrierId: formState.teamABarrierId.value!,
@@ -200,12 +211,14 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 		if (formState.type.value === RACE_TYPE_HEAD_TO_HEAD) {
 			onSubmit({
 				type: RACE_TYPE_HEAD_TO_HEAD,
-				round: formState.round.value ?? 1, // TODO: round is deprecated for RACE_TYPE_HEAD_TO_HEAD
+				number: formState.number.value!,
+				round: formState.round.value!,
 				teamAId: formState.teamAId.value!,
 				teamABarrierId: formState.teamABarrierId.value!,
 				teamBId: formState.teamBId.value!,
 				teamBBarrierId: formState.teamBBarrierId.value!,
 				lapsDuration: formState.lapsDuration.value!,
+				minLapTime: formState.minLapTime.value!,
 			});
 			return;
 		}
@@ -220,12 +233,13 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 			: event.currentTarget.value;
 
 		if (value !== undefined && (
-			name === 'round'
+			name === 'number'
+			|| name === 'round'
+			|| name === 'minLapTime'
 			|| name === 'teamAId'
 			|| name === 'teamBId'
 			|| name === 'teamABarrierId'
 			|| name === 'teamBBarrierId'
-			|| name === 'minLapTime'
 			|| name === 'timeDuration'
 			|| name === 'lapsDuration'
 		)
@@ -275,32 +289,39 @@ const NewRaceForm = ({ teams, onSubmit }: NewRaceFormProps) => {
 				error={formState.type.touched ? errors.get('type') : undefined}
 			/>
 
-			{formState.type.value === RACE_TYPE_TIME_TRIAL && (
-				<Input
-					type="number"
-					id="newRace--round"
-					label="newRaceForm.labels.round"
-					name="round"
-					value={formState.round.value ?? ''}
-					onChange={handleInputChange}
-					valid={!formState.round.touched || !isDefined(errors.get('round'))}
-					error={formState.round.touched ? errors.get('round') : undefined}
-				/>
-			)}
+			<Input
+				type="number"
+				id="newRace--number"
+				label="newRaceForm.labels.number"
+				name="number"
+				value={formState.number.value ?? ''}
+				onChange={handleInputChange}
+				valid={!formState.number.touched || !isDefined(errors.get('number'))}
+				error={formState.number.touched ? errors.get('number') : undefined}
+			/>
 
-			{formState.type.value === RACE_TYPE_TIME_TRIAL && (
-				<Input
-					type="number"
-					id="newRace--minLapTime"
-					label="newRaceForm.labels.minLapTime"
-					name="minLapTime"
-					value={formState.minLapTime.value ?? ''}
-					onChange={handleInputChange}
-					valid={!formState.minLapTime.touched || !isDefined(errors.get('minLapTime'))}
-					error={formState.minLapTime.touched ? errors.get('minLapTime') : undefined}
-					helpBlock={<p className="help-block">{t('newRaceForm.minLapTimeNote')}</p>}
-				/>
-			)}
+			<Input
+				type="number"
+				id="newRace--round"
+				label={`newRaceForm.labels.${formState.type.value === RACE_TYPE_TIME_TRIAL ? 'heat' : 'round'}`}
+				name="round"
+				value={formState.round.value ?? ''}
+				onChange={handleInputChange}
+				valid={!formState.round.touched || !isDefined(errors.get('round'))}
+				error={formState.round.touched ? errors.get('round') : undefined}
+			/>
+
+			<Input
+				type="number"
+				id="newRace--minLapTime"
+				label="newRaceForm.labels.minLapTime"
+				name="minLapTime"
+				value={formState.minLapTime.value ?? ''}
+				onChange={handleInputChange}
+				valid={!formState.minLapTime.touched || !isDefined(errors.get('minLapTime'))}
+				error={formState.minLapTime.touched ? errors.get('minLapTime') : undefined}
+				helpBlock={<p className="help-block">{t('newRaceForm.minLapTimeNote')}</p>}
+			/>
 
 			{formState.type.value === RACE_TYPE_TIME_TRIAL && (
 				<Input

@@ -41,7 +41,9 @@ export type RaceState =
 export interface AbstractRace extends Entity {
 	type: RaceType;
 	state: RaceState;
+	number: number;
 	round: number;
+	minLapTime: number;
 	teamAId: number;
 	teamA: Team;
 	teamABarrierId: number;
@@ -70,6 +72,7 @@ export type FullRace = Race & { crossings: Crossing[] };
 
 export interface CreateTimeTrialRaceData {
 	type: typeof RACE_TYPE_TIME_TRIAL;
+	number: number;
 	round: number;
 	teamAId: number;
 	teamABarrierId: number;
@@ -79,12 +82,14 @@ export interface CreateTimeTrialRaceData {
 
 export interface CreateHeadToHeadRaceData {
 	type: typeof RACE_TYPE_HEAD_TO_HEAD;
+	number: number;
 	round: number;
 	teamAId: number;
 	teamABarrierId: number;
 	teamBId: number;
 	teamBBarrierId: number;
 	lapsDuration: number;
+	minLapTime: number;
 }
 
 export type CreateRaceData = CreateTimeTrialRaceData | CreateHeadToHeadRaceData;

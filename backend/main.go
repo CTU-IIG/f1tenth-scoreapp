@@ -38,11 +38,12 @@ type Race struct {
 	CommonModelFields
 	Type           RaceType   `json:"type" gorm:"index"`
 	State          RaceState  `json:"state" gorm:"index"`
+	Number         *uint32    `json:"number,omitempty"`
 	Round          uint32     `json:"round"`
+	MinLapTime     *Duration  `json:"minLapTime,omitempty"`
 	TeamAID        uint       `json:"teamAId" query:"team_a_id"`
 	TeamA          Team       `json:"teamA"`
 	TeamABarrierId uint       `json:"teamABarrierId" query:"team_a_barrier_id"`
-	MinLapTime     *Duration  `json:"minLapTime,omitempty"`                     // if Type != TimeTrial then MinLapTime == nil
 	TimeDuration   *Duration  `json:"timeDuration,omitempty"`                   // if Type != TimeTrial then TimeDuration == nil
 	LapsDuration   *uint      `json:"lapsDuration,omitempty"`                   // if Type != HeadToHead then LapsDuration == nil
 	TeamBID        *int       `json:"teamBId,omitempty" query:"team_b_id"`      // if Type != HeadToHead then TeamBId == nil

@@ -453,6 +453,7 @@ export const CrossingsView = (
 		interactive = true,
 		barriersFilter = false,
 		showTeamSetter = false,
+		showMarkInterruptionBtn = false,
 		teamABarrierId,
 		teamBBarrierId,
 	}: CrossingsViewProps,
@@ -679,16 +680,16 @@ export const CrossingsView = (
 				showDebugInfo={state.showDebugInfo}
 
 				updateCrossing={updateCrossing}
-				onUpdateCrossingTeam={
-					interactive && showTeamSetter && isDefined(updateCrossing)
-						? handleUpdateCrossing : undefined
-				}
+				// onUpdateCrossingTeam={
+				// 	interactive && showTeamSetter && isDefined(updateCrossing)
+				// 		? handleUpdateCrossing : undefined
+				// }
 				onUpdateCrossingIgnored={
 					interactive && isDefined(updateCrossing)
 						? handleUpdateCrossing : undefined
 				}
 				onUpdateCrossingInterrupted={
-					interactive && isDefined(updateCrossing)
+					interactive && showMarkInterruptionBtn && isDefined(updateCrossing)
 						? handleUpdateCrossing : undefined
 				}
 

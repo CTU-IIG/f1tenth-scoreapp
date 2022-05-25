@@ -28,15 +28,15 @@ import WebSocketManager from './ws/WebSocketManager';
 
 
 const store = new Store<AppState>({
-	version: '0.0.6', // TODO: consider using build hash
+	version: '0.0.7', // TODO: consider using build hash
 	onInitData: () => typedMapConstructor([
 		['locale', 'auto'],
 		// ['restUrl', 'https://f1tenth-scoreapp.iid.ciirc.cvut.cz'],
 		// ['webSocketUrl', 'wss://f1tenth-scoreapp.iid.ciirc.cvut.cz/ws'],
 		// ['restUrl', 'http://195.0.0.41:4110'],
 		// ['webSocketUrl', 'ws://195.0.0.41:4110/ws'],
-		['restUrl', 'http://localhost:4110'],
-		['webSocketUrl', 'ws://localhost:4110/ws'],
+		['restUrl', 'http://192.168.1.2:4110'],
+		['webSocketUrl', 'ws://192.168.1.2:4110/ws'],
 		['authToken', undefined],
 		['soundEffects', true],
 	]),
