@@ -4,4 +4,5 @@ set -e
 
 # This script must be run from the frontend root
 
-./patches/patch-formatjs-intl.sh
+# no longer needed (the bug was fixed in the upstream package)
+# ./patches/patch-formatjs-intl.sh
