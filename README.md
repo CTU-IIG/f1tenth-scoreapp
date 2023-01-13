@@ -5,7 +5,7 @@
 This project consists of several parts:
 1. [frontend](./frontend/) (client-side React.js app)
 2. [backend](./backend/) (Go server providing REST and WebSocket APIs)
-3. [Arrowhead backend wrapper](./arrowhead/backend/) (Arrowhead Compliant wrapper for launching the backend)
+3. [Arrowhead backend wrapper](./arrowhead/backend/) (Arrowhead Compliant wrapper for launching the backend; [video](https://youtu.be/6wyAmGOmjF8))
 4. [optical barrier code and design](./barrier/) (KiCAD, C, Czech)
 5. [Arrowhead barrier wrapper](./barrier-arrowhead/) (Arrowhead Compliant wrapper for the optic barrier)
 
